@@ -1,18 +1,17 @@
-import { z } from "zod";
+import { z } from 'zod';
 
-import { ErrorDefaultCode } from "@/types";
+import { ErrorDefaultCode } from '@/types/index.d';
 
 // Définition d'un type utilitaire pour extraire le type d'un champ du schéma
-type SchemaField<T extends z.ZodTypeAny> =
-  T extends z.ZodType<infer U> ? U : never;
+type SchemaField<T extends z.ZodTypeAny> = T extends z.ZodType<infer U> ? U : never;
 
 /**
  * Options pour l'extraction des données du FormData
  */
 interface ExtractFormDataOptions {
-  keyTransforms?: Record<string, string>;
-  excludeFields?: string[];
-  includeFields?: string[];
+    keyTransforms?: Record<string, string>;
+    excludeFields?: string[];
+    includeFields?: string[];
 }
 /**
  * Extrait les données d'un objet FormData en gérant les valeurs multiples,
@@ -43,33 +42,27 @@ interface ExtractFormDataOptions {
  * // }
  * // Note : 'age' est exclu, 'nom' est transformé en 'name', et 'ville' en 'city'
  */
-export function extractFormData(
-  formData: FormData,
-  options: ExtractFormDataOptions = {},
-): Record<string, unknown> {
-  const { keyTransforms = {}, excludeFields = [], includeFields } = options;
-  const result: Record<string, unknown> = {};
+export function extractFormData(formData: FormData, options: ExtractFormDataOptions = {}): Record<string, unknown> {
+    const { keyTransforms = {}, excludeFields = [], includeFields } = options;
+    const result: Record<string, unknown> = {};
 
-  formData.forEach((value, key) => {
-    // Vérifier si le champ doit être inclus ou exclu
-    if (
-      excludeFields.includes(key) ||
-      (includeFields && !includeFields.includes(key))
-    ) {
-      return;
-    }
+    formData.forEach((value, key) => {
+        // Vérifier si le champ doit être inclus ou exclu
+        if (excludeFields.includes(key) || (includeFields && !includeFields.includes(key))) {
+            return;
+        }
 
-    const transformedKey = keyTransforms[key] || key;
+        const transformedKey = keyTransforms[key] || key;
 
-    if (formData.getAll(key).length > 1) {
-      // Si plusieurs valeurs pour la même clé, on les stocke dans un tableau
-      result[transformedKey] = formData.getAll(key);
-    } else {
-      result[transformedKey] = value;
-    }
-  });
+        if (formData.getAll(key).length > 1) {
+            // Si plusieurs valeurs pour la même clé, on les stocke dans un tableau
+            result[transformedKey] = formData.getAll(key);
+        } else {
+            result[transformedKey] = value;
+        }
+    });
 
-  return result;
+    return result;
 }
 
 /**
@@ -92,20 +85,18 @@ export function extractFormData(
  * //   'email': 'Invalid email'
  * // }
  */
-export const extractZodErrors = (
-  validationResult: z.SafeParseReturnType<any, any>,
-): { [key: string]: string } => {
-  if (validationResult.success) return {};
+export const extractZodErrors = (validationResult: z.SafeParseReturnType<any, any>): { [key: string]: string } => {
+    if (validationResult.success) return {};
 
-  const errors: { [key: string]: string } = {};
+    const errors: { [key: string]: string } = {};
 
-  validationResult.error.issues.forEach((issue) => {
-    const path = issue.path.join(".");
+    validationResult.error.issues.forEach((issue) => {
+        const path = issue.path.join('.');
 
-    errors[path] = issue.message;
-  });
+        errors[path] = issue.message;
+    });
 
-  return errors;
+    return errors;
 };
 
 /**
@@ -131,22 +122,19 @@ export const extractZodErrors = (
  * // }
  * // Note : 'hobby' et 'ville' sont ajoutés comme z.unknown()
  */
-export function createDynamicSchema<T extends z.ZodRawShape>(
-  baseSchema: z.ZodObject<T>,
-  data: Record<string, unknown>,
-): z.ZodObject<z.ZodRawShape> {
-  const dynamicSchema: z.ZodRawShape = {};
+export function createDynamicSchema<T extends z.ZodRawShape>(baseSchema: z.ZodObject<T>, data: Record<string, unknown>): z.ZodObject<z.ZodRawShape> {
+    const dynamicSchema: z.ZodRawShape = {};
 
-  for (const key in data) {
-    if (key in baseSchema.shape) {
-      dynamicSchema[key] = baseSchema.shape[key];
-    } else {
-      // Pour les champs non définis dans le schéma de base, on utilise z.unknown()
-      dynamicSchema[key] = z.unknown();
+    for (const key in data) {
+        if (key in baseSchema.shape) {
+            dynamicSchema[key] = baseSchema.shape[key];
+        } else {
+            // Pour les champs non définis dans le schéma de base, on utilise z.unknown()
+            dynamicSchema[key] = z.unknown();
+        }
     }
-  }
 
-  return z.object(dynamicSchema);
+    return z.object(dynamicSchema);
 }
 
 /**
@@ -173,15 +161,12 @@ export function createDynamicSchema<T extends z.ZodRawShape>(
  * // Note : 'hobby' est inclus même s'il n'est pas dans le schéma de base
  */
 export function validateWithDynamicSchema<T extends z.ZodRawShape>(
-  baseSchema: z.ZodObject<T>,
-  data: Record<string, unknown>,
-): z.SafeParseReturnType<
-  z.infer<z.ZodObject<z.ZodRawShape>>,
-  z.infer<z.ZodObject<z.ZodRawShape>>
-> {
-  const dynamicSchema = createDynamicSchema(baseSchema, data);
+    baseSchema: z.ZodObject<T>,
+    data: Record<string, unknown>,
+): z.SafeParseReturnType<z.infer<z.ZodObject<z.ZodRawShape>>, z.infer<z.ZodObject<z.ZodRawShape>>> {
+    const dynamicSchema = createDynamicSchema(baseSchema, data);
 
-  return dynamicSchema.safeParse(data);
+    return dynamicSchema.safeParse(data);
 }
 
 /**
@@ -206,19 +191,16 @@ export function validateWithDynamicSchema<T extends z.ZodRawShape>(
  * //   score: 9.5
  * // }
  */
-export function transformFormData(
-  data: Record<string, unknown>,
-  transformations: Record<string, (value: unknown) => unknown>,
-): Record<string, unknown> {
-  const transformedData: Record<string, unknown> = { ...data };
+export function transformFormData(data: Record<string, unknown>, transformations: Record<string, (value: unknown) => unknown>): Record<string, unknown> {
+    const transformedData: Record<string, unknown> = { ...data };
 
-  for (const [key, transform] of Object.entries(transformations)) {
-    if (key in data) {
-      transformedData[key] = transform(data[key]);
+    for (const [key, transform] of Object.entries(transformations)) {
+        if (key in data) {
+            transformedData[key] = transform(data[key]);
+        }
     }
-  }
 
-  return transformedData;
+    return transformedData;
 }
 
 /**
@@ -240,41 +222,48 @@ export function transformFormData(
  * //   code: ErrorDefaultCode.auth
  * // }
  */
-export function handleError(
-  error: any,
-  prevState: any,
-  defaultMessage: string,
-): any {
-  if (error.code === ErrorDefaultCode.exception) {
-    prevState.message = error.message;
-    prevState.status = "error";
-    prevState.code = error.code;
-  } else if (error.code === ErrorDefaultCode.rls) {
-    prevState.message = "Désolé, vous n'avez pas la permission requise";
-    prevState.status = "error";
-    prevState.code = error.code;
-  } else if (error.code === ErrorDefaultCode.auth) {
-    prevState.message = "Désolé, vous devez être connecté";
-    prevState.status = "error";
-    prevState.code = error.code;
-  } else {
-    prevState.message = defaultMessage;
-    prevState.status = "error";
-    prevState.code = error.code;
-  }
+export function handleError(error: any, prevState: any, defaultMessage: string): any {
+    if (error.code === ErrorDefaultCode.exception) {
+        prevState.message = error.message;
+        prevState.status = 'error';
+        prevState.code = error.code;
+    } else if (error.code === ErrorDefaultCode.exception) {
+        prevState.message = "Désolé, vous n'avez pas la permission requise";
+        prevState.status = 'error';
+        prevState.code = error.code;
+    } else if (error.code === ErrorDefaultCode.auth) {
+        prevState.message = 'Désolé, vous devez être connecté';
+        prevState.status = 'error';
+        prevState.code = error.code;
+    } else {
+        prevState.message = defaultMessage;
+        prevState.status = 'error';
+        prevState.code = error.code;
+    }
 
-  return prevState;
+    return prevState;
+}
+export function createFormData(formData: Record<string, unknown>): FormData {
+    const sendFormData = new FormData();
+    for (const [key, value] of Object.entries(formData)) {
+        if (value instanceof File) {
+            sendFormData.append(key, value, value.name);
+        } else {
+            sendFormData.append(key, value as string);
+        }
+    }
+
+    return sendFormData;
 }
 
 /**
  * Options pour le traitement des données du FormData
  */
-interface ProcessFormDataOptions<T extends z.ZodRawShape>
-  extends ExtractFormDataOptions {
-  useDynamicValidation?: boolean;
-  transformations?: {
-    [K in keyof T]?: (value: SchemaField<T[K]>) => SchemaField<T[K]>;
-  };
+interface ProcessFormDataOptions<T extends z.ZodRawShape> extends ExtractFormDataOptions {
+    useDynamicValidation?: boolean;
+    transformations?: {
+        [K in keyof T]?: (value: SchemaField<T[K]>) => SchemaField<T[K]>;
+    };
 }
 
 /**
@@ -316,44 +305,50 @@ interface ProcessFormDataOptions<T extends z.ZodRawShape>
  * // }
  */
 export function processFormData<T extends z.ZodRawShape>(
-  schema: z.ZodObject<T>,
-  formData: FormData,
-  options: ProcessFormDataOptions<T> = {},
+    schema: z.ZodObject<T>,
+    formData: FormData,
+    options: ProcessFormDataOptions<T> = {},
+    prevState?: any,
 ): {
-  success: boolean;
-  data: z.infer<z.ZodObject<T>>;
-  errors?: Record<string, string>;
+    success: boolean;
+    data: z.infer<z.ZodObject<T>>;
+    errors?: Record<string, string>;
 } {
-  const {
-    useDynamicValidation = false,
-    transformations = {},
-    ...extractOptions
-  } = options;
+    const { useDynamicValidation = true, transformations = {}, ...extractOptions } = options;
 
-  // Extraire les données du FormData
-  const extractedData = extractFormData(formData, extractOptions);
+    // Extraire les données du FormData
+    const extractedData = extractFormData(formData, extractOptions);
 
-  // Transformer les données si des transformations sont spécifiées
-  const transformedData = transformFormData(
-    extractedData,
-    transformations as any,
-  );
+    // Transformer les données si des transformations sont spécifiées
+    const transformedData = transformFormData(extractedData, transformations as any);
 
-  // Valider les données
-  const validationResult = useDynamicValidation
-    ? validateWithDynamicSchema(schema, transformedData)
-    : schema.safeParse(transformedData);
+    // Valider les données
+    const validationResult = useDynamicValidation ? validateWithDynamicSchema(schema, transformedData) : schema.safeParse(transformedData);
 
-  if (validationResult.success) {
-    return {
-      success: true,
-      data: validationResult.data as z.infer<z.ZodObject<T>>,
-    };
-  } else {
-    return {
-      success: false,
-      data: transformedData as z.infer<z.ZodObject<T>>,
-      errors: extractZodErrors(validationResult),
-    };
-  }
+    if (validationResult.success) {
+        if (prevState) {
+            prevState.errors = {};
+            prevState.message = '';
+            prevState.status = 'success';
+            prevState.code = undefined;
+        }
+
+        return {
+            success: true,
+            data: validationResult.data as z.infer<z.ZodObject<T>>,
+        };
+    } else {
+        if (prevState) {
+            prevState.errors = extractZodErrors(validationResult);
+            prevState.message = 'Informations invalides';
+            prevState.status = 'error';
+            prevState.code = ErrorDefaultCode.exception;
+        }
+
+        return {
+            success: false,
+            data: transformedData as z.infer<z.ZodObject<T>>,
+            errors: extractZodErrors(validationResult),
+        };
+    }
 }

@@ -11,146 +11,173 @@ import {
   User,
   SortDescriptor,
 } from "@nextui-org/react";
-import { CheckIcon, TrashIcon } from "@radix-ui/react-icons";
-import { IconSearch } from "@tabler/icons-react";
+import { Invitation } from "@/types/models";
+import { IconCheck, IconX } from "@tabler/icons-react";
+import { MagnifyingGlassIcon } from "@radix-ui/react-icons";
+import { acceptInvitation, rejectInvitation } from "@/src/actions/invitations.actions";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 
-type Invitation = {
-  id: number;
-  team: string;
-  role: string;
-  date: string;
-  logo: string;
-};
-
-export default function InvitationTable() {
+export default function InvitationTable({ 
+  invitations 
+}: { 
+  invitations: Invitation[] | null 
+}) {
+  const router = useRouter();
+  // State for filtering and sorting
   const [filterValue, setFilterValue] = React.useState("");
-
   const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
-    column: "team",
+    column: "organisation",
     direction: "ascending",
   });
 
-  const hasSearchFilter = Boolean(filterValue);
+  // Columns definition
+  const columns = [
+    { name: "ORGANISATION", uid: "organisation", sortable: true },
+    { name: "ROLE", uid: "role", sortable: true },
+    { name: "DATE", uid: "created_at", sortable: true },
+    { name: "ACTIONS", uid: "actions", sortable: false },
+  ];
 
-  const headerColumns = columns.filter((column) =>
-    ["team", "role", "actions"].includes(column.uid),
-  );
-
+  // Filtering logic
   const filteredItems = React.useMemo(() => {
-    let filteredUsers = [...inivitations];
+    if (!invitations) return [];
 
-    if (hasSearchFilter) {
-      filteredUsers = filteredUsers.filter((invitation) =>
-        invitation.team.toLowerCase().includes(filterValue.toLowerCase()),
-      );
-    }
+    return invitations.filter((invitation) =>
+      invitation.organisation?.name.toLowerCase().includes(filterValue.toLowerCase())
+    );
+  }, [invitations, filterValue]);
 
-    return filteredUsers;
-  }, [filterValue]);
-
+  // Sorting logic
   const sortedItems = React.useMemo(() => {
-    return [...filteredItems].sort((a: Invitation, b: Invitation) => {
-      const first = a[sortDescriptor.column as keyof Invitation];
-      const second = b[sortDescriptor.column as keyof Invitation];
-      const cmp = first < second ? -1 : first > second ? 1 : 0;
+    return [...filteredItems].sort((a, b) => {
+      const columnKey = sortDescriptor.column as keyof Invitation;
+      let first, second;
 
+      switch (columnKey) {
+        case 'organisation':
+          first = a.organisation?.name ?? '';
+          second = b.organisation?.name ?? '';
+          break;
+        case 'role':
+          first = a.role?.name ?? '';
+          second = b.role?.name ?? '';
+          break;
+        case 'created_at':
+          first = new Date(a.created_at);
+          second = new Date(b.created_at);
+          break;
+        default:
+          first = a[columnKey];
+          second = b[columnKey];
+      }
+
+      const cmp = (first ?? '') < (second ?? '') ? -1 : (first ?? '') > (second ?? '') ? 1 : 0;
       return sortDescriptor.direction === "descending" ? -cmp : cmp;
     });
   }, [sortDescriptor, filteredItems]);
 
+  // Render cell content
   const renderCell = React.useCallback(
     (invitation: Invitation, columnKey: React.Key) => {
-      const cellValue = invitation[columnKey as keyof Invitation];
-
       switch (columnKey) {
-        case "team":
+        case "organisation":
           return (
             <User
-              avatarProps={{ radius: "lg", src: invitation.logo }}
-              className="w-40"
-              description={invitation.date}
-              name={cellValue}
-            >
-              {invitation.team}
-            </User>
+              avatarProps={{ 
+                radius: "lg", 
+                src: invitation.organisation?.logo || undefined 
+              }}
+              description={invitation.email}
+              name={invitation.organisation?.name || 'N/A'}
+            />
           );
         case "role":
           return (
             <div className="flex flex-col">
-              <p className="text-bold text-small capitalize">{cellValue}</p>
+              <p className="text-bold text-small capitalize">
+                {invitation.role?.name || 'N/A'}
+              </p>
+            </div>
+          );
+        case "created_at":
+          return (
+            <div className="text-small text-default-500">
+              {new Date(invitation.created_at).toLocaleDateString()}
             </div>
           );
         case "actions":
           return (
-            <div className="relative flex justify-end items-center gap-2">
+            <div className="flex justify-end gap-2">
               <Button
                 color="success"
                 size="sm"
-                startContent={<CheckIcon />}
+                startContent={<IconCheck size={16} />}
                 variant="light"
+                onPress={async () => {
+                  const res = await acceptInvitation(invitation.id);
+                  if (res.status === 'success') {
+                      toast.success('Invitation acceptée avec succès');
+                      router.refresh();
+                  } else {
+                      toast.error('Erreur lors de l&apos;acceptation de l&apos;invitation');
+                  }
+              }}
               >
-                Accepter
+                Accept
               </Button>
               <Button
                 color="danger"
                 size="sm"
-                startContent={<TrashIcon />}
+                startContent={<IconX size={16} />}
                 variant="light"
+                onPress={async () => {
+                  const res = await rejectInvitation(invitation.id);
+                  if (res.status === 'success') {
+                      toast.success('Invitation annulée avec succès');
+                      router.refresh();
+                  } else {
+                      toast.error('Erreur lors de l&apos;annulation de l&apos;invitation');
+                  }
+              }}
               >
-                Refuser
+                Decline
               </Button>
             </div>
           );
         default:
-          return cellValue;
+          return null;
       }
     },
     [],
   );
 
-  const onSearchChange = React.useCallback((value: string) => {
-    if (value) {
-      setFilterValue(value);
-    } else {
-      setFilterValue("");
-    }
-  }, []);
+  // Search input and filtering
+  const topContent = React.useMemo(() => (
+    <div className="flex flex-col gap-4">
+      <Input
+        isClearable
+        className="w-full sm:max-w-[44%]"
+        placeholder="Rechercher par organisation..."
+        startContent={<MagnifyingGlassIcon />}
+        value={filterValue}
+        onClear={() => setFilterValue("")}
+        onValueChange={setFilterValue}
+      />
+    </div>
+  ), [filterValue]);
 
-  const onClear = React.useCallback(() => {
-    setFilterValue("");
-  }, []);
-
-  const topContent = React.useMemo(() => {
-    return (
-      <div className="flex flex-col gap-4">
-        <div className="flex justify-between gap-3 items-end">
-          <Input
-            isClearable
-            className="w-full sm:max-w-[44%]"
-            placeholder="Rechercher par nom..."
-            startContent={<IconSearch />}
-            value={filterValue}
-            onClear={() => onClear()}
-            onValueChange={onSearchChange}
-          />
-        </div>
-      </div>
-    );
-  }, [filterValue, onSearchChange]);
-
+  // Render the table
   return (
     <Table
       isHeaderSticky
-      aria-label="Invitation table for user"
-      classNames={{
-        wrapper: "after:bg-foreground after:text-background text-background",
-      }}
+      aria-label="Invitation table"
       sortDescriptor={sortDescriptor}
       topContent={topContent}
       topContentPlacement="inside"
       onSortChange={setSortDescriptor}
     >
-      <TableHeader columns={headerColumns}>
+      <TableHeader columns={columns}>
         {(column) => (
           <TableColumn
             key={column.uid}
@@ -161,7 +188,10 @@ export default function InvitationTable() {
           </TableColumn>
         )}
       </TableHeader>
-      <TableBody emptyContent={"No invitation found"} items={sortedItems}>
+      <TableBody 
+        emptyContent="No invitations found" 
+        items={sortedItems}
+      >
         {(item) => (
           <TableRow key={item.id}>
             {(columnKey) => (
@@ -173,40 +203,3 @@ export default function InvitationTable() {
     </Table>
   );
 }
-
-export const columns = [
-  { name: "TEAM", uid: "team", sortable: true },
-  { name: "ROLE", uid: "role", sortable: true },
-  { name: "ACTIONS", uid: "actions" },
-];
-
-export const inivitations: Invitation[] = [
-  {
-    id: 1,
-    role: "CEO",
-    team: "Team Wolf",
-    logo: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
-    date: "10 june 2024 18:31",
-  },
-  {
-    id: 2,
-    role: "Tech Lead",
-    team: "Team Lion",
-    logo: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
-    date: "10 june 2024 18:31",
-  },
-  {
-    id: 3,
-    role: "Dev",
-    team: "Team Ours",
-    logo: "https://i.pravatar.cc/150?u=a04258114e29026702d",
-    date: "10 june 2024 18:31",
-  },
-  {
-    id: 4,
-    role: "C.M.",
-    team: "Team Beer",
-    logo: "https://i.pravatar.cc/150?u=a048581f4e29026701d",
-    date: "10 june 2024 18:31",
-  },
-];

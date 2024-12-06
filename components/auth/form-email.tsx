@@ -1,80 +1,76 @@
-"use client";
+'use client';
 
-import { Divider } from "@nextui-org/divider";
-import { Input } from "@nextui-org/input";
-import { useFormState } from "react-dom";
-import { IconMail } from "@tabler/icons-react";
-import { useCallback } from "react";
-
-import ButtonSigninWithGoogle from "@/components/ui/form-ui/button-signinWithGoogle";
-import { SubmitButton } from "@/components/ui/form-ui/submit-button";
-import { logIn } from "@/src/actions/auth.actions";
-import { body, title } from "@/components/primitives";
-import { useToastStore } from "@/src/store/toast.store";
+import { Input } from '@nextui-org/react';
+import { useFormState } from 'react-dom';
+import { SubmitButton } from '@/components/ui/form-ui/submit-button';
+import { body, title } from '@/components/primitives';
+import { Mail } from 'lucide-react';
+import Link from 'next/link';
+import { registerStepFirst } from '@/src/actions/users.actions';
+import { toast } from 'react-toastify';
 
 export function FormEmail() {
-  const addToast = useToastStore((state) => state.addToast);
+    const [state, formAction] = useFormState(
+        async (prevState: any, formData: FormData) => {
+            const result = await registerStepFirst(prevState, formData);
 
-  const logInWithToast = useCallback(
-    async (prevState: any, formData: FormData) => {
-      const result = await logIn(prevState, formData);
+            if (result.status === 'success') {
+                toast.success(result.message || 'Bravo ! vous avez réussi');
+            } else {
+                toast.error(result.message || "Erreur lors de l'envoi de l'email");
+            }
 
-      addToast({
-        titre: result.status === "error" ? "Erreur" : "Succès",
-        message: result.message || "Aucun changement détecté",
-        type: result.status === "error" ? "error" : "success",
-        actionValider: {
-          texte: "OK",
-          onValider: () => {},
-          variant: "primary",
+            return result;
         },
-      });
+        {
+            data: null,
+            message: '',
+            errors: {},
+            status: 'idle',
+            code: undefined,
+        },
+    );
 
-      return result;
-    },
-    [addToast],
-  );
+    return (
+        <div className="w-full max-w-md space-y-8 bg-background p-10 rounded-lg shadow-xl">
+            <div className="text-center">
+                <h2 className={title({ size: 'h3' })}>Inscription</h2>
+                <p className={body({ size: 'caption', class: 'mt-4' })}>Veuillez entrer votre email ci-dessous pour commencer l&apos;inscription.</p>
+            </div>
+            <form action={formAction} className="mt-8 space-y-6">
+                <div className="grid gap-4">
+                    <Input
+                        isRequired
+                        required
+                        errorMessage={state?.errors?.email ?? ''}
+                        isInvalid={!!state?.errors?.email}
+                        label="Email"
+                        name="email"
+                        startContent={<Mail className="size-4 text-default-400" />}
+                        type="email"
+                        variant="bordered"
+                        radius="sm"
+                    />
 
-  const [state, formAction] = useFormState(logInWithToast, {
-    data: null,
-    message: "",
-    errors: {},
-    status: "idle",
-    code: undefined,
-  });
-
-  return (
-    <form action={formAction} className="mx-auto grid w-[350px] gap-6">
-      <div className="grid gap-2 text-center">
-        <h1 className={title({ size: "h4" })}>Connexion ou inscription</h1>
-        <p className={body()}>
-          Entrez votre email ci-dessous pour vous connecter à votre compte.
-        </p>
-      </div>
-      <div className="grid gap-4">
-        <Input
-          isRequired
-          required
-          errorMessage={state.errors.email ?? ""}
-          isInvalid={!!state.errors.email}
-          label="Email"
-          name="email"
-          startContent={
-            <IconMail className="text-2xl text-default-400 pointer-events-none flex-shrink-0" />
-          }
-          type="email"
-          variant="flat"
-        />
-
-        <SubmitButton>Continuer</SubmitButton>
-        <p
-          className={body({ size: "caption", className: "text-center" })}
-        >{`Nous vous enverrons un code de validation dans votre boîte de réception. Le code de validation peut parfois se retrouver dans les spams.`}</p>
-
-        <p className="mt-4 text-center text-sm text-gray-500">ou</p>
-        <Divider className="mb-4" />
-        <ButtonSigninWithGoogle />
-      </div>
-    </form>
-  );
+                    <SubmitButton>Continuer</SubmitButton>
+                    <p
+                        className={body({ size: 'caption', className: 'text-center' })}
+                    >{`Nous vous enverrons un code de validation dans votre boîte de réception. Le code de validation peut parfois se retrouver dans les spams.`}</p>
+                </div>
+            </form>
+            <div className="text-center">
+                <p
+                    className={body({
+                        size: 'caption',
+                        class: 'mt-2 text-sm text-gray-600',
+                    })}
+                >
+                    Vous avez déjà un compte ?{' '}
+                    <Link href="/auth" className="text-primary/80 hover:text-primary">
+                        Se connecter
+                    </Link>
+                </p>
+            </div>
+        </div>
+    );
 }

@@ -1,5 +1,5 @@
 export const TrimPhoneNumber = (phone: string): string => {
-  if (!phone) return "";
+    if (!phone) return '';
 
-  return phone.trim().replaceAll(" ", "").replace("+", "");
+  return phone.trim().replaceAll(" ", "");
 };

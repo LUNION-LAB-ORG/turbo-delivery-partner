@@ -76,7 +76,6 @@ export interface DockIconProps {
 }
 
 const DockIcon = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   size,
   magnification = DEFAULT_MAGNIFICATION,
   distance = DEFAULT_DISTANCE,

@@ -1,15 +1,9 @@
 "use client";
-import {
-  ResponsiveContainer,
-  Bar,
-  BarChart,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
+
+import { Card, CardBody, CardHeader } from "@nextui-org/react";
 
 import { title } from "@/components/primitives";
+import ComponentsChartsBar from "@/components/charts/components-charts-bar";
 
 const barData = [
   { name: "Direct", data: 9000 },
@@ -30,25 +24,15 @@ export const Traffic = () => {
               size: "h4",
             })}
           >
-            Website Traffic
+            Traffic du site web
           </h4>
           <p className="text-small text-default-500">
-            New users by First user primary channel group (Default Channel
-            Group)
+            Nouveaux utilisateurs par canal principal (Canal principal par défaut)
           </p>
         </div>
       </CardHeader>
       <CardBody>
-        <div className="h-[400px]">
-          <ResponsiveContainer height="100%" width="100%">
-            <BarChart data={barData} layout="vertical">
-              <XAxis type="number" />
-              <YAxis dataKey="name" type="category" width={150} />
-              <Tooltip />
-              <Bar dataKey="data" fill="#8884d8" radius={[0, 4, 4, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
+        <ComponentsChartsBar />
       </CardBody>
     </Card>
   );

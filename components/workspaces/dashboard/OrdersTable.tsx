@@ -6,17 +6,17 @@ import {
   TableColumn,
   TableHeader,
   TableRow,
-} from "@nextui-org/table";
-import { Button } from "@nextui-org/button";
-import {
+  Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-} from "@nextui-org/dropdown";
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
-import { Avatar } from "@nextui-org/avatar";
-import { Chip } from "@nextui-org/chip";
+  Card,
+  CardBody,
+  CardHeader,
+  Avatar,
+  Chip,
+} from "@nextui-org/react";
 import { TbArchive, TbPencil, TbTrash, TbUser } from "react-icons/tb";
 
 import { title } from "@/components/primitives";
@@ -34,17 +34,7 @@ interface Order {
   orders?: string;
 }
 
-const orders: Order[] = Array.from({ length: 8 }, (_, i) => ({
-  id: i,
-  name: "Anderson Kouadio",
-  email: "andersonkouadio@gmail.com",
-  avatarUrl: "",
-  date: "10/01/2024 18:34",
-  status: "Paid",
-  product: "Nike",
-  revenue: `$2000`,
-  orders: "14h30",
-}));
+const orders: Order[] = [];
 
 function getInitials(name: string): string {
   return name
@@ -64,11 +54,10 @@ export const Orders = () => {
               size: "h4",
             })}
           >
-            Orders
+            Réservations
           </h4>
           <p className="text-small text-default-500">
-            New users by First user primary channel group (Default Channel
-            Group)
+            Nouvelles réservations
           </p>
         </div>
       </CardHeader>

@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    reactStrictMode: true,
+    swcMinify: true,
+    eslint: {
+        ignoreDuringBuilds: true,
+    },
     images:{
         remotePatterns: [
           {
@@ -9,7 +14,7 @@ const nextConfig = {
             // pathname: '/demos/images/**',
           },
         ],
-      },
-}
+    },
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

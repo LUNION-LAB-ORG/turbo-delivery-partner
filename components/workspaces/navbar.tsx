@@ -3,28 +3,24 @@ import {
   Navbar as NextUINavbar,
   NavbarBrand,
   NavbarContent,
-} from "@nextui-org/navbar";
-import { Button } from "@nextui-org/button";
+  Button
+} from "@nextui-org/react";
 import { IconBell } from "@tabler/icons-react";
 
 import { Icone } from "../icons";
-import Tabs from "../layout/tabs";
-import UserProfileDropdown from "../layout/user-profile-dropdown";
 
-import { Tables } from "@/types/supabase";
-import { UserTeams } from "@/types";
-import { TeamDropdown } from "@/components/workspaces/team-dropdown";
+import { ProfileOrganisations } from "@/types/index.d";
+import { OrganisationDropdown } from "@/components/layouts/organisation-dropdown";
+import UserProfileDropdown from "../layouts/user-profile-dropdown";
+import TabsD from "../layouts/tabs";
 
-type Profile = Tables<"profiles">;
 
 const Navbar = ({
   reference,
-  profile,
-  teams,
+  profileOrganisations,
 }: {
   reference: string;
-  profile: Profile;
-  teams: UserTeams | null;
+  profileOrganisations: ProfileOrganisations | null;
 }) => {
   return (
     <>
@@ -36,7 +32,7 @@ const Navbar = ({
       >
         <NavbarBrand className="space-x-2 sm:space-x-4">
           <Icone height={32} width={32} />
-          <TeamDropdown reference={reference} teams={teams} />
+          <OrganisationDropdown reference={reference} profileOrganisations={profileOrganisations} />
         </NavbarBrand>
         <NavbarContent className="flex-grow" justify="center">
           {/* <div className="hidden md:block"><Search /></div> */}
@@ -46,7 +42,7 @@ const Navbar = ({
             <Button isIconOnly aria-label="Notifications" variant="light">
               <IconBell className="h-5 w-5" />
             </Button>
-            <UserProfileDropdown profile={profile} />
+            <UserProfileDropdown />
           </div>
         </NavbarContent>
       </NextUINavbar>
@@ -59,7 +55,7 @@ const Navbar = ({
         position="sticky"
       >
         <NavbarContent className="overflow-hidden" justify="center">
-          <Tabs reference={reference} />
+          <TabsD reference={reference} />
         </NavbarContent>
       </NextUINavbar>
     </>

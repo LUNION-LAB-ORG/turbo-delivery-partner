@@ -1,11 +1,12 @@
-import { Suspense } from "react";
+import { Suspense } from 'react';
 
-import Content from "./content";
+import Content from './content';
+import Loading from '@/components/layouts/loading';
 
 export default function AuthPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Content />
-    </Suspense>
-  );
+    return (
+        <Suspense fallback={<Loading />}>
+            <Content />
+        </Suspense>
+    );
 }

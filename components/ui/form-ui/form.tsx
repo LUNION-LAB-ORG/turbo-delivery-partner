@@ -1,5 +1,5 @@
-import { Button } from "@nextui-org/button";
-import { Progress } from "@nextui-org/progress";
+import { Button } from "@nextui-org/react";
+import { Progress } from "@nextui-org/react";
 import { useFormStatus } from "react-dom";
 
 interface StepIndicatorProps {

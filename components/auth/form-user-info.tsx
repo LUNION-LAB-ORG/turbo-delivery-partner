@@ -1,123 +1,132 @@
-"use client";
+'use client';
 
-import { Input } from "@nextui-org/input";
-import { useFormState } from "react-dom";
-import { useCallback, useState } from "react";
-import { DateInput } from "@nextui-org/date-input";
+import { Input, Button } from '@nextui-org/react';
+import { useFormState } from 'react-dom';
+import { useCallback, useState } from 'react';
 
-import { body, title } from "@/components/primitives";
-import { SubmitButton } from "@/components/ui/form-ui/submit-button";
-import { InputPhone } from "@/components/ui/form-ui/input-phone";
-import { FinishedSignIn } from "@/src/actions/auth.actions";
-import { SelectCountry } from "@/components/ui/form-ui/select-country";
-import { useToastStore } from "@/src/store/toast.store";
+import { body, title } from '@/components/primitives';
+import { SubmitButton } from '@/components/ui/form-ui/submit-button';
+import { InputPhone } from '@/components/ui/form-ui/input-phone';
+import Link from 'next/link';
+import { FormChangePassword } from './form-change-password';
+import { registerFinalStep } from '@/src/actions/users.actions';
+import { toast } from 'react-toastify';
 
 export function FormUserInfo() {
-  const [contact, setContact] = useState<string>("");
-  const [country, setCountry] = useState<string>("");
+    const [contact, setContact] = useState<string>('');
 
-  const addToast = useToastStore((state) => state.addToast);
+    // handle change password modal
+    const [isOpen, setIsOpen] = useState<boolean>(false);
+    const handleChangeOpen = (value: boolean) => {
+        setIsOpen(value);
+    };
 
-  const finishedSignInWithToast = useCallback(
-    async (prevState: any, formData: FormData) => {
-      const result = await FinishedSignIn(prevState, formData);
+    const [state, formAction] = useFormState(
+        async (prevState: any, formData: FormData) => {
+            const result = await registerFinalStep(prevState, formData);
 
-      addToast({
-        titre: result.status === "error" ? "Erreur" : "Succès",
-        message: result.message || "Aucun changement détecté",
-        type: result.status === "error" ? "error" : "success",
-        actionValider: {
-          texte: "OK",
-          onValider: () => {},
-          variant: "primary",
+            if (result.status === 'error') {
+                toast.error(result.message);
+            } else {
+                toast.success(result.message);
+                handleChangeOpen(true);
+            }
+
+            return result;
         },
-      });
+        {
+            data: null,
+            message: '',
+            errors: {},
+            status: 'idle',
+            code: undefined,
+        },
+    );
 
-      return result;
-    },
-    [addToast],
-  );
+    return (
+        <>
+            {state && state.data && !state.data.changePassword && (
+                <FormChangePassword isOpen={isOpen} onOpenChange={handleChangeOpen} userName={state.data?.username} oldPassword={state.data?.oldPassword} />
+            )}
 
-  const [state, formAction] = useFormState(finishedSignInWithToast, {
-    data: null,
-    message: "",
-    errors: {},
-    status: "idle",
-    code: undefined,
-  });
+            <div className="w-full max-w-md space-y-8 bg-background p-10 rounded-lg shadow-xl">
+                <div className="text-center">
+                    <h2 className={title({ size: 'h3' })}>Terminer l&apos;inscription</h2>
+                    <p className={body({ size: 'caption', class: 'mt-4' })}>Completez vos informations personnelles</p>
+                </div>
+                <form action={formAction} className="mt-8 space-y-6">
+                    <div className="grid gap-4">
+                        <Input
+                            isRequired
+                            required
+                            errorMessage={state.errors?.username ?? ''}
+                            isInvalid={!!state.errors?.username}
+                            label="Nom d'utilisateur"
+                            labelPlacement="outside"
+                            name="username"
+                            placeholder="Entrer votre nom d'utilisateur"
+                            type="text"
+                            variant="bordered"
+                            radius="sm"
+                        />
+                        <Input
+                            isRequired
+                            required
+                            errorMessage={state.errors?.lastName ?? ''}
+                            isInvalid={!!state.errors?.lastName}
+                            label="Nom"
+                            labelPlacement="outside"
+                            name="lastName"
+                            placeholder="Entrer votre nom de famille"
+                            type="text"
+                            variant="bordered"
+                            radius="sm"
+                        />
+                        <Input
+                            isRequired
+                            required
+                            errorMessage={state.errors?.firstName ?? ''}
+                            isInvalid={!!state.errors?.firstName}
+                            label="Prénoms"
+                            labelPlacement="outside"
+                            name="firstName"
+                            placeholder="Entrer votre prénom"
+                            type="text"
+                            variant="bordered"
+                            radius="sm"
+                        />
 
-  return (
-    <form action={formAction} className="mx-auto grid w-[350px] gap-6">
-      <div className="grid gap-2 text-center">
-        <h1 className={title({ size: "h4" })}>
-          Terminer l&apos;enregistrement
-        </h1>
-        <p className={body()}>Completez vos informations personnelles</p>
-      </div>
+                        <InputPhone
+                            isRequired
+                            required
+                            errorMessage={state.errors?.telephone ?? ''}
+                            isInvalid={!!state.errors?.telephone}
+                            label="Téléphone"
+                            name="telephone"
+                            placeholder="Téléphone"
+                            setValue={(value: string) => setContact(value)}
+                            value={contact}
+                            variant="bordered"
+                            radius="sm"
+                        />
 
-      <div className="grid gap-4">
-        <Input
-          isRequired
-          required
-          errorMessage={state.errors.last_name ?? ""}
-          isInvalid={!!state.errors.last_name}
-          label="Nom"
-          labelPlacement="outside"
-          name="last_name"
-          placeholder="Entrer votre nom de famille"
-          type="text"
-          variant="flat"
-        />
-        <Input
-          isRequired
-          required
-          errorMessage={state.errors.first_name ?? ""}
-          isInvalid={!!state.errors.first_name}
-          label="Prénoms"
-          labelPlacement="outside"
-          name="first_name"
-          placeholder="Entrer votre prénom"
-          type="text"
-          variant="flat"
-        />
-
-        <DateInput
-          isRequired
-          errorMessage={state.errors.birthdate ?? ""}
-          isInvalid={!!state.errors.birthdate}
-          label="Date de naissance"
-          labelPlacement="outside"
-          name="birthdate"
-          variant="flat"
-        />
-
-        <SelectCountry
-          isRequired
-          required
-          errorMessage={state.errors.country ?? ""}
-          isInvalid={!!state.errors.country}
-          label="Pays"
-          labelPlacement="outside"
-          name="country"
-          placeholder="Entre votre pays d'origine"
-          setValue={(value: string) => setCountry(value)}
-          value={country}
-        />
-
-        <InputPhone
-          isRequired
-          required
-          errorMessage={state.errors.phone_number}
-          isInvalid={!!state.errors.phone_number}
-          label="Téléphone"
-          name="phone_number"
-          placeholder="Téléphone"
-          setValue={(value: string) => setContact(value)}
-          value={contact}
-        />
-
-        <SubmitButton className="mt-4">Terminer</SubmitButton>
-      </div>
-    </form>
-  );
+                        <SubmitButton>Continuer</SubmitButton>
+                    </div>
+                </form>
+                <div className="text-center">
+                    <p
+                        className={body({
+                            size: 'caption',
+                            class: 'mt-2 text-sm text-gray-600',
+                        })}
+                    >
+                        Vous avez déjà un compte ?{' '}
+                        <Link href="/auth" className="text-primary/80 hover:text-primary">
+                            Se connecter
+                        </Link>
+                    </p>
+                </div>
+            </div>
+        </>
+    );
 }
