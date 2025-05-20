@@ -1,6 +1,6 @@
 'use client';
 
-import { getAllBonLivraisons } from '@/src/actions/tickets.actions';
+import { getAllBonLivraisons, getAllBonLivraisonTerminers } from '@/src/actions/tickets.actions';
 import { BonLivraisonVM } from '@/types';
 import { PaginatedResponse } from '@/types/models';
 import { CalendarDate, RangeValue, Switch } from '@heroui/react';
@@ -29,11 +29,7 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
     const [isLoading, setIsLoading] = useState(!initialData);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(10);
-    const [data, setData] = useState<PaginatedResponse<BonLivraisonVM> | null>();
-
-    useEffect(() => {
-        mapData(initialData)
-    }, [initialData])
+    const [data, setData] = useState<PaginatedResponse<BonLivraisonVM> | null>(initialData);
 
     const [dates, setDates] = useState<RangeValue<CalendarDate> | null>(null);
 
@@ -56,8 +52,8 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
             if ((dates?.start && dates?.end) || currentPage || pageSize) {
                 setIsLoading(true);
                 try {
-                    const newData = await getAllBonLivraisons(restaurantId ?? '', currentPage - 1, pageSize, { dates: { start: dates?.start?.toString() ?? '', end: dates?.end?.toString() ?? '' } });
-                    mapData(newData)
+                    const newData = await getAllBonLivraisonTerminers(restaurantId ?? '', currentPage - 1, pageSize, { dates: { start: dates?.start?.toString() ?? '', end: dates?.end?.toString() ?? '' } });
+                    setData(newData)
                 } catch (error) {
                     toast.error('Erreur lors de la récupération des données');
                 } finally {
@@ -68,11 +64,11 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
         fetchData();
     }, [dates?.start, dates?.end, currentPage, pageSize, restaurantId]);
 
-    const mapData = (result: PaginatedResponse<BonLivraisonVM> | null) => {
-        const data = result?.content.filter((item: BonLivraisonVM) => item.statut === "TERMINER" as any);
-        (data && result) && setData({ ...result, content: data })
+    // const mapData = (result: PaginatedResponse<BonLivraisonVM> | null) => {
+    //     const data = result?.content.filter((item: BonLivraisonVM) => item.statut === "TERMINER" as any);
+    //     (data && result) && setData({ ...result, content: data })
 
-    }
+    // }
 
     const renderCell = useCallback((bonLivraison: BonLivraisonVM, columnKey: Key) => {
         const cellValue = bonLivraison[columnKey as keyof BonLivraisonVM];
@@ -89,7 +85,7 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
                 case 'coutCommande':
                     return <p>{String(cellValue) + ' FCFA'}</p>;
                 case 'statut':
-                    return cellValue == 'TERMINER' ? <Switch size="sm" color="primary" readOnly isSelected /> : <Switch size="sm" isSelected={false} readOnly />;
+                    return <Switch size="sm" color="primary" readOnly isSelected />;
                 default:
                     return cellValue;
             }

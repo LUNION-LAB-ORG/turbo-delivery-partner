@@ -2,10 +2,11 @@
 
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Pagination, RangeValue, CalendarDate, DateRangePicker, Button } from '@heroui/react';
 import { title } from '@/components/primitives';
-import { Calendar, Cherry, CircleDollarSign, CircleFadingPlus, DollarSign, Home, Printer, SquareMenu, ToggleRight, User } from 'lucide-react';
+import { ArrowLeft, Calendar, Cherry, CircleDollarSign, CircleFadingPlus, DollarSign, Home, Printer, SquareMenu, ToggleRight, User } from 'lucide-react';
 import { PaginatedResponse } from '@/types/models';
 import { BonLivraisonVM } from '@/types';
 import useContentCtx from './useContentCtx';
+import Link from 'next/link';
 
 interface ContentProps {
     initialData: PaginatedResponse<BonLivraisonVM> | null;
@@ -16,8 +17,11 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
     const { columns, renderCell, data, handlePageChange, currentPage, isLoading, handleDateChange, type } = useContentCtx({ initialData, restaurantId });
     return (
         <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4 min-w[200px] overflow-auto ">
-            <span>Rechercher par période</span>
-            <DateRangePicker className="max-w-xs relative" onChange={(value) => handleDateChange(value as RangeValue<CalendarDate>)} />
+            <span className='ml-2'>Rechercher par période</span>
+            <div className='flex justify-between items-center'>
+                <DateRangePicker className="max-w-xs relative" onChange={(value) => handleDateChange(value as RangeValue<CalendarDate>)} />
+                <Link href={"/analytics"} className='text-blue-400 font-bold flex gap-2 mr-3 cursor-pointer'><ArrowLeft size={18} /> Retour</Link>
+            </div>
             <div className="flex items-center justify-between">
                 <h1 className={title({ size: 'h3', class: 'text-primary' })}>Gestions des tickets : Commandes terminées</h1>
             </div>
@@ -97,7 +101,7 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                                 <CircleDollarSign size={25} className='text-primary font-[1000]' />
                                 <div >
                                     <div className=''>Total des commssions</div>
-                                    <span className='text-primary font-[1000]'>250000 FCFA</span>
+                                    <span className='text-primary font-[1000]'>0 FCFA</span>
                                 </div>
                             </div>
                         </div>
