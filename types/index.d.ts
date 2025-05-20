@@ -11,39 +11,53 @@ export interface ActionResult<T> {
         [key: string]: string;
     };
     status?: 'idle' | 'loading' | 'success' | 'error';
-    code?: ErrorDefaultCode | number;
-}
-
-export interface Organisation {
-    id: string;
-    name: string;
-    role: string;
-    logo: string | null;
-    reference: string;
-    description: string | null;
-    created_at: string;
-    members: string[];
-}
-
-export interface ProfileOrganisations {
-    organisations: Organisation[];
-    shared_organisations: Organisation[];
+    code?: string | number;
 }
 
 export interface ErrorCode {
-    code: ErrorDefaultCode;
+    code?: string | number;
     message: string;
 }
 
-export enum ErrorDefaultCode {
-    exception = '400',
-    permission = '42501',
-    auth = '401',
+export type DayOfWeek = 'LUNDI' | 'MARDI' | 'MERCREDI' | 'JEUDI' | 'VENDREDI' | 'SAMEDI' | 'DIMANCHE';
+
+export interface OpeningHours {
+    dayOfWeek: DayOfWeek;
+    openingTime: string;
+    closingTime: string;
 }
 
-export interface SelectedPermissions {
-    [moduleId: string]: {
-        all: boolean;
-        actions: string[];
-    };
+export interface DaySchedule {
+    enabled: boolean;
+    openingTime: string;
+    closingTime: string;
+}
+
+export type WeekSchedule = Record<DayOfWeek, DaySchedule>;
+
+export interface MarkerData {
+    start: google.maps.LatLngLiteral;
+    end: google.maps.LatLngLiteral;
+    color: string;
+}
+
+interface LocalTime {
+    hour?: number;
+    minute?: number;
+    second?: number;
+    nano?: number;
+}
+
+export type statutType = "En de recupération" | "Annuler" | "Récupérer" | "En cours de livraison" | "En attente de versement" | "Terminer";
+
+export interface BonLivraisonVM {
+    commandeId?: string;
+    reference?: string;
+    livreur?: string;
+    restaurant?: string;
+    coutLivraison?: string;
+    coutCommande?: string;
+    date?: string;
+    heure?: LocalTime;
+    statut?: statutType
 }

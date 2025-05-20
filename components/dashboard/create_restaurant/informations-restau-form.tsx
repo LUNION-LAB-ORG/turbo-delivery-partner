@@ -1,8 +1,7 @@
 'use client';
 
 import { Control, Controller, FieldErrors } from 'react-hook-form';
-import { Input, Textarea } from '@nextui-org/react';
-import { Select, SelectItem } from '@nextui-org/react';
+import { Input, Textarea } from "@heroui/react";
 
 import { _createRestaurantSchema } from '@/src/schemas/restaurants.schema';
 
@@ -32,6 +31,7 @@ export const InformationRestauForm: React.FC<FormStepProps> = ({ errors, control
                             name="nomEtablissement"
                             placeholder="Entrez le nom de l'établissement"
                             value={field.value ?? ''}
+                            variant="bordered"
                         />
                     )}
                 />
@@ -51,6 +51,7 @@ export const InformationRestauForm: React.FC<FormStepProps> = ({ errors, control
                             name="description"
                             placeholder="Entrez la description de l'établissement"
                             value={field.value ?? ''}
+                            variant="bordered"
                         />
                     )}
                 />
@@ -71,6 +72,7 @@ export const InformationRestauForm: React.FC<FormStepProps> = ({ errors, control
                             name="commune"
                             placeholder="Entrez la commune d'implentation de l'établissement"
                             value={field.value ?? ''}
+                            variant="bordered"
                         />
                     )}
                 />

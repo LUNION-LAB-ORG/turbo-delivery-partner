@@ -1,17 +1,21 @@
 import { title } from '@/components/primitives';
-import { Card, CardBody } from '@nextui-org/react';
+import { Card, CardBody } from "@heroui/react";
 import '@smastrom/react-rating/style.css';
 
-import { restaurants } from '@/data';
 import RestaurantDetail from '@/components/dashboard/settings/restaurant-detail';
+import { findOneRestaurant } from '@/src/actions/restaurant.actions';
+import { redirect } from 'next/navigation';
 
 interface SettingsLayoutProps {
     children: React.ReactNode;
 }
 
 export default async function SettingsLayout({ children }: SettingsLayoutProps) {
-    const restaurant = restaurants[0];
-
+    const data = await findOneRestaurant();
+    const restaurant = data?.restaurant;
+    if (!restaurant) {
+        redirect('/create-restaurant');
+    }
     return (
         <div className="w-full h-full flex flex-1 flex-col gap-4 lg:gap-6">
             <div className="flex items-center">

@@ -9,7 +9,7 @@ import {
   Input,
   AvatarGroup,
   Avatar,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import {
   ChartConfig,
@@ -18,10 +18,9 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-import { Card, CardBody, CardHeader } from "@nextui-org/card";
+import { Card, CardBody, CardHeader, Select, SelectItem } from "@heroui/react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { orders, orderState, rapportCommandeWeek } from "@/data";
-import { Select, SelectItem } from "@nextui-org/select";
 import { Search } from "lucide-react";
 
 const chartConfig = {
