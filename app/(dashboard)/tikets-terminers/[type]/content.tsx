@@ -9,7 +9,7 @@ import useContentCtx from './useContentCtx';
 import Link from 'next/link';
 
 interface ContentProps {
-    initialData: PaginatedResponse<BonLivraisonVM> | null;
+    initialData: BonLivraisonVM[] | null;
     restaurantId?: string;
 }
 
@@ -49,37 +49,35 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                                 )}
                                 {
 
-                                    (type === "commision-en-montant-fixe" && column.name === "Commission (Montant fixe)") ?
+                                    (type === "FIXE") ?
                                         column.name
                                         :
-                                        (type === "commision-en-pourcentage" && column.name === "Commission") ?
+                                        (type === "POURCENTAGE") ?
                                             column.name
                                             :
                                             column.name === "Commission" ? <></>
                                                 :
-                                                column.name === "Commission (Montant fixe)" ? <></>
-                                                    :
-                                                    column.name
+                                                column.name
                                 }
                             </div>
                         </TableColumn>
                     )}
                 </TableHeader>
-                <TableBody items={data?.content ?? []} emptyContent={'No rows to display.'}>
+                <TableBody items={data ?? []} emptyContent={'No rows to display.'}>
                     {(item) => <TableRow key={item.commandeId}>{(columnKey) => <TableCell>{renderCell(item, columnKey) as React.ReactNode}</TableCell>}</TableRow>}
                 </TableBody>
             </Table>
             {/* justify-center */}
             <div className="flex-wrap  lg:flex md:flex xl:flex h-fit z-10  mt-8 fixed bottom-4 items-center w-full">
                 <div className="bg-gray-200 absolute inset-0 w-full h-full blur-sm opacity-50"></div>
-                <Pagination total={data?.totalPages ?? 1} page={currentPage} onChange={handlePageChange} showControls color="primary" variant="bordered" isDisabled={isLoading} />
+                <Pagination total={1} page={currentPage} onChange={handlePageChange} showControls color="primary" variant="bordered" isDisabled={isLoading} />
                 <div className='absolute right-0  bottom-10 lg:bottom-0 xl:bottom-0 lg:right-[30%] md:right-[30%] xl:right-[30%] flex-wrap  lg:flex xl:flex gap-4 items-center pr-4'>
                     <div className=' border border-primary/50 rounded-lg pl-2 pr-2 lg:mt-0  xl:mt-0'>
                         <div className='flex gap-2 items-center '>
                             <CircleDollarSign size={25} className='text-primary font-[1000]' />
                             <div>
                                 <div className='text-md'>Total de frais de livraison</div>
-                                <span className='text-primary font-[1000]'>{data && data.content.reduce(
+                                <span className='text-primary font-[1000]'>{data && data.reduce(
                                     (acc, item) => acc + (Number(item.coutLivraison) || 0), 0)} FCFA</span>
                             </div>
                         </div>
@@ -89,7 +87,7 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                             <CircleDollarSign size={25} className='text-primary font-[1000]' />
                             <div >
                                 <div className=''>Total des commandes</div>
-                                <span className='text-primary font-[1000]'>{data && data.content.reduce(
+                                <span className='text-primary font-[1000]'>{data && data.reduce(
                                     (acc, item) => acc + (Number(item.coutCommande) || 0), 0)} FCFA</span>
                             </div>
                         </div>
@@ -101,7 +99,10 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                                 <CircleDollarSign size={25} className='text-primary font-[1000]' />
                                 <div >
                                     <div className=''>Total des commssions</div>
-                                    <span className='text-primary font-[1000]'>0 FCFA</span>
+                                    <span className='text-primary font-[1000]'>
+                                        {data && data.reduce(
+                                            (acc, item) => acc + (Number(item.commission) || 0), 0)} FCFA
+                                    </span>
                                 </div>
                             </div>
                         </div>
