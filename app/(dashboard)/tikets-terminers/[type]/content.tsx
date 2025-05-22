@@ -50,7 +50,7 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                                 {
 
                                     (type === "FIXE") ?
-                                        column.name
+                                        "Commission (Montant fixe)"
                                         :
                                         (type === "POURCENTAGE") ?
                                             column.name
