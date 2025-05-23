@@ -15,12 +15,12 @@ export const columns = [
     { name: 'Coût livraison', uid: 'coutLivraison' },
     { name: 'Coût commande', uid: 'coutCommande' },
     { name: "Commission", uid: 'commission' },
-    { name: "Commission (Montant fixe)", uid: 'commssionFixe' },
+    // { name: "Commission (Montant fixe)", uid: 'commission ' },
     { name: 'Terminé', uid: 'statut' },
 ];
 
 interface Props {
-    initialData: PaginatedResponse<BonLivraisonVM> | null;
+    initialData: BonLivraisonVM[] | null;
     restaurantId?: string;
 }
 
@@ -29,7 +29,7 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
     const [isLoading, setIsLoading] = useState(!initialData);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(10);
-    const [data, setData] = useState<PaginatedResponse<BonLivraisonVM> | null>(initialData);
+    const [data, setData] = useState<BonLivraisonVM[] | null>(initialData);
 
     const [dates, setDates] = useState<RangeValue<CalendarDate> | null>(null);
 
@@ -48,11 +48,12 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
     };
 
     useEffect(() => {
+        const typeCommsion = type === "POURCENTAGE" ? "POURCENTAGE" : type === "FIXE" ? "FIXE" : ""
         const fetchData = async () => {
             if ((dates?.start && dates?.end) || currentPage || pageSize) {
                 setIsLoading(true);
                 try {
-                    const newData = await getAllBonLivraisonTerminers(restaurantId ?? '', currentPage - 1, pageSize, { dates: { start: dates?.start?.toString() ?? '', end: dates?.end?.toString() ?? '' } });
+                    const newData = await getAllBonLivraisonTerminers(restaurantId ?? '', currentPage - 1, pageSize, { dates: { start: dates?.start?.toString() ?? '', end: dates?.end?.toString() ?? '' } }, typeCommsion as any);
                     setData(newData)
                 } catch (error) {
                     toast.error('Erreur lors de la récupération des données');
@@ -64,18 +65,14 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
         fetchData();
     }, [dates?.start, dates?.end, currentPage, pageSize, restaurantId]);
 
-    // const mapData = (result: PaginatedResponse<BonLivraisonVM> | null) => {
-    //     const data = result?.content.filter((item: BonLivraisonVM) => item.statut === "TERMINER" as any);
-    //     (data && result) && setData({ ...result, content: data })
 
-    // }
 
     const renderCell = useCallback((bonLivraison: BonLivraisonVM, columnKey: Key) => {
         const cellValue = bonLivraison[columnKey as keyof BonLivraisonVM];
-        if (columnKey === "commission" && type === "commision-en-pourcentage") {
-            return <p className='text-blue-600'>{' 0 (10% CC)'}</p>;
-        } else if (columnKey === "commssionFixe" && type === "commision-en-montant-fixe") {
-            return <p className='text-purple-600'>{'0 FCFA'}</p>;
+        if (columnKey === "commission" && type === "POURCENTAGE") {
+            return <p className='text-blue-600'>{cellValue + '  (10% CC)'}</p>;
+        } else if (columnKey === "commission" && type === "FIXE") {
+            return <p className='text-purple-600'>{cellValue + ' FCFA'}</p>;
         } else {
             switch (columnKey) {
                 case 'livreur':
@@ -86,10 +83,15 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
                     return <p>{String(cellValue) + ' FCFA'}</p>;
                 case 'statut':
                     return <Switch size="sm" color="primary" readOnly isSelected />;
-                default:
+                case 'reference':
                     return cellValue;
+                case 'date':
+                    return cellValue
+                default:
+                    return "";
             }
         }
+
 
 
     }, []);
