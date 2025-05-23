@@ -1,6 +1,5 @@
 import NextAuth, { User } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import usersEndpoints from '@/src/endpoints/users.endpoint';
 
 export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     providers: [
@@ -14,7 +13,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
             async authorize(credentials) {
                 if (!credentials?.username || !credentials?.password) return null;
 
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_RESTO_URL}${usersEndpoints.login}`, {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_API_RESTO_URL}/api/V1/turbo/resto/user/login`, {
                     method: 'POST',
                     body: JSON.stringify({ username: credentials.username, password: credentials.password }),
                     headers: { 'Content-Type': 'application/json' },
@@ -22,26 +21,31 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 
                 if (res.ok) {
                     const data = await res.json();
-
+                    console.log("data----------------------------------------------", data)
                     return {
                         id: data?.user?.id,
                         name: data?.user?.username,
                         image: data?.user?.avatarUrl,
                         email: data?.user?.email,
                         token: data?.token,
-                        restaurant: data.user.restaurant,
-                        role: data.user.role,
+                        restaurant: data?.user?.restaurant?.nomEtablissement ?? null,
+                        restauranID: data?.user?.restaurant?.id ?? null,
+                        role: data?.user?.role?.libelle ?? null,
                     } as User;
                 }
                 return null;
             },
         }),
     ],
+    session: {
+        strategy: 'jwt',
+        maxAge: 60 * 60, // 1 heure (en secondes)
+        // updateAge: 30 * 60, // Mise à jour de la session toutes les 30 minutes
+    },
     callbacks: {
         async signIn({ user, account }) {
             if (account?.provider === 'credentials-user') {
                 try {
-                    console.log('signIn', user);
                     return true;
                 } catch (error) {
                     return false;
@@ -52,7 +56,6 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
         },
         async jwt({ token, user, account, trigger, session }) {
             if (account && user) {
-                console.log({ token, user, account });
                 // Première connexion
                 return {
                     ...token,
@@ -63,6 +66,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
                     token: user.token as string,
                     role: user.role as string,
                     restaurant: user.restaurant as string,
+                    restauranID: user.restauranID as string,
                 };
             }
 
@@ -79,6 +83,8 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
             session.user.image = token.image as string;
             session.user.role = token.role as string;
             session.user.restaurant = token.restaurant as string;
+            session.user.restauranID = token.restauranID as string;
+
             return session;
         },
     },

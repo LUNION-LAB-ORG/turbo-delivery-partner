@@ -1,8 +1,0 @@
-{
-  "/create-restaurant/page": "app/create-restaurant/page.js",
-  "/auth/signin/page": "app/auth/signin/page.js",
-  "/auth/page": "app/auth/page.js",
-  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js",
-  "/(dashboard)/collections/page": "app/(dashboard)/collections/page.js"
-}

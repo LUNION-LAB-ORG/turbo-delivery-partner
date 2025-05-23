@@ -1,6 +1,6 @@
 import { ButtonBack } from "@/components/ui/navigation-ui/button-back";
 import { title } from "@/components/primitives";
-import { Divider } from "@nextui-org/react";
+import { Divider } from "@heroui/react";
 
 export default function Policy() {
   const edit_1 = <div>10 Novembre 2024</div>;
@@ -8,7 +8,7 @@ export default function Policy() {
     <div className="w-full h-full gap-4 lg:gap-6">
       <ButtonBack
         className="bg-background"
-        link="/dashboard/settings"
+        link="/settings"
         size="sm"
       />
       <div className="space-y-4 mt-4">
@@ -30,7 +30,7 @@ export default function Policy() {
             <li>Votre nom</li>
             <li>Votre adresse e-mail</li>
             <li>Votre numéro de téléphone</li>
-            <li>D'autres informations pertinentes</li>
+            <li>D&apos;autres informations pertinentes</li>
           </ul>
         </div>
 
@@ -55,7 +55,7 @@ export default function Policy() {
             Nous mettons en œuvre une variété de mesures de sécurité pour
             protéger vos informations personnelles. Vos données sont stockées
             dans des environnements sécurisés et accessibles uniquement à un
-            nombre limité de personnes ayant des droits d'accès spéciaux.
+            nombre limité de personnes ayant des droits d&apos;accès spéciaux.
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function Policy() {
             Vos droits
           </h2>
           <p className="mt-2">
-            Vous avez le droit de demander l'accès à vos informations
+            Vous avez le droit de demander l&apos;accès à vos informations
             personnelles, de demander leur correction ou leur suppression. Pour
             exercer ces droits, veuillez nous contacter.
           </p>

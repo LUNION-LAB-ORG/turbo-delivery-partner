@@ -1,16 +1,16 @@
 "use client";
 import { ButtonBack } from "@/components/ui/navigation-ui/button-back";
 import { title } from "@/components/primitives";
-import { Listbox, ListboxItem } from "@nextui-org/react";
+import { Listbox, ListboxItem } from "@heroui/react";
 import { Check, LanguagesIcon } from "lucide-react";
-import { Divider } from "@nextui-org/react";
+import { Divider } from "@heroui/react";
 
 export default function Languages() {
   return (
     <div className="w-full h-full gap-4 lg:gap-6">
       <ButtonBack
         className="bg-background"
-        link="/dashboard/settings"
+        link="/settings"
         size="sm"
       />
       <div className="space-y-4 mt-4">

@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { signOut } from '@/src/actions/users.actions';
 import { Restaurant } from '@/types/models';
 import { title } from '../primitives';
-import { Avatar } from '@nextui-org/react';
-import restaurantsEndpoint from '@/src/endpoints/restaurants.endpoint';
+import { Avatar } from "@heroui/react";
+import createUrlFile from '@/utils/createUrlFile';
+import { User } from 'next-auth';
+import { useRouter } from 'next/navigation';
 
-export const DashboardUserDropdown = ({ restaurant }: { restaurant: Restaurant | null }) => {
-    const path = process.env.NEXT_PUBLIC_API_RESTO_URL + restaurantsEndpoint.serveFile('logo', 'fa2b4eb1-354a-49e6-a8d7-a1ba9c19605f.png');
-
+export const DashboardUserDropdown = ({ restaurant, user }: { restaurant: Restaurant | null | undefined; user: User }) => {
+    const router = useRouter();
     return (
         <div className="flex items-center gap-2">
             <span className={title({ size: 'h4', class: 'uppercase' })}>{restaurant?.nomEtablissement ?? ''}</span>
@@ -18,15 +19,15 @@ export const DashboardUserDropdown = ({ restaurant }: { restaurant: Restaurant |
                 <DropdownMenuTrigger>
                     <div>
                         <Button variant="secondary" size="icon" className="rounded-full">
-                            <Avatar size="sm" src={path ?? ''} alt="Logo Restaurant" />
+                            <Avatar size="sm" src={createUrlFile(restaurant?.logo ?? '', 'restaurant') ?? ''} alt="Logo Restaurant" />
                         </Button>
                     </div>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                    <DropdownMenuLabel>Utilisateur : {user?.name}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
-                    <DropdownMenuItem>Support</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/settings')}>Paramètre</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => router.push('/settings/help')}>Support</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
                         onClick={async () => {

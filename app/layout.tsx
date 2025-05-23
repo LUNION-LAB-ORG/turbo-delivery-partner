@@ -3,8 +3,7 @@ import 'react-perfect-scrollbar/dist/css/styles.css';
 import '../styles/tailwind.css';
 import { Metadata, Viewport } from 'next';
 import { Lato } from 'next/font/google';
-import { SessionProvider } from 'next-auth/react';
-import NextAuthSessionProvider from "@/providers/next-auth-session.provider";
+import NextAuthSessionProvider from '@/providers/next-auth-session.provider';
 
 export const metadata: Metadata = {
     title: {
@@ -129,9 +128,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
                 </head>
                 <body className={nunito.variable}>
-                    <SessionProvider>
-                        <ProviderComponent>{children}</ProviderComponent>
-                    </SessionProvider>
+                    <ProviderComponent>{children}</ProviderComponent>
                 </body>
             </html>
         </NextAuthSessionProvider>

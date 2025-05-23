@@ -1,14 +1,14 @@
 import { ButtonBack } from "@/components/ui/navigation-ui/button-back";
 import { title } from "@/components/primitives";
 import Content from "./content";
-import { Divider } from "@nextui-org/react";
+import { Divider } from "@heroui/react";
 
 export default function Help() {
   return (
     <div className="w-full h-full gap-4 lg:gap-6">
       <ButtonBack
         className="bg-background"
-        link="/dashboard/settings"
+        link="/settings"
         size="sm"
       />
       <div className="space-y-4 mt-4">
