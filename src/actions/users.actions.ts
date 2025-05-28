@@ -124,7 +124,8 @@ export async function registerStepFirst(prevState: any, formData: FormData): Pro
     cookies().set('email_otp', formdata.email);
     redirect('/auth/signin?step=2');
 }
-export async function resendEmail(): Promise<void> {
+export async function resendEmail(): Promise<any> {
+    console.log("entre+++++++++++++++++++++++++++++++++++++++")
     // Processing
     const hasCookie = cookies().has('email_otp');
 
@@ -139,10 +140,22 @@ export async function resendEmail(): Promise<void> {
                 service: 'restaurant',
             });
         } catch (error: any) {
-            // return {
-            //     status: 'error',
-            //     message: error?.response?.data?.detail ?? error?.response?.data?.message ?? "Erreur lors de l'inscription étape 1",
-            // };
+            if (error?.response?.data && error?.response?.data?.detail) {
+                return {
+                    status: 'error',
+                    message: error?.response?.data?.detail ?? "Erreur lors de l'inscription étape 1",
+                };
+            } else if (error?.response?.data?.message) {
+                return {
+                    status: 'error',
+                    message: error?.response?.data?.detail ?? "Erreur lors de l'inscription étape 1",
+                };
+            } else {
+                return {
+                    status: 'error',
+                    message: "Erreur lors de l'inscription étape 1",
+                };
+            }
         }
     }
 }
@@ -309,6 +322,7 @@ export async function changePassword(prevState: any, formData: FormData): Promis
             data: data,
         };
     } catch (error: any) {
+        console.log("error------------------------------------", error)
         if (error?.response?.data && error?.response?.data?.detail) {
             return {
                 status: 'error',

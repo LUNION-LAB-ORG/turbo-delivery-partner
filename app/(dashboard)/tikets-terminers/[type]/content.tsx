@@ -47,18 +47,15 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                                 ) : (
                                     <></>
                                 )}
-                                {
-
-                                    (type === "FIXE") ?
-                                        "Commission (Montant fixe)"
-                                        :
-                                        (type === "POURCENTAGE") ?
-                                            column.name
-                                            :
-                                            column.name === "Commission" ? <></>
-                                                :
-                                                column.name
-                                }
+                                {column.name === 'Commission' && type === 'FIXE' ? (
+                                    'Commission (Montant fixe)'
+                                ) : column.name === 'Commission' && type === 'POURCENTAGE' ? (
+                                    'Commission'
+                                ) : column.name === 'Commission' ? (
+                                    <></>
+                                ) : (
+                                    column.name
+                                )}
                             </div>
                         </TableColumn>
                     )}
