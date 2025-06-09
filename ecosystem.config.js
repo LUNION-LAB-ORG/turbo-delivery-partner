@@ -1,6 +1,6 @@
 module.exports = {
 	apps: [{
-		name: 'partner-test-website',
+		name: 'partner-website',
 		script: 'pnpm',
 		args: 'start --port 3012',
 		cwd: '/var/www/turbo/test/turbo-delivery-partner',
