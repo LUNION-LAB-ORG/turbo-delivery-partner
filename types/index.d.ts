@@ -59,7 +59,6 @@ export interface BonLivraisonVM {
     coutCommande?: string;
     date?: string;
     heure?: LocalTime;
-    commission?: number;
     statut?: statutType
 }
 

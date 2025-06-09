@@ -26,28 +26,6 @@ export async function getAllBonLivraisons(restaurantId: string, page: number = 0
                 size: size.toString(),
                 debut: start ? formatDate(start, 'YYYY-MM-DD') : '',
                 fin: end ? formatDate(end, 'YYYY-MM-DD') : '',
-                statut: "TERMINER"
-            }
-        });
-        return data;
-    } catch (error) {
-        return [] as any;
-    }
-}
-
-export async function getAllBonLivraisonTerminers(restaurantId: string, page: number = 0, size: number = 10,
-    { dates: { start, end } }: { dates: RangeValue<string | null> }, typeCommsion: string): Promise<BonLivraisonVM[]> {
-    try {
-        const data = await apiClientHttp.request<BonLivraisonVM[]>({
-            endpoint: ticketsEndpoints.bonLivraisonTerminers.endpoint,
-            method: ticketsEndpoints.bonLivraisonTerminers.method,
-            params: {
-                page: page.toString(),
-                size: size.toString(),
-                debut: start ? formatDate(start, 'YYYY-MM-DD') : '',
-                fin: end ? formatDate(end, 'YYYY-MM-DD') : '',
-                type: typeCommsion ?? "",
-                restaurantId: restaurantId
             }
         });
         return data;
