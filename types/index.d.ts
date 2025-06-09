@@ -59,5 +59,17 @@ export interface BonLivraisonVM {
     coutCommande?: string;
     date?: string;
     heure?: LocalTime;
+    commission?: number;
     statut?: statutType
+}
+
+export type FormatsSupportes = "PDF" | "EXCEL" | "HTML";
+export type TypeCommission = 'POURCENTAGE' | 'FIXE';
+
+export interface ParametreBonLivraisonFacture {
+    restaurantId: string;
+    debut?: string;
+    fin?: string;
+    type?: TypeCommission
+    format: FormatsSupportes
 }
