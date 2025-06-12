@@ -50,7 +50,7 @@ export const DocumentRestauForm: React.FC<FormStepProps> = ({ errors, control })
                     control={control}
                     name="dateService"
                     render={({ field: { onChange, value, ...field } }) => {
-                        console.log("value", value)
+
                         return (
                             <DateInput
                                 {...field}

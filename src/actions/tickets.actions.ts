@@ -56,18 +56,18 @@ export async function getAllBonLivraisonTerminers(restaurantId: string, page: nu
     }
 }
 
-export async function reportingBonLivraisonTerminers(parametre: ParametreBonLivraisonFacture): Promise<Blob | null> {
+export async function reportingBonLivraisonTerminers(parametre: ParametreBonLivraisonFacture): Promise<ArrayBuffer | null> {
     try {
-        // const data = await apiClientHttp.request<Blob>({
-        //     endpoint: bonLivraisonEndpoints.reportingBonLivraison.endpoint,
-        //     method: bonLivraisonEndpoints.reportingBonLivraison.method,
-        //     data: parametre,
-        //     service: 'backend',
-        // });
-        const data = (await axios.post(`${process.env.NEXT_PUBLIC_API_BACKEND_URL}${ticketsEndpoints.reportingBonLivraison.endpoint}`, parametre))?.data
-        return data;
+        const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_API_BACKEND_URL}${ticketsEndpoints.reportingBonLivraison.endpoint}`,
+            parametre,
+            {
+                responseType: "arraybuffer",
+            }
+        );
+        return response.data;
     } catch (error) {
-        console.log("error++++++++++++++", error)
         return null;
     }
 }
+
