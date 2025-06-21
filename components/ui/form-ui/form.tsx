@@ -27,11 +27,10 @@ export const StepIndicator: React.FC<StepIndicatorProps> = ({
           >
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mb-1
-                  ${
-                    index <= currentStep
-                      ? "bg-primary text-white"
-                      : "bg-gray-200 text-gray-600"
-                  }`}
+                  ${index <= currentStep
+                  ? "bg-primary text-white"
+                  : "bg-gray-200 text-gray-600"
+                }`}
             >
               {index + 1}
             </div>
@@ -64,9 +63,9 @@ export function FormControls({
 
   return (
     <div className="mt-4 gap-2 flex justify-between">
-      {onPrev && <Button onClick={onPrev}>Précédent</Button>}
+      {onPrev && <Button onPress={onPrev}>Précédent</Button>}
       {onNext && !isSubmit && (
-        <Button color="primary" onClick={onNext}>
+        <Button color="primary" onPress={onNext}>
           Suivant
         </Button>
       )}
@@ -77,7 +76,7 @@ export function FormControls({
           disabled={pending}
           isLoading={pending}
           type="submit"
-          onClick={onNext}
+          onPress={onNext}
         >
           Soumettre
         </Button>
