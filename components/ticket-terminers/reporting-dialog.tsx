@@ -15,7 +15,7 @@ export function TicketTermineReportingDialog({ isOpen, onClose, restaurantId }: 
         <Modal isOpen={isOpen} size={"md"} onClose={onClose} >
             <ModalContent>
                 <ModalBody className="p-5">
-                    <div className="text-center text-primary">Imprimer les bon bons de livraison</div>
+                    <div className="text-center text-primary">Imprimez les bons de livraison</div>
                     <div className="grid grid-cols-1 gap-4">
                         <Controller name="debut" control={ctrl.form.control}
                             render={({ field }) =>
@@ -43,7 +43,7 @@ export function TicketTermineReportingDialog({ isOpen, onClose, restaurantId }: 
                             render={({ field }) =>
                                 <div className="w-full ">
                                     <div className="mb-2">Selectionnez un type</div>
-                                    <SelectField label="id"
+                                    <SelectField label=""
                                         options={[
                                             { label: "Pourcentage", id: "POURCENTAGE" },
                                             { label: "Fixe", id: "FIXE" }
@@ -54,10 +54,10 @@ export function TicketTermineReportingDialog({ isOpen, onClose, restaurantId }: 
                             render={({ field }) =>
                                 <div className="w-full ">
                                     <div className="mb-2">Selectionnez un format</div>
-                                    <SelectField label="id"
+                                    <SelectField label=""
                                         options={[
-                                            { label: "PDF", id: "PDF" },
-                                            { label: "EXCEL", id: "EXCEL" }
+                                            { label: "PDF", key: "PDF" },
+                                            { label: "EXCEL", key: "EXCEL" }
                                         ]} setSelectValue={field.onChange} selectValue={field.value} />
                                 </div>
                             } />
