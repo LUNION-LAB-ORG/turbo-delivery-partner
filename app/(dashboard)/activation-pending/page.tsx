@@ -4,13 +4,13 @@ import { RefreshCcw } from 'lucide-react';
 import { Button } from "@heroui/react";
 import Link from 'next/link';
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 export default function ActivationPending() {
-    const router = useRouter();
+
     useEffect(() => {
         const interval = setInterval(() => {
-            router.push('/');
-        }, 10 * 1000); // 2 minutes en millisecondes
+          window.location.href = '/';
+        }, 20 * 1000); // 20 secondes
 
         // Nettoyage lors du démontage du composant
         return () => clearInterval(interval);

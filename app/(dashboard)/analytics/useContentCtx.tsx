@@ -68,8 +68,8 @@ export default function useContentCtx({ initialData }: Props) {
 
     const statCards = [
         {
-            title: "Chiffre d'Affaires Total",
-            value: totalRevenue ? formatNumber(totalRevenue) : 0,
+            title: "Cumul commande terminées",
+            value: data?.commandeTotalTermine ? formatNumber(data.commandeTotalTermine) : 0,
             icon: TbTrendingUp,
             color: 'from-green-500 to-green-600',
             url: '/tikets-terminers/chiffre-affaire'
@@ -77,6 +77,12 @@ export default function useContentCtx({ initialData }: Props) {
         {
             title: 'Commandes Totales',
             value: totalOrders ? formatNumber(totalOrders) : 0,
+            icon: TbReceipt,
+            color: 'from-yellow-500 to-yellow-600',
+        },
+        {
+            title: 'Cumul commande en attente',
+            value: data?.commandeTotalEnAttente ? formatNumber(data.commandeTotalEnAttente) : 0,
             icon: TbReceipt,
             color: 'from-yellow-500 to-yellow-600',
         },

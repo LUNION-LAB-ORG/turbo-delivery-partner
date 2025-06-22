@@ -37,11 +37,6 @@ export default function Content({ initialData }: Props) {
                         </div>
                     </div>
                     <div className="flex gap-2 items-center">
-                        {/* <Select className="max-w-xs" selectedKeys={period} onSelectionChange={(keys) => setPeriod(keys as any)}>
-                    {periods.map((period: { key: string; label: string }) => (
-                        <SelectItem key={period.key}>{period.label}</SelectItem>
-                    ))}
-                </Select> */}
                         <span>Rechercher la période</span>
                         <DateRangePicker className="max-w-xs relative" value={dates} onChange={(value) => handleDateChange(value as RangeValue<CalendarDate>)} />
                     </div>
