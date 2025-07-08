@@ -1,5 +1,6 @@
 import NextAuth, { User } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
+import { Restaurant } from './types/models';
 
 export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
     providers: [
@@ -31,6 +32,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
                         restaurant: data?.user?.restaurant?.nomEtablissement ?? null,
                         restauranID: data?.user?.restaurant?.id ?? null,
                         role: data?.user?.role?.libelle ?? null,
+                        typeCommission: data?.user?.restaurant.typeCommission ?? null
                     } as User;
                 }
                 return null;
@@ -67,6 +69,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
                     role: user.role as string,
                     restaurant: user.restaurant as string,
                     restauranID: user.restauranID as string,
+                    typeCommission: user.typeCommission as string
                 };
             }
 
@@ -84,6 +87,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
             session.user.role = token.role as string;
             session.user.restaurant = token.restaurant as string;
             session.user.restauranID = token.restauranID as string;
+            session.user.typeCommission = token.typeCommission as string
 
             return session;
         },

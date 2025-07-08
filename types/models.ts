@@ -84,6 +84,7 @@ export interface Restaurant {
     idLocation: string | null;
     pictures: Picture[];
     openingHours: OpeningHour[];
+    typeCommission?: string;
 }
 export interface Picture {
     id: string;

@@ -7,6 +7,6 @@ export default async function Page() {
     const session = await auth();
     const initialData = await getAllBonLivraisonTerminers(session?.user.restauranID ?? "", 0, 10, { dates: { start: null, end: null } }, "");
     return (
-        <Content initialData={initialData} restaurantId={session?.user.restauranID} />
+        <Content initialData={initialData} restaurantId={session?.user?.restauranID} typeCommission={session?.user?.typeCommission} />
     )
 }

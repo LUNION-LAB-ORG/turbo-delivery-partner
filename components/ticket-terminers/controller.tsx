@@ -6,9 +6,11 @@ import { reportingBonLivraisonTerminers } from "@/src/actions/tickets.actions";
 import { TypeReportingSchema, reportingSchema } from "@/src/schemas/reporting.schema";
 import { TypeCommission, FormatsSupportes } from "@/types";
 import { saveAsPDFFile, saveAsExcelFile } from "@/utils/reporting-file";
+import { useState } from "react";
 
 
-export function useReportingController(restaurantId?: string) {
+export function useReportingController(restaurantId?: string, type?: string) {
+    const [isLoading, setIsLoading] = useState(false)
     const initialiValues: TypeReportingSchema = {
         restaurantId: "",
         debut: "",
@@ -23,14 +25,19 @@ export function useReportingController(restaurantId?: string) {
 
 
     const onPreview = async () => {
-        await form.trigger();
+        const isValid = await form.trigger();
+        if (!isValid) {
+            toast.error("Vérifiez que les champs sont bien renseigner !")
+            return
+        }
+        setIsLoading(true)
         const data: TypeReportingSchema = form.getValues();
         try {
             const response = await reportingBonLivraisonTerminers({
                 restaurantId: restaurantId ?? "",
                 debut: data.debut ?? "",
                 fin: data.fin ?? "",
-                type: data.type as TypeCommission,
+                type: type as TypeCommission,
                 format: data.format as FormatsSupportes
             });
 
@@ -47,16 +54,23 @@ export function useReportingController(restaurantId?: string) {
             } else {
                 toast.error("Une erreur s'est produite")
             }
+        } finally {
+            setIsLoading(false)
         }
     };
 
 
     const onexportFile = async () => {
-        await form.trigger();
+        const isValid = await form.trigger();
+        if (!isValid) {
+            toast.error("Vérifiez que les champs sont bien renseigner !")
+            return
+        }
+        setIsLoading(true)
         const data: TypeReportingSchema = form.getValues()
         try {
             const result = await reportingBonLivraisonTerminers({
-                restaurantId: data.restaurantId,
+                restaurantId: data.restaurantId ?? "",
                 debut: data.debut ?? "",
                 fin: data.fin ?? "",
                 type: data.type as TypeCommission,
@@ -77,6 +91,7 @@ export function useReportingController(restaurantId?: string) {
                 }
             }
         } catch (error: any) {
+            console.log("error.response", error.response)
             if (error.response && error.response?.data) {
                 toast.error(error.response?.data?.detail)
             } else if (error.response && error.response?.message) {
@@ -84,6 +99,8 @@ export function useReportingController(restaurantId?: string) {
             } else {
                 toast.error("Une erreur s'est produite")
             }
+        } finally {
+            setIsLoading(false)
         }
     };
 
@@ -92,6 +109,7 @@ export function useReportingController(restaurantId?: string) {
     return {
         onexportFile,
         onPreview,
-        form
+        form,
+        isLoading
     }
 }

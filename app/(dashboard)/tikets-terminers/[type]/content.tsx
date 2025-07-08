@@ -3,7 +3,7 @@
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Pagination, RangeValue, CalendarDate, DateRangePicker, Button } from '@heroui/react';
 import { title } from '@/components/primitives';
 import { ArrowLeft, Calendar, Cherry, CircleDollarSign, CircleFadingPlus, DollarSign, Home, Printer, SquareMenu, ToggleRight, User } from 'lucide-react';
-import { PaginatedResponse } from '@/types/models';
+import { PaginatedResponse, Restaurant } from '@/types/models';
 import { BonLivraisonVM } from '@/types';
 import useContentCtx from './useContentCtx';
 import Link from 'next/link';
@@ -12,12 +12,13 @@ import { TicketTermineReportingDialog } from '@/components/ticket-terminers/repo
 interface ContentProps {
     initialData: BonLivraisonVM[] | null;
     restaurantId?: string;
+    typeCommission?: string;
 }
 
-export default function Content({ initialData, restaurantId }: ContentProps) {
-    const { columns, renderCell, data, handlePageChange, currentPage, isLoading, handleDateChange, type,
-        onClose, onOpen, isOpen
-    } = useContentCtx({ initialData, restaurantId });
+export default function Content({ initialData, restaurantId, typeCommission }: ContentProps) {
+    const { columns, renderCell, data, handlePageChange, currentPage, isLoading, handleDateChange, typeResto,
+        onClose, onOpen, isOpen, type
+    } = useContentCtx({ initialData, restaurantId, typeCommission });
     return (
         <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4 min-w[200px] overflow-auto ">
             <span className='ml-2'>Rechercher par période</span>
@@ -110,7 +111,7 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                     <Button className='bg-primary h-10 text-white mt-2 lg:mt-0  xl:mt-0' onPress={onOpen}><Printer size={20} /> Imprimer</Button>
                 </div>
             </div>
-            <TicketTermineReportingDialog restaurantId={restaurantId} isOpen={isOpen} onClose={onClose} />
+            <TicketTermineReportingDialog restaurantId={restaurantId} isOpen={isOpen} onClose={onClose} type={typeResto} />
         </div>
     );
 }

@@ -1,4 +1,5 @@
 import NextAuth from 'next-auth';
+import { Restaurant } from './models';
 
 declare module 'next-auth' {
     interface Session {
@@ -11,6 +12,7 @@ declare module 'next-auth' {
             role: string;
             restaurant: string;
             restauranID: string;
+            typeCommission: string;
         };
     }
 
@@ -23,6 +25,7 @@ declare module 'next-auth' {
         role: string;
         restaurant: string;
         restauranID: string;
+        typeCommission: string;
     }
 }
 
@@ -34,7 +37,7 @@ declare module 'next-auth/jwt' {
         email: string;
         token: string;
         role: string;
-        restaurant: string;
+        typeCommission: string;
         restauranID: string;
     }
 }
