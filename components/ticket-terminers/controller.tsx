@@ -9,7 +9,7 @@ import { saveAsPDFFile, saveAsExcelFile } from "@/utils/reporting-file";
 import { useState } from "react";
 
 
-export function useReportingController(restaurantId?: string, type?: string) {
+export function useReportingController(restaurantId?: string, type?: string, initialiType?: string) {
     const [isLoading, setIsLoading] = useState(false)
     const initialiValues: TypeReportingSchema = {
         restaurantId: "",
@@ -37,7 +37,7 @@ export function useReportingController(restaurantId?: string, type?: string) {
                 restaurantId: restaurantId ?? "",
                 debut: data.debut ?? "",
                 fin: data.fin ?? "",
-                type: type as TypeCommission,
+                type: initialiType === "chiffre-affaire" || initialiType === "frais-livraison" ? null : type as TypeCommission,
                 format: data.format as FormatsSupportes
             });
 
@@ -73,7 +73,7 @@ export function useReportingController(restaurantId?: string, type?: string) {
                 restaurantId: data.restaurantId ?? "",
                 debut: data.debut ?? "",
                 fin: data.fin ?? "",
-                type: data.type as TypeCommission,
+                type: initialiType === "chiffre-affaire" || initialiType === "frais-livraison" ? null : type as TypeCommission,
                 format: data.format as FormatsSupportes
             });
             if (data?.format === "PDF" && result != null) {

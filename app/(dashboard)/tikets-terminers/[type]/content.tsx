@@ -111,7 +111,7 @@ export default function Content({ initialData, restaurantId, typeCommission }: C
                     <Button className='bg-primary h-10 text-white mt-2 lg:mt-0  xl:mt-0' onPress={onOpen}><Printer size={20} /> Imprimer</Button>
                 </div>
             </div>
-            <TicketTermineReportingDialog restaurantId={restaurantId} isOpen={isOpen} onClose={onClose} type={typeResto} />
+            <TicketTermineReportingDialog restaurantId={restaurantId} isOpen={isOpen} onClose={onClose} type={typeResto} initialiType={type as any} />
         </div>
     );
 }
