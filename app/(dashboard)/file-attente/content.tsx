@@ -48,9 +48,14 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                     icon={<Database size={20} />}
                     titleClassName='bg-red-500 rounded-md pl-4 pr-4 text-sm text-white font-bold pb-1' />
 
-                <NextUICard title={'Commandes terminées'} nombreCommande={`${ctrl.statistiqueCommandes ? ctrl.statistiqueCommandes.commandeTermine : 0}`}
-                    icon={<Database size={20} />}
-                    titleClassName='bg-green-400 rounded-md pl-4 pr-4 text-sm text-white font-bold pb-1' />
+                <Link href="/tikets-terminers/chiffre-affaire">
+                    <NextUICard
+                        title={'Commandes terminées'}
+                        nombreCommande={`${ctrl.statistiqueCommandes ? ctrl.statistiqueCommandes.commandeTermine : 0}`}
+                        icon={<Database size={20} />}
+                        titleClassName='bg-green-400 rounded-md pl-4 pr-4 text-sm text-white font-bold pb-1'
+                    />
+                </Link>
 
                 <Card className={`py-1 border-2  bg-purple-800 text-white border-gary-500`}>
                     <div className="pb-0 pt-2 px-4 flex-col items-start card">
