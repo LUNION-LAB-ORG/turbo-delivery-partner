@@ -27,8 +27,8 @@ export function useReportingController(restaurantId?: string, type?: string, ini
     const onPreview = async () => {
         const isValid = await form.trigger();
         if (!isValid) {
-            toast.error("Vérifiez que les champs sont bien renseigner !")
-            return
+            toast.error("Vous devez selectionnée un format !")
+            return false
         }
         setIsLoading(true)
         const data: TypeReportingSchema = form.getValues();
@@ -63,8 +63,8 @@ export function useReportingController(restaurantId?: string, type?: string, ini
     const onexportFile = async () => {
         const isValid = await form.trigger();
         if (!isValid) {
-            toast.error("Vérifiez que les champs sont bien renseigner !")
-            return
+            toast.error("Vous devez selectionnée un format !")
+            return false
         }
         setIsLoading(true)
         const data: TypeReportingSchema = form.getValues()
@@ -76,6 +76,10 @@ export function useReportingController(restaurantId?: string, type?: string, ini
                 type: initialiType === "chiffre-affaire" || initialiType === "frais-livraison" ? null : type as TypeCommission,
                 format: data.format as FormatsSupportes
             });
+            if (result?.status === "error") {
+                toast.error(result?.message);
+                return false
+            }
             if (data?.format === "PDF" && result != null) {
                 try {
                     saveAsPDFFile(result, "bon-de-livraison-termine");
@@ -91,7 +95,6 @@ export function useReportingController(restaurantId?: string, type?: string, ini
                 }
             }
         } catch (error: any) {
-            console.log("error.response", error.response)
             if (error.response && error.response?.data) {
                 toast.error(error.response?.data?.detail)
             } else if (error.response && error.response?.message) {
