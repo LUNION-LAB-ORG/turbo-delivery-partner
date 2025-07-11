@@ -58,6 +58,7 @@ export async function loginUser(prevState: any, formData: FormData): Promise<Act
             message: 'Connexion réussie',
         };
     } catch (error: any) {
+        console.log(error)
         if (error?.response?.data && error.response?.data?.detail) {
             return {
                 status: 'error',
