@@ -32,7 +32,7 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
                         restaurant: data?.user?.restaurant?.nomEtablissement ?? null,
                         restauranID: data?.user?.restaurant?.id ?? null,
                         role: data?.user?.role?.libelle ?? null,
-                        typeCommission: data?.user?.restaurant.typeCommission ?? null
+                        typeCommission: data?.user?.restaurant?.typeCommission ?? null
                     } as User;
                 }
                 return null;
