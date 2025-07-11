@@ -11,8 +11,8 @@ export interface InputReportingField {
 
 export const reportingSchema = z.object({
     restaurantId: z.string().optional(),
-    debut: z.string().min(1, "Ce champ est requis !"),
-    fin: z.string().min(1, "Ce champ est requis !"),
+    debut: z.string().optional(),
+    fin: z.string().optional(),
     format: z.string().min(1, "Ce champ est requis !"),
     type: z.string().optional(),
 });
