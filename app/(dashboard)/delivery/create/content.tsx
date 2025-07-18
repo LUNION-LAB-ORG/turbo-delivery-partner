@@ -69,6 +69,8 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
         name: 'commandes',
     });
 
+    console.log(fraisLivraisons);
+
     const handleAddressSelect = useCallback(
         (index: number, type: 'lieuRecuperation' | 'lieuLivraison') => {
             const autocomplete = new google.maps.places.Autocomplete(document.getElementById(`${type}-${index}`) as HTMLInputElement, {});
