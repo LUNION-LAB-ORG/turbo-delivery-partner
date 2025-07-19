@@ -31,7 +31,7 @@ interface CommandeFormSectionProps {
 }
 
 export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, restaurant, fraisLivraisons }: CommandeFormSectionProps) => {
-
+    console.log("📦 fraisLivraisons (zones)", fraisLivraisons);   
     return (
         <Card className="p-3 space-y-3 bg-background border-l-4 border-l-primary">
             <div className="flex justify-between items-center bg-muted/50 dark:bg-muted p-2 rounded-lg">
@@ -140,6 +140,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                         <div className="bg-primary/5 dark:bg-primary/10 p-2 rounded-lg">
                             <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} handleAddressSelect={handleAddressSelect} />
                         </div>
+                        
                         <FormField
                             control={form.control}
                             name={`commandes.${index}.zoneId`}
@@ -147,8 +148,11 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 <FormItem className="space-y-1">
                                     <FormLabel className="text-sm">Zone de livraison</FormLabel>
                                     <Select value={field.value} onChange={(e) => field.onChange(e.target.value)} variant="bordered" size="sm" className="h-8">
+                                        
                                         {fraisLivraisons.map((mode) => (
+                                            
                                             <SelectItem key={mode.id}>{mode.name}</SelectItem>
+                                            
                                         ))}
                                     </Select>
                                     <FormMessage />

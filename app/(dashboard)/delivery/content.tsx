@@ -1,16 +1,14 @@
 'use client';
 import { title } from '@/components/primitives';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
-import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
-import { Button, Card, CardBody, CardHeader, Input, Chip, Divider, Pagination, Skeleton, Select, SelectItem } from "@heroui/react";
+import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button, Card, CardBody, CardHeader, Chip, Divider, Pagination, Skeleton } from '@heroui/react';
 import { IconPlus } from '@tabler/icons-react';
 import { useState } from 'react';
 import Link from 'next/link';
-import { SORT_OPTIONS } from '@/data';
+import { SORT_OPTIONS, courses_statuses_filters } from '@/data';
 import DeliveryTools from './component/deliveryTools';
 import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { courses_statuses_filters } from '@/data';
 import EmptyDataTable from '@/components/commons/EmptyDataTable';
 
 type SortOption = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
@@ -68,7 +66,6 @@ interface Props {
 }
 
 export default function Content({ restaurant, initialData }: Props) {
-    // États
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.DATE_DESC);
@@ -83,17 +80,13 @@ export default function Content({ restaurant, initialData }: Props) {
         setIsLoading(true);
         setStatusFilter(status);
 
-        if (status == 'all') {
-            setDataFilter(data?.content ?? []);
-        } else {
-            const dd = typeof _data == 'undefined' ? data : _data;
-            const dataFilter = dd?.content.filter((d) => d.statut?.toUpperCase() == status) ?? [];
-            setDataFilter(dataFilter);
-        }
+        const dd = typeof _data == 'undefined' ? data : _data;
+        const filtered = status === 'all' ? (dd?.content ?? []) : (dd?.content.filter((d) => d.statut?.toUpperCase() === status) ?? []);
+
+        setDataFilter(filtered);
         setIsLoading(false);
     };
 
-    // Fonction de récupération des données
     const fetchData = async (page: number) => {
         setCurrentPage(page);
         setIsLoading(true);
@@ -109,32 +102,26 @@ export default function Content({ restaurant, initialData }: Props) {
         }
     };
 
-    // Handlers
-
-    const handleReset = () => {
-        setSearchTerm('');
-        setSortBy(SORT_OPTIONS.DATE_DESC);
-        setCurrentPage(1);
-    };
-
     const toggleExpand = (deliveryId: string) => {
         setExpandedDelivery(expandedDelivery === deliveryId ? null : deliveryId);
     };
+
     return (
-        <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4">
-            <div className="flex items-center justify-between">
+        <div className="w-full h-full pb-10 flex flex-col gap-4">
+            <div className="flex flex-row flex-wrap items-center justify-between gap-2">
                 <h1 className={title({ size: 'h3', class: 'text-primary' })}>Mes Courses</h1>
                 <Button as={Link} href="/delivery/create" color="primary" size="sm" startContent={<IconPlus className="h-5 w-5" />}>
                     Demande de coursier
                 </Button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                <ScrollArea className="w-full whitespace-nowrap pb-2">
+            {/* Filtres horizontal scroll */}
+            <div className="w-full overflow-x-auto py-2">
+                <div className="grid gap-2 min-w-max grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {courses_statuses_filters.map((category) => (
                         <Button
                             key={category.id}
-                            className="flex-shrink-0 mx-2"
+                            className="w-full"
                             variant={statusFilter === category.id ? 'solid' : 'flat'}
                             color={statusFilter === category.id ? 'primary' : 'default'}
                             onPress={() => handleFilter(category.id)}
@@ -143,39 +130,7 @@ export default function Content({ restaurant, initialData }: Props) {
                             {category.name}
                         </Button>
                     ))}
-                    <ScrollBar orientation="horizontal" className="h-0" />
-                </ScrollArea>
-
-                {/* <Input
-                    startContent={<Search className="text-gray-500 w-4 h-4" />}
-                    label="Rechercher par code"
-                    variant="bordered"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="max-w-sm"
-                    size="sm"
-                /> */}
-                {/* <div className="flex items-center flex-1 gap-4">
-                    <Select label="Filtrer par statut" variant="bordered" selectedKeys={[statusFilter]} onChange={(e) => setStatusFilter(e.target.value)}>
-                        <SelectItem key="all">Tous les statuts</SelectItem>
-                        <SelectItem key={'EN_ATTENTE'}>En Attentes</SelectItem>
-                        <SelectItem key={'VALIDER'}>Validées</SelectItem>
-                        <SelectItem key={'EN_COURS'}>En Cours</SelectItem>
-                        <SelectItem key={'TERMINER'}>Terminées</SelectItem>
-                        <SelectItem key={'ANNULER'}>Annulées</SelectItem>
-                    </Select>
-
-                    <Select label="Trier par" variant="bordered" selectedKeys={[sortBy]} onChange={(e) => setSortBy(e.target.value as SortOption)}>
-                        <SelectItem key={SORT_OPTIONS.DATE_DESC}>Plus récent</SelectItem>
-                        <SelectItem key={SORT_OPTIONS.DATE_ASC}>Plus ancien</SelectItem>
-                        <SelectItem key={SORT_OPTIONS.TOTAL_DESC}>Montant décroissant</SelectItem>
-                        <SelectItem key={SORT_OPTIONS.TOTAL_ASC}>Montant croissant</SelectItem>
-                    </Select>
-
-                    <Button variant="bordered" className="shrink-0" onClick={handleReset}>
-                        Réinitialiser
-                    </Button>
-                </div> */}
+                </div>
             </div>
 
             {isLoading ? (
@@ -184,13 +139,13 @@ export default function Content({ restaurant, initialData }: Props) {
                         <Skeleton key={index} className="rounded-lg h-52" />
                     ))}
                 </div>
-            ) : (data && data?.content.length) ? (
+            ) : data && data?.content.length ? (
                 <>
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                         {dataFilter.map((delivery) => (
                             <Card key={delivery.id} className={`w-full ${getStatusBorderClass(delivery.statut)}`}>
                                 <CardHeader className="flex justify-between">
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                                         <Chip color={getStatusColor(delivery.statut)} variant="flat">
                                             {delivery.statut}
                                         </Chip>
@@ -198,7 +153,6 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </div>
                                     <div className="flex gap-2">
                                         <DeliveryTools restaurant={restaurant} delivery={delivery} />
-
                                         <Button isIconOnly color="primary" variant="light" onClick={() => toggleExpand(delivery.id)}>
                                             {expandedDelivery === delivery.id ? <ChevronUp /> : <ChevronDown />}
                                         </Button>
@@ -207,8 +161,8 @@ export default function Content({ restaurant, initialData }: Props) {
 
                                 <CardBody>
                                     <div className="space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <Store className="text-default-500" />
+                                        <div className="flex items-start gap-2">
+                                            <Store className="text-default-500 mt-1" />
                                             <div>
                                                 <p className="text-default-700">{delivery.restaurant.nomEtablissement}</p>
                                                 <p className="text-default-500 text-sm">{delivery.restaurant.commune}</p>
@@ -224,7 +178,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                     {delivery.nombreCommande} commande{delivery.nombreCommande > 1 ? 's' : ''}
                                                 </span>
                                             </div>
-                                            <span className="text-large font-semibold">{delivery.total.toFixed(2)} XOF</span>
+                                            <span className="text-lg font-semibold">{delivery.total.toFixed(2)} XOF</span>
                                         </div>
 
                                         {expandedDelivery === delivery.id && (
@@ -232,15 +186,13 @@ export default function Content({ restaurant, initialData }: Props) {
                                                 {delivery.commandes.map((commande, index) => (
                                                     <Card key={commande.id} className="w-full">
                                                         <CardHeader className="flex justify-between">
-                                                            <div className="flex items-center gap-4">
+                                                            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
                                                                 <Chip size="sm" variant="flat" color={getCommandeStatusColor(commande.statut)}>
                                                                     {commande.statut ?? 'EN_ATTENTE'}
                                                                 </Chip>
-                                                                <span className="text-default-500 font-bold">Commande #{commande.numero}</span>
+                                                                <span className="text-default-500 font-bold text-sm sm:text-base">Commande #{commande.numero}</span>
                                                             </div>
-                                                            <div className="flex gap-2">
-                                                                <span className="text-default-500 font-bold">{index + 1}</span>
-                                                            </div>
+                                                            <span className="text-default-500 font-bold">{index + 1}</span>
                                                         </CardHeader>
                                                         <CardBody>
                                                             <div className="space-y-3">
@@ -254,7 +206,9 @@ export default function Content({ restaurant, initialData }: Props) {
 
                                                                 <div className="flex items-start gap-2">
                                                                     <MapPin className="text-default-500 mt-1" />
-                                                                    <p className="text-default-600">{`${commande.lieuLivraison.latitude}, ${commande.lieuLivraison.longitude}`}</p>
+                                                                    <p className="text-default-600 text-sm">
+                                                                        {commande.lieuLivraison.latitude}, {commande.lieuLivraison.longitude}
+                                                                    </p>
                                                                 </div>
 
                                                                 <Divider />
@@ -270,17 +224,6 @@ export default function Content({ restaurant, initialData }: Props) {
                                                         </CardBody>
                                                     </Card>
                                                 ))}
-                                                {/* <MapComponent
-                                                    markers={delivery.commandes.map(
-                                                        (c, index) =>
-                                                            ({
-                                                                start: { lat: c.lieuLivraison.latitude ?? 0, lng: c.lieuLivraison.longitude ?? 0 },
-                                                                end: { lat: c.lieuRecuperation.latitude ?? 0, lng: c.lieuRecuperation.longitude ?? 0 },
-                                                                color: ROUTE_COLORS[index % ROUTE_COLORS.length],
-                                                            }) as MarkerData,
-                                                    )}
-                                                    restaurant={restaurant}
-                                                /> */}
                                             </div>
                                         )}
 
@@ -289,8 +232,8 @@ export default function Content({ restaurant, initialData }: Props) {
                                         <div className="flex items-center gap-2">
                                             <Clock className="text-default-500" />
                                             <div>
-                                                <p className="text-default-600">Début: {delivery.dateHeureDebut}</p>
-                                                <p className="text-default-600">Fin: {delivery.dateHeureFin ?? '---'}</p>
+                                                <p className="text-default-600 text-sm">Début: {delivery.dateHeureDebut}</p>
+                                                <p className="text-default-600 text-sm">Fin: {delivery.dateHeureFin ?? '---'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -299,9 +242,11 @@ export default function Content({ restaurant, initialData }: Props) {
                         ))}
                     </div>
 
-                    <div className="flex h-fit z-10 justify-center mt-8 fixed bottom-4">
-                        <div className="bg-gray-200 absolute inset-0 w-full h-full blur-sm opacity-50"></div>
-                        <Pagination total={data?.totalPages ?? 1} page={currentPage} onChange={fetchData} showControls color="primary" variant="bordered" isDisabled={isLoading} />
+                    {/* Pagination Responsive */}
+                    <div className="flex justify-center mt-8 sm:fixed sm:bottom-4 sm:left-0 sm:right-0 z-10">
+                        <div className="relative w-full max-w-screen-sm mx-auto">
+                            <Pagination total={data?.totalPages ?? 1} page={currentPage} onChange={fetchData} showControls color="primary" variant="bordered" isDisabled={isLoading} />
+                        </div>
                     </div>
                 </>
             ) : (
