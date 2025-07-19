@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import { Bell, Home, Menu, Gauge, Settings, Pizza, MessageSquare, ShoppingBag, TicketCheck, Hammer } from 'lucide-react';
 
@@ -6,20 +9,17 @@ import { DashboardNavItems } from '@/components/dashboard/dashboard-nav-items';
 import { Button } from '@heroui/react';
 import { DashboardUserDropdown } from '@/components/dashboard/dashboard-user-dropdown';
 import { Logo } from '@/components/icons';
-import { auth } from '@/auth';
-import { findOneRestaurant } from '@/src/actions/restaurant.actions';
 import { TbTruckDelivery } from 'react-icons/tb';
 import Notifications from '@/components/dashboard/notifications/notifications';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
+    session: any;
+    restaurant: any;
 }
 
-export default async function DashboardLayout({ children }: DashboardLayoutProps) {
-    const session = await auth();
-
-    const data = await findOneRestaurant();
-    const restaurant = data?.restaurant;
+export default function DashboardLayout({ children, session, restaurant }: DashboardLayoutProps) {
+    const [sheetOpen, setSheetOpen] = useState(false);
 
     const navItems = [
         {
@@ -78,8 +78,11 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
             icon: <Settings className="h-5 w-5" />,
             label: 'Paramètres',
         },
-
     ];
+
+    const handleNavItemClick = () => {
+        setSheetOpen(false);
+    };
 
     return (
         <div className="grid relative mx-auto w-full max-w-screen-2xl h-screen md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -90,8 +93,6 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
                             <Logo />
                             <span className="">Turbo Delivery</span>
                         </Link>
-                        {/* <Button variant="bordered" startContent={
-                            <Bell className="h-4 w-4" />} className="ml-auto h-8 w-8" isIconOnly={true} radius="sm" /> */}
                         <Notifications />
                     </div>
                     <div className="flex-1">
@@ -102,12 +103,17 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
             </div>
             <div className="flex flex-col">
                 <header className="flex h-14 items-center gap-4 border-b dark:border-muted bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-                    <Sheet>
+                    <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                         <SheetTrigger asChild>
-                            <Button variant="bordered" startContent={<Menu className="h-5 w-5" />} className="shrink-0 md:hidden" isIconOnly={true} />
+                            <Button 
+                                variant="bordered" 
+                                startContent={<Menu className="h-5 w-5" />} 
+                                className="shrink-0 md:hidden" 
+                                isIconOnly={true} 
+                            />
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col">
-                            <DashboardNavItems navItems={navItems} />
+                            <DashboardNavItems navItems={navItems} onItemClick={handleNavItemClick} />
                         </SheetContent>
                     </Sheet>
                     <div className="md:hidden lg:hidden xl:hidden">
@@ -120,7 +126,9 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
 
                     {session && session?.user && <DashboardUserDropdown restaurant={restaurant} user={session?.user} />}
                 </header>
-                <main className="relative  p-2 lg:p-4 w-full bg-muted overflow-y-auto h-full max-h-[calc(100vh-60px)]">{children}</main>
+                <main className="relative p-2 lg:p-4 w-full bg-muted overflow-y-auto h-full max-h-[calc(100vh-60px)]">
+                    {children}
+                </main>
             </div>
         </div>
     );

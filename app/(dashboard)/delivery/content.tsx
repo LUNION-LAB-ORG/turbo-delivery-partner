@@ -110,7 +110,6 @@ export default function Content({ restaurant, initialData }: Props) {
     };
 
     // Handlers
-
     const handleReset = () => {
         setSearchTerm('');
         setSortBy(SORT_OPTIONS.DATE_DESC);
@@ -120,177 +119,206 @@ export default function Content({ restaurant, initialData }: Props) {
     const toggleExpand = (deliveryId: string) => {
         setExpandedDelivery(expandedDelivery === deliveryId ? null : deliveryId);
     };
+
     return (
-        <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4">
-            <div className="flex items-center justify-between">
-                <h1 className={title({ size: 'h3', class: 'text-primary' })}>Mes Courses</h1>
-                <Button as={Link} href="/delivery/create" color="primary" size="sm" startContent={<IconPlus className="h-5 w-5" />}>
-                    Demande de coursier
+        <div className="w-full h-full pb-20 sm:pb-10 flex flex-1 flex-col gap-4 px-2 sm:px-4">
+            {/* Header - Responsive */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
+                <h1 className={title({ 
+                    size: 'h3', 
+                    class: 'text-primary text-xl sm:text-2xl lg:text-3xl' 
+                })}>
+                    Mes Courses
+                </h1>
+                <Button 
+                    as={Link} 
+                    href="/delivery/create" 
+                    color="primary" 
+                    size="sm" 
+                    startContent={<IconPlus className="h-4 w-4 sm:h-5 sm:w-5" />}
+                    className="w-full sm:w-auto text-sm"
+                >
+                    <span className="sm:hidden">Nouvelle demande</span>
+                    <span className="hidden sm:inline">Demande de coursier</span>
                 </Button>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-4">
+            {/* Filtres - Responsive */}
+            <div className="flex flex-col gap-4 mb-4">
                 <ScrollArea className="w-full whitespace-nowrap pb-2">
-                    {courses_statuses_filters.map((category) => (
-                        <Button
-                            key={category.id}
-                            className="flex-shrink-0 mx-2"
-                            variant={statusFilter === category.id ? 'solid' : 'flat'}
-                            color={statusFilter === category.id ? 'primary' : 'default'}
-                            onPress={() => handleFilter(category.id)}
-                            size="sm"
-                        >
-                            {category.name}
-                        </Button>
-                    ))}
+                    <div className="flex gap-2 px-2">
+                        {courses_statuses_filters.map((category) => (
+                            <Button
+                                key={category.id}
+                                className="flex-shrink-0 text-xs sm:text-sm"
+                                variant={statusFilter === category.id ? 'solid' : 'flat'}
+                                color={statusFilter === category.id ? 'primary' : 'default'}
+                                onPress={() => handleFilter(category.id)}
+                                size="sm"
+                            >
+                                {category.name}
+                            </Button>
+                        ))}
+                    </div>
                     <ScrollBar orientation="horizontal" className="h-0" />
                 </ScrollArea>
-
-                {/* <Input
-                    startContent={<Search className="text-gray-500 w-4 h-4" />}
-                    label="Rechercher par code"
-                    variant="bordered"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="max-w-sm"
-                    size="sm"
-                /> */}
-                {/* <div className="flex items-center flex-1 gap-4">
-                    <Select label="Filtrer par statut" variant="bordered" selectedKeys={[statusFilter]} onChange={(e) => setStatusFilter(e.target.value)}>
-                        <SelectItem key="all">Tous les statuts</SelectItem>
-                        <SelectItem key={'EN_ATTENTE'}>En Attentes</SelectItem>
-                        <SelectItem key={'VALIDER'}>Validées</SelectItem>
-                        <SelectItem key={'EN_COURS'}>En Cours</SelectItem>
-                        <SelectItem key={'TERMINER'}>Terminées</SelectItem>
-                        <SelectItem key={'ANNULER'}>Annulées</SelectItem>
-                    </Select>
-
-                    <Select label="Trier par" variant="bordered" selectedKeys={[sortBy]} onChange={(e) => setSortBy(e.target.value as SortOption)}>
-                        <SelectItem key={SORT_OPTIONS.DATE_DESC}>Plus récent</SelectItem>
-                        <SelectItem key={SORT_OPTIONS.DATE_ASC}>Plus ancien</SelectItem>
-                        <SelectItem key={SORT_OPTIONS.TOTAL_DESC}>Montant décroissant</SelectItem>
-                        <SelectItem key={SORT_OPTIONS.TOTAL_ASC}>Montant croissant</SelectItem>
-                    </Select>
-
-                    <Button variant="bordered" className="shrink-0" onClick={handleReset}>
-                        Réinitialiser
-                    </Button>
-                </div> */}
             </div>
 
+            {/* Contenu principal */}
             {isLoading ? (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-4 sm:gap-6">
                     {[...Array(2)].map((_, index) => (
-                        <Skeleton key={index} className="rounded-lg h-52" />
+                        <Skeleton key={index} className="rounded-lg h-48 sm:h-52" />
                     ))}
                 </div>
             ) : (data && data?.content.length) ? (
                 <>
-                    <div className="grid grid-cols-1 gap-6">
+                    <div className="grid grid-cols-1 gap-4 sm:gap-6">
                         {dataFilter.map((delivery) => (
                             <Card key={delivery.id} className={`w-full ${getStatusBorderClass(delivery.statut)}`}>
-                                <CardHeader className="flex justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <Chip color={getStatusColor(delivery.statut)} variant="flat">
+                                {/* Header de la carte - Responsive */}
+                                <CardHeader className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 p-3 sm:p-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                        <Chip 
+                                            color={getStatusColor(delivery.statut)} 
+                                            variant="flat"
+                                            size="sm"
+                                            className="w-fit"
+                                        >
                                             {delivery.statut}
                                         </Chip>
-                                        <span className="text-default-500 font-bold">Code: {delivery.code}</span>
+                                        <span className="text-default-500 font-bold text-sm sm:text-base">
+                                            Code: {delivery.code}
+                                        </span>
                                     </div>
-                                    <div className="flex gap-2">
+                                    <div className="flex gap-2 self-end sm:self-auto">
                                         <DeliveryTools restaurant={restaurant} delivery={delivery} />
-
-                                        <Button isIconOnly color="primary" variant="light" onClick={() => toggleExpand(delivery.id)}>
-                                            {expandedDelivery === delivery.id ? <ChevronUp /> : <ChevronDown />}
+                                        <Button 
+                                            isIconOnly 
+                                            color="primary" 
+                                            variant="light" 
+                                            onClick={() => toggleExpand(delivery.id)}
+                                            size="sm"
+                                        >
+                                            {expandedDelivery === delivery.id ? 
+                                                <ChevronUp className="h-4 w-4" /> : 
+                                                <ChevronDown className="h-4 w-4" />
+                                            }
                                         </Button>
                                     </div>
                                 </CardHeader>
 
-                                <CardBody>
-                                    <div className="space-y-4">
-                                        <div className="flex items-center gap-2">
-                                            <Store className="text-default-500" />
-                                            <div>
-                                                <p className="text-default-700">{delivery.restaurant.nomEtablissement}</p>
-                                                <p className="text-default-500 text-sm">{delivery.restaurant.commune}</p>
+                                <CardBody className="p-3 sm:p-4">
+                                    <div className="space-y-3 sm:space-y-4">
+                                        {/* Informations restaurant - Responsive */}
+                                        <div className="flex items-start gap-2 sm:gap-3">
+                                            <Store className="text-default-500 mt-1 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-default-700 text-sm sm:text-base font-medium truncate">
+                                                    {delivery.restaurant.nomEtablissement}
+                                                </p>
+                                                <p className="text-default-500 text-xs sm:text-sm truncate">
+                                                    {delivery.restaurant.commune}
+                                                </p>
                                             </div>
                                         </div>
 
                                         <Divider />
 
-                                        <div className="flex justify-between items-center">
+                                        {/* Résumé commande - Responsive */}
+                                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
                                             <div className="flex items-center gap-2">
-                                                <Package className="text-default-500" />
-                                                <span>
+                                                <Package className="text-default-500 h-4 w-4 sm:h-5 sm:w-5" />
+                                                <span className="text-sm sm:text-base">
                                                     {delivery.nombreCommande} commande{delivery.nombreCommande > 1 ? 's' : ''}
                                                 </span>
                                             </div>
-                                            <span className="text-large font-semibold">{delivery.total.toFixed(2)} XOF</span>
+                                            <span className="text-lg sm:text-xl font-semibold text-primary">
+                                                {delivery.total.toFixed(2)} XOF
+                                            </span>
                                         </div>
 
+                                        {/* Section détails expandable */}
                                         {expandedDelivery === delivery.id && (
-                                            <div className="mt-4 space-y-4">
+                                            <div className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
                                                 {delivery.commandes.map((commande, index) => (
                                                     <Card key={commande.id} className="w-full">
-                                                        <CardHeader className="flex justify-between">
-                                                            <div className="flex items-center gap-4">
-                                                                <Chip size="sm" variant="flat" color={getCommandeStatusColor(commande.statut)}>
+                                                        <CardHeader className="flex flex-col sm:flex-row sm:justify-between gap-3 sm:gap-4 p-3">
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                                                                <Chip 
+                                                                    size="sm" 
+                                                                    variant="flat" 
+                                                                    color={getCommandeStatusColor(commande.statut)}
+                                                                    className="w-fit"
+                                                                >
                                                                     {commande.statut ?? 'EN_ATTENTE'}
                                                                 </Chip>
-                                                                <span className="text-default-500 font-bold">Commande #{commande.numero}</span>
+                                                                <span className="text-default-500 font-bold text-sm">
+                                                                    Commande #{commande.numero}
+                                                                </span>
                                                             </div>
-                                                            <div className="flex gap-2">
-                                                                <span className="text-default-500 font-bold">{index + 1}</span>
+                                                            <div className="flex gap-2 self-end sm:self-auto">
+                                                                <Chip size="sm" variant="flat" color="secondary">
+                                                                    {index + 1}
+                                                                </Chip>
                                                             </div>
                                                         </CardHeader>
-                                                        <CardBody>
+                                                        <CardBody className="p-3">
                                                             <div className="space-y-3">
+                                                                {/* Destinataire */}
                                                                 <div className="flex items-start gap-2">
-                                                                    <User className="text-default-500 mt-1" />
-                                                                    <div>
-                                                                        <p className="text-default-700">{commande.destinataire.nomComplet}</p>
-                                                                        <p className="text-default-500">{commande.destinataire.contact}</p>
+                                                                    <User className="text-default-500 mt-1 h-4 w-4 flex-shrink-0" />
+                                                                    <div className="min-w-0 flex-1">
+                                                                        <p className="text-default-700 text-sm font-medium truncate">
+                                                                            {commande.destinataire.nomComplet}
+                                                                        </p>
+                                                                        <p className="text-default-500 text-xs break-all">
+                                                                            {commande.destinataire.contact}
+                                                                        </p>
                                                                     </div>
                                                                 </div>
 
+                                                                {/* Lieu de livraison */}
                                                                 <div className="flex items-start gap-2">
-                                                                    <MapPin className="text-default-500 mt-1" />
-                                                                    <p className="text-default-600">{`${commande.lieuLivraison.latitude}, ${commande.lieuLivraison.longitude}`}</p>
+                                                                    <MapPin className="text-default-500 mt-1 h-4 w-4 flex-shrink-0" />
+                                                                    <p className="text-default-600 text-xs sm:text-sm break-all">
+                                                                        {`${commande.lieuLivraison.latitude}, ${commande.lieuLivraison.longitude}`}
+                                                                    </p>
                                                                 </div>
 
                                                                 <Divider />
 
-                                                                <div className="flex justify-between items-center">
+                                                                {/* Prix et paiement */}
+                                                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
                                                                     <div className="flex items-center gap-2">
-                                                                        <CreditCard className="text-default-500" />
-                                                                        <span className="text-default-600">{commande.modePaiement}</span>
+                                                                        <CreditCard className="text-default-500 h-4 w-4" />
+                                                                        <span className="text-default-600 text-sm">
+                                                                            {commande.modePaiement}
+                                                                        </span>
                                                                     </div>
-                                                                    <span className="font-semibold">{commande.prix.toFixed(2)} XOF</span>
+                                                                    <span className="font-semibold text-primary">
+                                                                        {commande.prix.toFixed(2)} XOF
+                                                                    </span>
                                                                 </div>
                                                             </div>
                                                         </CardBody>
                                                     </Card>
                                                 ))}
-                                                {/* <MapComponent
-                                                    markers={delivery.commandes.map(
-                                                        (c, index) =>
-                                                            ({
-                                                                start: { lat: c.lieuLivraison.latitude ?? 0, lng: c.lieuLivraison.longitude ?? 0 },
-                                                                end: { lat: c.lieuRecuperation.latitude ?? 0, lng: c.lieuRecuperation.longitude ?? 0 },
-                                                                color: ROUTE_COLORS[index % ROUTE_COLORS.length],
-                                                            }) as MarkerData,
-                                                    )}
-                                                    restaurant={restaurant}
-                                                /> */}
                                             </div>
                                         )}
 
                                         <Divider />
 
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="text-default-500" />
-                                            <div>
-                                                <p className="text-default-600">Début: {delivery.dateHeureDebut}</p>
-                                                <p className="text-default-600">Fin: {delivery.dateHeureFin ?? '---'}</p>
+                                        {/* Horaires - Responsive */}
+                                        <div className="flex items-start gap-2 sm:gap-3">
+                                            <Clock className="text-default-500 mt-1 h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-default-600 text-xs sm:text-sm">
+                                                    <span className="font-medium">Début:</span> {delivery.dateHeureDebut}
+                                                </p>
+                                                <p className="text-default-600 text-xs sm:text-sm">
+                                                    <span className="font-medium">Fin:</span> {delivery.dateHeureFin ?? '---'}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -299,13 +327,27 @@ export default function Content({ restaurant, initialData }: Props) {
                         ))}
                     </div>
 
-                    <div className="flex h-fit z-10 justify-center mt-8 fixed bottom-4">
-                        <div className="bg-gray-200 absolute inset-0 w-full h-full blur-sm opacity-50"></div>
-                        <Pagination total={data?.totalPages ?? 1} page={currentPage} onChange={fetchData} showControls color="primary" variant="bordered" isDisabled={isLoading} />
+                    {/* Pagination - Responsive */}
+                    <div className="flex justify-center mt-6 sm:mt-8 pb-4 sm:pb-0">
+                        <div className="bg-background/80 backdrop-blur-sm rounded-lg p-2 sm:p-3 border border-default-200">
+                            <Pagination 
+                                total={data?.totalPages ?? 1} 
+                                page={currentPage} 
+                                onChange={fetchData} 
+                                showControls 
+                                color="primary" 
+                                variant="bordered" 
+                                isDisabled={isLoading}
+                                size="sm"
+                                className="gap-1"
+                            />
+                        </div>
                     </div>
                 </>
             ) : (
-                <EmptyDataTable />
+                <div className="flex justify-center items-center min-h-[200px]">
+                    <EmptyDataTable />
+                </div>
             )}
         </div>
     );
