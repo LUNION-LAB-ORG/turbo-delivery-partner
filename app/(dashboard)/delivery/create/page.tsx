@@ -3,7 +3,7 @@ import Content from './content';
 import Loading from '@/components/layouts/loading';
 import { findOneRestaurant, getAllFraisLivraison } from '@/src/actions/restaurant.actions';
 import { redirect } from 'next/navigation';
-
+  
 export default async function Page() {
     const data = await findOneRestaurant();
     const restaurant = data?.restaurant;
