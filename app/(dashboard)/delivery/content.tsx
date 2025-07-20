@@ -4,7 +4,7 @@ import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
 import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button, Card, CardBody, CardHeader, Input, Chip, Divider, Pagination, Skeleton, Select, SelectItem } from "@heroui/react";
 import { IconPlus } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { SORT_OPTIONS } from '@/data';
 import DeliveryTools from './component/deliveryTools';
@@ -79,17 +79,34 @@ export default function Content({ restaurant, initialData }: Props) {
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
 
+    // Fonction pour filtrer les données basée sur le terme de recherche et le statut
+    const filteredData = useMemo(() => {
+        let filtered = data?.content ?? [];
+        
+        // Filtrage par statut
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter((d) => d.statut?.toUpperCase() === statusFilter);
+        }
+        
+        // Filtrage par terme de recherche (code)
+        if (searchTerm.trim()) {
+            const searchLower = searchTerm.toLowerCase().trim();
+            filtered = filtered.filter((d) => 
+                d.code?.toLowerCase().includes(searchLower)
+            );
+        }
+        
+        return filtered;
+    }, [data?.content, statusFilter, searchTerm]);
+
+    // Effet pour mettre à jour dataFilter quand filteredData change
+    useEffect(() => {
+        setDataFilter(filteredData);
+    }, [filteredData]);
+
     const handleFilter = (status: string, _data?: PaginatedResponse<CourseExterne> | null) => {
         setIsLoading(true);
         setStatusFilter(status);
-
-        if (status == 'all') {
-            setDataFilter(data?.content ?? []);
-        } else {
-            const dd = typeof _data == 'undefined' ? data : _data;
-            const dataFilter = dd?.content.filter((d) => d.statut?.toUpperCase() == status) ?? [];
-            setDataFilter(dataFilter);
-        }
         setIsLoading(false);
     };
 
@@ -100,8 +117,8 @@ export default function Content({ restaurant, initialData }: Props) {
         try {
             const newData = await getPaginationCourseExterne(restaurant.id ?? '', page - 1, pageSize);
             setData(newData);
-            setDataFilter(newData?.content ?? []);
             setStatusFilter('all');
+            setSearchTerm(''); // Reset search when changing page
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -114,6 +131,11 @@ export default function Content({ restaurant, initialData }: Props) {
         setSearchTerm('');
         setSortBy(SORT_OPTIONS.DATE_DESC);
         setCurrentPage(1);
+        setStatusFilter('all');
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
     };
 
     const toggleExpand = (deliveryId: string) => {
@@ -151,10 +173,29 @@ export default function Content({ restaurant, initialData }: Props) {
                         </Button>
                     </div>
 
-                    {/* Filtres - Amélioré pour mobile */}
+                    {/* Filtres - Amélioré pour mobile avec champ de recherche */}
                     <div className="bg-default-50 rounded-xl p-3 sm:p-4 lg:p-6 border border-default-200">
                         <div className="space-y-3 sm:space-y-4">
                             <h3 className="text-base sm:text-lg font-semibold text-default-700">Filtrer les courses</h3>
+                            
+                            {/* Champ de recherche par code */}
+                            <div className="w-full">
+                                <Input
+                                    placeholder="Rechercher par code de course..."
+                                    value={searchTerm}
+                                    onValueChange={handleSearchChange}
+                                    startContent={<Search className="h-4 w-4 text-default-400" />}
+                                    variant="bordered"
+                                    size="md"
+                                    className="w-full"
+                                    classNames={{
+                                        input: "text-sm",
+                                        inputWrapper: "bg-background border-default-300 data-[hover=true]:border-primary/50 group-data-[focus=true]:border-primary"
+                                    }}
+                                    isClearable
+                                    onClear={() => setSearchTerm('')}
+                                />
+                            </div>
                             
                             {/* Filtres par statut - Responsive grid */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
@@ -170,6 +211,25 @@ export default function Content({ restaurant, initialData }: Props) {
                                         {category.name}
                                     </Button>
                                 ))}
+                            </div>
+
+                            {/* Bouton de réinitialisation et compteur de résultats */}
+                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 pt-2">
+                                <div className="text-sm text-default-500">
+                                    {dataFilter.length} course{dataFilter.length !== 1 ? 's' : ''} trouvée{dataFilter.length !== 1 ? 's' : ''}
+                                    {searchTerm && ` pour "${searchTerm}"`}
+                                </div>
+                                {(searchTerm || statusFilter !== 'all') && (
+                                    <Button 
+                                        size="sm" 
+                                        variant="flat" 
+                                        color="default"
+                                        onPress={handleReset}
+                                        className="w-full xs:w-auto"
+                                    >
+                                        Réinitialiser
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -196,20 +256,22 @@ export default function Content({ restaurant, initialData }: Props) {
                                 </Card>
                             ))}
                         </div>
-                    ) : (data && data?.content.length) ? (
+                    ) : (dataFilter.length > 0) ? (
                         <>
-                            {/* Stats rapides - Nouveau */}
+                            {/* Stats rapides - Nouveau (basé sur les données filtrées) */}
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                                 <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
-                                        <p className="text-lg sm:text-2xl font-bold text-primary">{data.totalElements}</p>
-                                        <p className="text-xs sm:text-sm text-default-600">Total</p>
+                                        <p className="text-lg sm:text-2xl font-bold text-primary">{dataFilter.length}</p>
+                                        <p className="text-xs sm:text-sm text-default-600">
+                                            {searchTerm || statusFilter !== 'all' ? 'Résultats' : 'Total'}
+                                        </p>
                                     </CardBody>
                                 </Card>
                                 <Card className="bg-gradient-to-r from-success/10 to-success/5 border-success/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-success">
-                                            {data.content.filter(d => d.statut?.toUpperCase() === 'TERMINER').length}
+                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'TERMINER').length}
                                         </p>
                                         <p className="text-xs sm:text-sm text-default-600">Terminées</p>
                                     </CardBody>
@@ -217,7 +279,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                 <Card className="bg-gradient-to-r from-warning/10 to-warning/5 border-warning/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-warning">
-                                            {data.content.filter(d => d.statut?.toUpperCase() === 'VALIDER').length}
+                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'VALIDER').length}
                                         </p>
                                         <p className="text-xs sm:text-sm text-default-600">En cours</p>
                                     </CardBody>
@@ -225,7 +287,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                 <Card className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-secondary">
-                                            {data.content.filter(d => d.statut?.toUpperCase() === 'EN_ATTENTE').length}
+                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'EN_ATTENTE').length}
                                         </p>
                                         <p className="text-xs sm:text-sm text-default-600">En attente</p>
                                     </CardBody>
@@ -458,16 +520,29 @@ export default function Content({ restaurant, initialData }: Props) {
                         <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] text-center p-6 sm:p-8">
                             <EmptyDataTable />
                             <div className="mt-4 space-y-2">
-                                <p className="text-default-500 text-sm sm:text-base">Aucune course trouvée</p>
-                                <Button 
-                                    as={Link} 
-                                    href="/delivery/create" 
-                                    color="primary" 
-                                    variant="flat"
-                                    size="sm"
-                                >
-                                    Créer votre première course
-                                </Button>
+                                <p className="text-default-500 text-sm sm:text-base">
+                                    {searchTerm ? `Aucune course trouvée pour "${searchTerm}"` : 'Aucune course trouvée'}
+                                </p>
+                                {searchTerm || statusFilter !== 'all' ? (
+                                    <Button 
+                                        color="default" 
+                                        variant="flat"
+                                        size="sm"
+                                        onPress={handleReset}
+                                    >
+                                        Réinitialiser les filtres
+                                    </Button>
+                                ) : (
+                                    <Button 
+                                        as={Link} 
+                                        href="/delivery/create" 
+                                        color="primary" 
+                                        variant="flat"
+                                        size="sm"
+                                    >
+                                        Créer votre première course
+                                    </Button>
+                                )}
                             </div>
                         </div>
                     )}

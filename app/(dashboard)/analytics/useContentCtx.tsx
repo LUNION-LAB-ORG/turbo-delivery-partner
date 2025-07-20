@@ -31,7 +31,6 @@ export default function useContentCtx({ initialData }: Props) {
                     end: dateRange?.end?.toString() ?? '',
                 },
             });
-
             if (data) {
                 setData(data);
             }
@@ -58,6 +57,7 @@ export default function useContentCtx({ initialData }: Props) {
     const totalCommission = data && data.commissionChiffreAffaire + data.commissionCommande;
     const totalFraisLivraison = data?.fraisLivraisonTotalTermine;
 
+    
     // Data for pie chart
     const orderStatusData = [
         { name: 'Terminées', value: data && data.nbCommandeTotalTermine, color: '#10B981' },
@@ -65,6 +65,7 @@ export default function useContentCtx({ initialData }: Props) {
         { name: 'Initiées', value: data && data.nbCommandeTotalInitie, color: '#3B82F6' },
         { name: 'En Cours', value: data && data.nbCommandeTotalEnCours, color: '#6366F1' },
     ];
+    
 
     const statCards = [
         {
