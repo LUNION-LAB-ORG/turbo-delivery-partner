@@ -94,6 +94,7 @@ export async function getPaginationCourseExterne(idRestaurant: string, page: num
         const data = await apiClientHttp.request<PaginatedResponse<CourseExterne>>({
             endpoint: courseEndpoints.getPaginationCourseExterne.endpoint(idRestaurant),
             method: courseEndpoints.getPaginationCourseExterne.method,
+            service: 'backend',
             params: {
                 page: page.toString(),
                 size: size.toString(),

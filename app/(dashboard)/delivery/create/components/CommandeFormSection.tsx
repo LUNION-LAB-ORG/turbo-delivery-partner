@@ -46,7 +46,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
                 <div className="lg:col-span-2 space-y-3">
                     {/* Section Libellé et Date/Heure */}
-                    <FormField
+                    {/* <FormField
                         control={form.control}
                         name={`commandes.${index}.libelle`}
                         render={({ field }) => (
@@ -58,14 +58,14 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 <FormMessage />
                             </FormItem>
                         )}
-                    />
+                    /> */}
                     <div className="bg-card p-2 rounded-lg shadow-sm border border-border grid grid-cols-1 md:grid-cols-2 gap-2">
                         <FormField
                             control={form.control}
                             name={`commandes.${index}.prix`}
                             render={({ field }) => (
                                 <FormItem className="space-y-1">
-                                    <FormLabel className="text-sm">Prix</FormLabel>
+                                    <FormLabel className="text-sm">Montant de la commande</FormLabel>
                                     <FormControl>
                                         <Input {...field} type="number" min="0" step="0.01" onChange={(e) => field.onChange(parseFloat(e.target.value))} className="h-8" />
                                     </FormControl>
@@ -91,8 +91,8 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                     {/* Rest of the Destinataire section remains the same */}
                     <div className="bg-card p-2 rounded-lg shadow-sm border border-border space-y-2">
                         <h4 className="font-semibold text-green-600 dark:text-green-400">Destinataire</h4>
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
-                            <FormField
+                        <div className="grid grid-cols-1 gap-2">
+                            {/* <FormField
                                 control={form.control}
                                 name={`commandes.${index}.destinataire.nomComplet`}
                                 render={({ field }) => (
@@ -104,13 +104,13 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                         <FormMessage />
                                     </FormItem>
                                 )}
-                            />
+                            /> */}
                             <FormField
                                 control={form.control}
                                 name={`commandes.${index}.destinataire.contact`}
                                 render={({ field }) => (
                                     <FormItem className="space-y-1">
-                                        <FormLabel className="text-sm">Contact</FormLabel>
+                                        <FormLabel className="text-sm">N° du client</FormLabel>
                                         <FormControl>
                                             <InputPhone
                                                 value={field.value ?? ''}
@@ -129,7 +129,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             />
                         </div>
                         <div className="bg-green-50/50 dark:bg-green-950/30 p-2 rounded-lg shadow-sm border border-green-100 dark:border-green-900">
-                            <AddressFields index={index} type="lieuLivraison" label="Lieu de livraison" form={form} handleAddressSelect={handleAddressSelect} />
+                            <AddressFields index={index} type="lieuLivraison" label="Aidez-nous à localiser le client" form={form} handleAddressSelect={handleAddressSelect} />
                         </div>
                     </div>
                 </div>
