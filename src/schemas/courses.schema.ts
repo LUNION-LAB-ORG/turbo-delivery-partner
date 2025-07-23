@@ -8,7 +8,7 @@ const localisationCourseExterneSchema = z.object({
 
 // Schéma pour le destinataire
 const destinataireCourseExterneSchema = z.object({
-    nomComplet: z.string().min(1, 'Le nom complet est requis'),
+    // nomComplet: z.string().min(1, 'Le nom complet est requis'),
     contact: z.string().min(1, 'Le contact est requis'),
 });
 
@@ -44,10 +44,10 @@ export const locationSchema = z.object({
 });
 
 export const commandeSchema = z.object({
-    libelle: z.string().optional(),
+    // libelle: z.string().optional(),
     numero: z.string().min(1, 'Le numéro est requis'),
     destinataire: z.object({
-        nomComplet: z.string().min(1, 'Le nom est requis'),
+        // nomComplet: z.string().min(1, 'Le nom est requis'),
         contact: z.string().min(1, 'Le contact est requis'),
     }),
     lieuRecuperation: locationSchema,

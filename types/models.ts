@@ -215,7 +215,6 @@ export interface LocationCourseExterne {
 }
 
 export interface DestinataireCourseExterne {
-    nomComplet: string;
     contact: string;
 }
 
@@ -225,7 +224,6 @@ export interface RepositionnerCommande {
 
 export interface CommandeCourseExterne {
     id: string;
-    libelle: string;
     numero: string;
     dateHeure: string;
     destinataire: DestinataireCourseExterne;
