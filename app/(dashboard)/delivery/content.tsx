@@ -444,9 +444,6 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                             <div className="flex items-start gap-2">
                                                                                 <User className="text-default-500 mt-0.5 h-4 w-4 flex-shrink-0" />
                                                                                 <div className="min-w-0 flex-1">
-                                                                                    <p className="text-default-700 font-medium text-sm">
-                                                                                        {commande.destinataire.nomComplet}
-                                                                                    </p>
                                                                                     <p className="text-default-500 text-xs break-all">
                                                                                         {commande.destinataire.contact}
                                                                                     </p>
