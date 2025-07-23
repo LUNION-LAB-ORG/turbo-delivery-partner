@@ -61,7 +61,7 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                     <div className="pb-0 pt-2 px-4 flex-col items-start card">
                         <p className={`"text-white" font-bold text-md`}>
                             {
-                                ctrl.currentDelivery?.commande ? ctrl.currentDelivery.commande?.libelle : `En attente d'une commande prête`
+                                ctrl.currentDelivery?.commande ? ctrl.currentDelivery.commande?.numero : `En attente d'une commande prête`
                             }
                         </p>
                     </div>

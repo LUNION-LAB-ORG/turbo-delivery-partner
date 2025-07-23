@@ -17,7 +17,7 @@ const modePaiementEnum = z.enum(['ESPECE', 'WAVE']);
 
 // Schéma pour une commande individuelle
 const commandeCourseExterneSchema = z.object({
-    libelle: z.string().optional(),
+    // libelle: z.string().optional(),
     numero: z.string().min(1, 'Le numéro de commande est requis'),
     zoneId: z.string().min(1, "Vous devez selectionner une zone !"),
     destinataire: destinataireCourseExterneSchema,
