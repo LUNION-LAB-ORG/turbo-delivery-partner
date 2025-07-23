@@ -149,7 +149,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                 <div className="flex items-start gap-2">
                                                                     <User className="text-default-500 mt-1" />
                                                                     <div>
-                                                                        <p className="text-default-700">{commande.destinataire.nomComplet}</p>
+                                                                        {/* <p className="text-default-700">{commande.destinataire.nomComplet}</p> */}
                                                                         <p className="text-default-500">{commande.destinataire.contact}</p>
                                                                     </div>
                                                                 </div>
