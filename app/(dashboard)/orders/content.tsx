@@ -22,6 +22,7 @@ import { Card, CardBody, CardHeader, Select, SelectItem } from "@heroui/react";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { orders, orderState, rapportCommandeWeek } from "@/data";
 import { Search } from "lucide-react";
+import { InWorking } from '@/components/commons/InWorking';
 
 const chartConfig = {
   orders: {
@@ -113,6 +114,17 @@ export default function Content() {
               </AreaChart>
             </ChartContainer>
           </CardBody>
+        </Card>
+        
+        <Card
+          className="w-full col-span-12"
+          shadow="sm">
+          <InWorking
+            titre="Notre Nouvelle Fonctionnalité Arrive Bientôt"
+            message="Notre équipe travaille actuellement sur cette page pour vous offrir une meilleure expérience"
+            datePrevue="1er Août 2025"
+            showDate={true}
+          />
         </Card>
       </div>
     </div>

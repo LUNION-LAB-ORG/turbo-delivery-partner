@@ -122,7 +122,7 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
         async (prevState: any, formData: FormData) => {
             
             const result = await addCourseExterne(form.getValues(), restaurant.id);
-            console.log(result);
+            
             if (result.status === 'success') {
                 toast.success(result.message);
                 router.push('/delivery');

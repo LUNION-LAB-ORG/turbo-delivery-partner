@@ -6,10 +6,12 @@ import { SearchField } from "@/components/commons/form/search-field";
 import { PlusIcon } from "lucide-react";
 import { Image, Button, Chip } from "@heroui/react";
 import { FindOneRestaurant } from "@/types/models";
+import { Card } from "@heroui/react";
 import Link from "next/link";
 import { useGestionRestaurantController } from "./controller";
 import { CreerRestaurantModale } from "../../../components/dashboard/gestion-restaurant/creer-restaurant/content";
 import ReglageContent from "../../../components/dashboard/gestion-restaurant/reglages/regalges";
+import { InWorking } from '@/components/commons/InWorking';
 
 export default function Content({ restaurant }: { restaurant: FindOneRestaurant | null }) {
     const ctrl = useGestionRestaurantController()
@@ -58,7 +60,17 @@ export default function Content({ restaurant }: { restaurant: FindOneRestaurant 
             }
             <CreerRestaurantModale onClose={ctrl.dialogClosture.onClose} isOpen={ctrl.dialogClosture.isOpen} />
             <ReglageContent onClose={ctrl.reglageDialogCloture.onClose} isOpen={ctrl.reglageDialogCloture.isOpen} restaurant={restaurant} />
+        
+            <Card
+                className="w-full col-span-12"
+                shadow="sm">
+                <InWorking
+                titre="Notre Nouvelle Fonctionnalité Arrive Bientôt"
+                message="Notre équipe travaille actuellement sur cette page pour vous offrir une meilleure expérience"
+                datePrevue="1er Août 2025"
+                showDate={true}
+                />
+            </Card>
         </div>
-
     )
 }

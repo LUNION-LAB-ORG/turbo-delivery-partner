@@ -2,6 +2,8 @@ import { TrashIcon } from 'lucide-react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Combobox } from '@headlessui/react'
+import { useState } from "react";
 import { Button, Switch, Select, SelectItem } from '@heroui/react';
 import { AddressFields } from './AddressFields';
 import { InputPhone } from '@/components/ui/form-ui/input-phone';
@@ -114,9 +116,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                         <FormControl>
                                             <InputPhone
                                                 value={field.value ?? ''}
-                                                setValue={(value: any) => {
-                                                    field.onChange(value);
-                                                }}
+                                                setValue={(value: any) => field.onChange(value)}
                                                 variant="bordered"
                                                 isInvalid={!!form.formState.errors?.commandes?.[index]?.destinataire?.contact}
                                                 errorMessage={form.formState.errors?.commandes?.[index]?.destinataire?.contact?.message}
@@ -140,20 +140,78 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                         <div className="bg-primary/5 dark:bg-primary/10 p-2 rounded-lg">
                             <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} handleAddressSelect={handleAddressSelect} />
                         </div>
+                        
                         <FormField
                             control={form.control}
                             name={`commandes.${index}.zoneId`}
-                            render={({ field }) => (
+                            render={({ field }) => {
+                                const [query, setQuery] = useState("");
+                                const [isOpen, setIsOpen] = useState(false);
+
+                                const filtered = query === ""
+                                ? fraisLivraisons
+                                : fraisLivraisons.filter(
+                                    (z) =>
+                                        z.name &&
+                                        z.name.toLowerCase().includes(query.toLowerCase())
+                                    );
+
+                                const selectedZone = fraisLivraisons.find(
+                                (z) => z.id === field.value
+                                );
+
+                                return (
                                 <FormItem className="space-y-1">
                                     <FormLabel className="text-sm">Zone de livraison</FormLabel>
-                                    <Select value={field.value} onChange={(e) => field.onChange(e.target.value)} variant="bordered" size="sm" className="h-8">
-                                        {fraisLivraisons.map((mode) => (
-                                            <SelectItem key={mode.id}>{mode.name}</SelectItem>
-                                        ))}
-                                    </Select>
+                                    <Combobox
+                                    value={selectedZone}
+                                    onChange={(val) => val && field.onChange(val.id)}
+                                    >
+                                    {({ open }) => (
+                                        <div className="relative">
+                                        <Combobox.Input
+                                            className="w-full border rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                                            placeholder="Rechercher une zone..."
+                                            value={query}
+                                            onChange={(e) => setQuery(e.target.value)}
+                                            onFocus={() => setIsOpen(true)} // ouvre la liste au focus
+                                            onBlur={() =>
+                                            setTimeout(() => setIsOpen(false), 150)
+                                            }
+                                            displayValue={(zone: DeliveryFee) => zone?.name || ""}
+                                        />
+                                        {(isOpen || open) && (
+                                            <Combobox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-sm shadow-lg border">
+                                            {filtered.length > 0 ? (
+                                                filtered.map((zone) => (
+                                                <Combobox.Option
+                                                    key={zone.id}
+                                                    value={zone}
+                                                    className={({ active }) =>
+                                                    `cursor-pointer select-none px-4 py-2 ${
+                                                        active
+                                                        ? "bg-primary text-white"
+                                                        : "text-gray-900"
+                                                    }`
+                                                    }
+                                                >
+                                                    {zone.name}
+                                                </Combobox.Option>
+                                                ))
+                                            ) : (
+                                                <div className="px-4 py-2 text-gray-500 italic">
+                                                Aucune zone trouvée
+                                                </div>
+                                            )}
+                                            </Combobox.Options>
+                                        )}
+                                        </div>
+                                    )}
+                                    </Combobox>
                                     <FormMessage />
                                 </FormItem>
-                            )}
+                                );
+                            }}
                         />
                     </div>
 
@@ -183,7 +241,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-2 shadow-sm bg-muted/50 dark:bg-muted">
                                         <div>
-                                            <FormLabel className="text-sm">Livraison payée</FormLabel>
+                                            <FormLabel className="text-sm">Frais de livraison inclus</FormLabel>
                                         </div>
                                         <FormControl>
                                             <Switch checked={field.value} onValueChange={field.onChange} className="scale-75" />

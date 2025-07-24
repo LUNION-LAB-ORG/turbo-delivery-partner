@@ -1,5 +1,6 @@
 "use client";
 import { Listbox, ListboxItem, ListboxSection } from "@heroui/react";
+import { signOut } from '@/src/actions/users.actions';
 import {
   User,
   Languages,
@@ -75,6 +76,9 @@ export default function Content() {
           key="logout"
           className="text-danger"
           color="danger"
+          onClick={async () => {
+            await signOut();
+          }}
           startContent={<LogOut className="w-8 h-8 md:w-10 md:h-10" />}
           endContent={<ChevronRightIcon className="text-xl" />}
         >
