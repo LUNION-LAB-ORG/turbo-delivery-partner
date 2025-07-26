@@ -78,7 +78,7 @@ export default function useContentCtx({ initialData, restaurantId, typeCommissio
   const renderCell = useCallback((bonLivraison: BonLivraisonVM, columnKey: Key) => {
     const cellValue = bonLivraison[columnKey as keyof BonLivraisonVM];
     if (columnKey === "commission" && type === "POURCENTAGE") {
-      return <p className='text-blue-600'>{cellValue + '  (10% CC)'}</p>;
+      return <p className='text-blue-600'>{cellValue?.toString()}</p>;
     } else if (columnKey === "commission" && type === "FIXE") {
       return <p className='text-purple-600'>{cellValue + ' FCFA'}</p>;
     } else {

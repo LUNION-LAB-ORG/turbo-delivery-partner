@@ -15,6 +15,23 @@ import EmptyDataTable from '@/components/commons/EmptyDataTable';
 
 type SortOption = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
 
+// AJOUT : Définition des mois pour le filtre
+const MONTHS_FILTERS = [
+    { value: 'all', label: 'Tous les mois' },
+    { value: '1', label: 'Janvier' },
+    { value: '2', label: 'Février' },
+    { value: '3', label: 'Mars' },
+    { value: '4', label: 'Avril' },
+    { value: '5', label: 'Mai' },
+    { value: '6', label: 'Juin' },
+    { value: '7', label: 'Juillet' },
+    { value: '8', label: 'Août' },
+    { value: '9', label: 'Septembre' },
+    { value: '10', label: 'Octobre' },
+    { value: '11', label: 'Novembre' },
+    { value: '12', label: 'Décembre' },
+];
+
 const getStatusColor = (statut: string) => {
     switch (statut?.toUpperCase()) {
         case 'VALIDER':
@@ -71,6 +88,7 @@ export default function Content({ restaurant, initialData }: Props) {
     // États
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
+    const [monthFilter, setMonthFilter] = useState('all'); // AJOUT : État pour le filtre par mois
     const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.DATE_DESC);
     const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -79,7 +97,7 @@ export default function Content({ restaurant, initialData }: Props) {
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
 
-    // Fonction pour filtrer les données basée sur le terme de recherche et le statut
+    // Fonction pour filtrer les données
     const filteredData = useMemo(() => {
         let filtered = data?.content ?? [];
         
@@ -95,9 +113,22 @@ export default function Content({ restaurant, initialData }: Props) {
                 d.code?.toLowerCase().includes(searchLower)
             );
         }
+
+        // AJOUT : Filtrage par mois
+        if (monthFilter !== 'all') {
+            filtered = filtered.filter((d) => {
+                if (!d.dateHeureDebut) return false;
+        
+                // d.dateHeureDebut = '24/07/2025 16:46'
+                const [datePart] = d.dateHeureDebut.split(' '); // '24/07/2025'
+                const [, monthStr] = datePart.split('/');       // ['24', '07', '2025']
+        
+                return monthStr === monthFilter.padStart(2, '0'); // comparer '07' à '7' ou '07'
+            });
+        }
         
         return filtered;
-    }, [data?.content, statusFilter, searchTerm]);
+    }, [data?.content, statusFilter, searchTerm, monthFilter]); // AJOUT : Dépendance monthFilter
 
     // Effet pour mettre à jour dataFilter quand filteredData change
     useEffect(() => {
@@ -118,7 +149,8 @@ export default function Content({ restaurant, initialData }: Props) {
             const newData = await getPaginationCourseExterne(restaurant.id ?? '', page - 1, pageSize);
             setData(newData);
             setStatusFilter('all');
-            setSearchTerm(''); // Reset search when changing page
+            setMonthFilter('all'); // AJOUT : Réinitialiser le mois
+            setSearchTerm('');
         } catch (error) {
             console.error('Error fetching data:', error);
         } finally {
@@ -132,10 +164,18 @@ export default function Content({ restaurant, initialData }: Props) {
         setSortBy(SORT_OPTIONS.DATE_DESC);
         setCurrentPage(1);
         setStatusFilter('all');
+        setMonthFilter('all'); // AJOUT : Réinitialiser le filtre par mois
     };
 
     const handleSearchChange = (value: string) => {
         setSearchTerm(value);
+    };
+
+    const handleMonthChange = (keys: any) => {
+        // HeroUI Select renvoie un Set, nous prenons le premier élément ou 'all' par défaut
+        const selectedKey = Array.from(keys)[0] as string;
+        console.log(selectedKey);
+        setMonthFilter(selectedKey || 'all');
     };
 
     const toggleExpand = (deliveryId: string) => {
@@ -147,7 +187,7 @@ export default function Content({ restaurant, initialData }: Props) {
             <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
                 <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
                     
-                    {/* Header - Mobile First Design */}
+                    {/* Header */}
                     <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1">
                             <h1 className={title({ 
@@ -173,15 +213,16 @@ export default function Content({ restaurant, initialData }: Props) {
                         </Button>
                     </div>
 
-                    {/* Filtres - Amélioré pour mobile avec champ de recherche */}
+                    {/* Filtres */}
                     <div className="bg-default-50 rounded-xl p-3 sm:p-4 lg:p-6 border border-default-200">
                         <div className="space-y-3 sm:space-y-4">
                             <h3 className="text-base sm:text-lg font-semibold text-default-700">Filtrer les courses</h3>
                             
-                            {/* Champ de recherche par code */}
-                            <div className="w-full">
+                            {/* AJOUT : Conteneur flex pour la recherche et le filtre par mois */}
+                            <div className="flex flex-col sm:flex-row gap-3">
                                 <Input
-                                    placeholder="Rechercher par code de course..."
+                                    label="Recherche par code"
+                                    placeholder="Rechercher par code..."
                                     value={searchTerm}
                                     onValueChange={handleSearchChange}
                                     startContent={<Search className="h-4 w-4 text-default-400" />}
@@ -195,9 +236,30 @@ export default function Content({ restaurant, initialData }: Props) {
                                     isClearable
                                     onClear={() => setSearchTerm('')}
                                 />
+                                
+                                {/* AJOUT : Champ de filtre par mois */}
+                                <Select
+                                    label="Filtre par mois"
+                                    placeholder="Sélectionner un mois"
+                                    variant="bordered"
+                                    size="md"
+                                    className="w-full"
+                                    selectedKeys={[monthFilter]}
+                                    onSelectionChange={(keys: any) => handleMonthChange(keys)}
+                                    classNames={{
+                                        value: "text-sm",
+                                        trigger: "bg-background border-default-300 data-[hover=true]:border-primary/50 group-data-[focus=true]:border-primary"
+                                    }}
+                                >
+                                    {MONTHS_FILTERS.map((month) => (
+                                        <SelectItem key={month.value}>
+                                            {month.label}
+                                        </SelectItem>
+                                    ))}
+                                </Select>
                             </div>
                             
-                            {/* Filtres par statut - Responsive grid */}
+                            {/* Filtres par statut */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                 {courses_statuses_filters.map((category) => (
                                     <Button
@@ -217,9 +279,9 @@ export default function Content({ restaurant, initialData }: Props) {
                             <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 pt-2">
                                 <div className="text-sm text-default-500">
                                     {dataFilter.length} course{dataFilter.length !== 1 ? 's' : ''} trouvée{dataFilter.length !== 1 ? 's' : ''}
-                                    {searchTerm && ` pour "${searchTerm}"`}
                                 </div>
-                                {(searchTerm || statusFilter !== 'all') && (
+                                {/* AJOUT : Condition mise à jour pour inclure le filtre par mois */}
+                                {(searchTerm || statusFilter !== 'all' || monthFilter !== 'all') && (
                                     <Button 
                                         size="sm" 
                                         variant="flat" 
@@ -227,14 +289,14 @@ export default function Content({ restaurant, initialData }: Props) {
                                         onPress={handleReset}
                                         className="w-full xs:w-auto"
                                     >
-                                        Réinitialiser
+                                        Réinitialiser les filtres
                                     </Button>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Contenu principal avec loading states améliorés */}
+                    {/* Contenu principal */}
                     {isLoading ? (
                         <div className="space-y-4 sm:space-y-6">
                             {[...Array(3)].map((_, index) => (
@@ -490,57 +552,46 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </Card>
                                 ))}
                             </div>
-
-                            {/* Pagination - Mobile optimized */}
-                            <div className="flex justify-center mt-8 sm:mt-12 pb-6 sm:pb-8">
-                                <div className="bg-background/95 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-default-200 shadow-lg">
-                                    <Pagination 
-                                        total={data?.totalPages ?? 1} 
-                                        page={currentPage} 
-                                        onChange={fetchData} 
-                                        showControls 
-                                        color="primary" 
-                                        variant="bordered" 
-                                        isDisabled={isLoading}
-                                        size="sm"
-                                        className="gap-1"
-                                        classNames={{
-                                            wrapper: "gap-1",
-                                            item: "w-8 h-8 text-small",
-                                            cursor: "bg-primary text-primary-foreground shadow-lg"
-                                        }}
-                                    />
-                                </div>
-                            </div>
                         </>
                     ) : (
                         <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] text-center p-6 sm:p-8">
-                            <EmptyDataTable />
+                            <EmptyDataTable 
+                                title="Aucune course trouvée"
+                                message="Il semble qu'il n'y ait aucune course correspondant à vos critères de recherche ou de filtre."
+                            />
                             <div className="mt-4 space-y-2">
-                                <p className="text-default-500 text-sm sm:text-base">
-                                    {searchTerm ? `Aucune course trouvée pour "${searchTerm}"` : 'Aucune course trouvée'}
-                                </p>
-                                {searchTerm || statusFilter !== 'all' ? (
+                                {(searchTerm || statusFilter !== 'all' || monthFilter !== 'all') && (
                                     <Button 
                                         color="default" 
                                         variant="flat"
                                         size="sm"
                                         onPress={handleReset}
                                     >
-                                        Réinitialiser les filtres
-                                    </Button>
-                                ) : (
-                                    <Button 
-                                        as={Link} 
-                                        href="/delivery/create" 
-                                        color="primary" 
-                                        variant="flat"
-                                        size="sm"
-                                    >
-                                        Créer votre première course
+                                        Effacer les filtres
                                     </Button>
                                 )}
+                                <Button 
+                                    as={Link} 
+                                    href="/delivery/create" 
+                                    color="primary" 
+                                    variant="flat"
+                                    size="sm"
+                                >
+                                    Créer une course
+                                </Button>
                             </div>
+                        </div>
+                    )}
+                    
+                    {/* Pagination */}
+                    {data && data.totalPages > 1 && !searchTerm && monthFilter === 'all' && statusFilter === 'all' && (
+                        <div className="flex justify-center pt-4 sm:pt-6">
+                            <Pagination
+                                total={data.totalPages}
+                                page={currentPage}
+                                onChange={fetchData}
+                                color="primary"
+                            />
                         </div>
                     )}
                 </div>
