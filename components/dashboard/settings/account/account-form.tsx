@@ -9,6 +9,8 @@ import { useRouter } from 'next/navigation';
 import { SubmitButton } from '@/components/ui/form-ui/submit-button';
 import { Account } from '@/data';
 import { FormChangePassword } from '@/components/auth/form-change-password';
+import SelectLocationMap from './SelectLocationMap';
+import { updateInfo } from '@/src/actions/update.info';
 
 export const AccountForm = ({ account }: { account: any }) => {
     const router = useRouter();
@@ -16,19 +18,16 @@ export const AccountForm = ({ account }: { account: any }) => {
 
     const [state, formAction] = useFormState(
         async (prevState: any, formData: FormData) => {
-            // const result = await updateTeam(prevState, formData, account.id);
+            const result = await updateInfo(prevState, formData, account.id);
 
             // router.refresh();
-
-            // return result;
-            return prevState;
+            return result;
         },
         {
-            data: null,
+            data: undefined,
             message: '',
-            errors: {},
+            errors: undefined,
             status: 'idle',
-            code: undefined,
         },
     );
 
@@ -42,6 +41,8 @@ export const AccountForm = ({ account }: { account: any }) => {
             lastname: account.name,
             email: account.email,
             phone: account.phone,
+            latitude: account.latitude ?? 5.345317,
+            longitude: account.longitude ?? -4.024429,
         },
     });
 
@@ -133,6 +134,32 @@ export const AccountForm = ({ account }: { account: any }) => {
                             />
                         )}
                     />
+                    <Controller
+                        control={control}
+                        name="latitude"
+                        render={({ field: { onChange: onLatChange, value: lat } }) => (
+                            <Controller
+                            control={control}
+                            name="longitude"
+                            render={({ field: { onChange: onLngChange, value: lng } }) => (
+                                <div>
+                                <label className="block font-semibold mb-2">Sélectionnez l'emplacement de votre restaurant sur la carte :</label>
+                                <SelectLocationMap
+                                    value={{ lat, lng }}
+                                    onChange={({ lat, lng }) => {
+                                        onLatChange(lat);
+                                        onLngChange(lng);
+                                    }}
+                                />
+                                </div>
+                            )}
+                            />
+                        )}
+                    />
+
+                    <input type="hidden" name="latitude" value={control._formValues.latitude ?? ''} />
+                    <input type="hidden" name="longitude" value={control._formValues.longitude ?? ''} />
+
                     <div className="flex flex-col sm:flex-row justify-end gap-4 items-center">
                         <SubmitButton className="w-fit" color="primary" type="submit">
                             Sauvegarder
