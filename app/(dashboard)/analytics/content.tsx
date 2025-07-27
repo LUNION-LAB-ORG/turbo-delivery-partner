@@ -79,7 +79,7 @@ export default function Content({ initialData }: Props) {
                     <div className="flex flex-col gap-1">
                         <span className="text-sm text-gray-500">{stat.title}</span>
                         <span className="text-2xl font-semibold text-gray-800">
-                        {stat.value} {stat.title.includes('Commandes') ? '' : 'XOF'}
+                          {stat.value} {stat.title.includes('Total des commandes terminées') ? '' : 'XOF'}
                         </span>
                     </div>
                     <div className={`p-3 rounded-full bg-gradient-to-r ${stat.color}`}>

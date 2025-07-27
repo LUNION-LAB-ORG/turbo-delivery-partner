@@ -51,10 +51,22 @@ export default function useContentCtx({ initialData }: Props) {
         }
     };
     // Calculate total orders and revenue
-    const totalOrders = data && data.nbCommandeTotalTermine + data.nbCommandeTotalEnAttente + data.nbCommandeTotalInitie + data.nbCommandeTotalEnCours;
+    const totalOrders = data 
+        && data.nbCommandeTotalTermine 
+        + data.nbCommandeTotalEnAttente 
+        + data.nbCommandeTotalInitie 
+        + data.nbCommandeTotalEnCours;
 
-    const totalRevenue = data && data.commandeTotalTermine + data.commandeTotalEnAttente + data.commandeTotalInitie + data.commandeTotalEnCours;
+    const totalRevenue = data 
+        && data.commandeTotalTermine 
+        + data.commandeTotalEnAttente 
+        + data.commandeTotalInitie 
+        + data.commandeTotalEnCours;
+
+    const totalOrdersFinished = data && data.commandeTotalTermine;
+
     const totalCommission = data && data.commissionChiffreAffaire + data.commissionCommande;
+
     const totalFraisLivraison = data?.fraisLivraisonTotalTermine;
 
     
@@ -65,19 +77,21 @@ export default function useContentCtx({ initialData }: Props) {
         { name: 'Initiées', value: data && data.nbCommandeTotalInitie, color: '#3B82F6' },
         { name: 'En Cours', value: data && data.nbCommandeTotalEnCours, color: '#6366F1' },
     ];
+
+    console.log(data);
     
 
     const statCards = [
         {
             title: "Cumul des commandes terminées",
-            value: totalRevenue ? formatNumber(totalRevenue) : 0,
+            value: totalOrdersFinished ? formatNumber(totalOrdersFinished) : 0,
             icon: TbTrendingUp,
             color: 'from-green-500 to-green-600',
             url: '/tikets-terminers/chiffre-affaire'
         },
         {
-            title: 'Montant des commandes terminées',
-            value: totalOrders ? formatNumber(totalOrders) : 0,
+            title: 'Total des commandes terminées',
+            value:  data?.nbCommandeTotalTermine ?? 0,
             icon: TbReceipt,
             color: 'from-yellow-500 to-yellow-600',
         },
