@@ -8,38 +8,53 @@ import { useRouter } from 'next/navigation';
 import { body, title } from '@/components/primitives';
 import { SubmitButton } from '@/components/ui/form-ui/submit-button';
 import { Restaurant } from '@/types/models';
+import SelectLocationMap from './SelectLocationMap';
+import { updateRestaurant } from '@/src/actions/restaurant.actions';
 
 export const RestaurantForm = ({ restaurant }: { restaurant: Restaurant }) => {
-    const router = useRouter();
+    console.log(restaurant);
 
     const [, formAction] = useFormState(
         async (prevState: any, formData: FormData) => {
-            // const result = await updateTeam(prevState, formData, id);
+            console.log(formData);
+            const result = updateRestaurant(formData);
+            console.log(result)
             // router.refresh();
-            // return result;
-            return prevState;
+            return result;
         },
         {
             data: null,
             message: '',
-            errors: {},
+            errors: undefined,
             status: 'idle',
-            code: undefined,
         },
     );
 
     const {
         formState: { errors },
         control,
+        handleSubmit,
     } = useForm<any>({
-        // resolver: zodResolver(),
         defaultValues: {
             nomEtablissement: restaurant?.nomEtablissement,
+            latitude: restaurant?.latitude ?? 5.345317,
+            longitude: restaurant?.longitude ?? -4.024429,
         },
     });
+    
+    const onSubmit = async (data: any) => {
+        const formattedData = {
+            ...data,
+            latitude: String(data.latitude),
+            longitude: String(data.longitude),
+        };
+        const result = await updateRestaurant(formattedData);
+        console.log(result);
+    };
+
 
     return (
-        <form action={formAction}>
+        <form onSubmit={handleSubmit(onSubmit)}>
             <Card className="max-w-screen-lg p-1">
                 <CardHeader>
                     <div className="flex flex-col gap-2 w-full">
@@ -56,25 +71,65 @@ export const RestaurantForm = ({ restaurant }: { restaurant: Restaurant }) => {
                 </CardHeader>
                 <CardBody>
                     <div className="">
-                        <Controller
-                            control={control}
-                            name="nomEtablissement"
-                            render={({ field }) => (
+                        <div className="mb-8">
+                            <Controller
+                                control={control}
+                                name="nomEtablissement"
+                                render={({ field }) => (
                                 <Input
                                     {...field}
                                     isRequired
                                     aria-invalid={errors.nomEtablissement ? 'true' : 'false'}
                                     aria-label="nomEtablissement input"
-                                    // errorMessage={errors.nomEtablissement?.message ?? ''}
-                                    // isInvalid={!!errors.nomEtablissement}
                                     name="nomEtablissement"
                                     placeholder="Entrez le nom du restaurant"
                                     radius="sm"
                                     type="text"
                                     value={field.value ?? ''}
                                 />
+                                )}
+                            />
+                        </div>
+
+
+                        <Controller
+                            control={control}
+                            name="latitude"
+                            render={({ field: { onChange: onLatChange, value: lat } }) => (
+                                <Controller
+                                    control={control}
+                                    name="longitude"
+                                    render={({ field: { onChange: onLngChange, value: lng } }) => (
+                                        <div>
+                                        <label className="block font-semibold mb-4">Sélectionnez l'emplacement de votre restaurant sur la carte :</label>
+                                        <SelectLocationMap
+                                            value={{ lat, lng }}
+                                            onChange={({ lat, lng }) => {
+                                                onLatChange(lat);
+                                                onLngChange(lng);
+                                            }}
+                                        />
+                                        </div>
+                                    )}
+                                />
                             )}
                         />
+
+                        <Controller
+                            control={control}
+                            name="latitude"
+                            render={({ field }) => (
+                                <input type="hidden" {...field} />
+                            )}
+                        />
+                        <Controller
+                            control={control}
+                            name="longitude"
+                            render={({ field }) => (
+                                <input type="hidden" {...field} />
+                            )}
+                        />
+
                     </div>
                 </CardBody>
                 <Divider />

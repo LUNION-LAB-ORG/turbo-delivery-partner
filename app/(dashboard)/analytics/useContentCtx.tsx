@@ -69,14 +69,14 @@ export default function useContentCtx({ initialData }: Props) {
 
     const statCards = [
         {
-            title: "Chiffre d'Affaires Total",
+            title: "Cumul des commandes terminées",
             value: totalRevenue ? formatNumber(totalRevenue) : 0,
             icon: TbTrendingUp,
             color: 'from-green-500 to-green-600',
             url: '/tikets-terminers/chiffre-affaire'
         },
         {
-            title: 'Commandes Totales',
+            title: 'Montant des commandes terminées',
             value: totalOrders ? formatNumber(totalOrders) : 0,
             icon: TbReceipt,
             color: 'from-yellow-500 to-yellow-600',

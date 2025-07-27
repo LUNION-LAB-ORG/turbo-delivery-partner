@@ -10,6 +10,7 @@ import {
     addPictureSchema,
     addPlatOptionSchema,
     addPlatOptionValueSchema,
+    updateRestaurantSchema,
     createDishSchema,
     createRestaurantSchema,
     updateAccompagnementSchema,
@@ -58,6 +59,7 @@ const restaurantEndpoints = {
     listPlatOption: { endpoint: `/api/V1/turbo/resto/type/cuisine/liste`, method: 'GET' },
     addPlatOption: { endpoint: `/api/V1/turbo/resto/plat/add/option/plat`, method: 'POST' },
     addPlatOptionValue: { endpoint: `/api/V1/turbo/resto/plat/add/option/value`, method: 'POST' },
+    updateRestaurant: { endpoint: `/api/V1/turbo/restaurant/update`, method: 'POST' },
     addAccompagnement: { endpoint: `/api/V1/turbo/resto/accompagnement/create`, method: 'POST' },
     listAccompagnement: {
         endpoint: (restauranID: string) => `/api/V1/turbo/resto/accompagnement/list/${restauranID}`,
@@ -918,6 +920,60 @@ export async function retirerLivreur(livreurId: string): Promise<any> {
             return {
                 status: 'error',
                 message: "Erreur s'est produite ",
+            };
+        }
+    }
+}
+
+
+export async function updateRestaurant(formData: FormData): Promise<ActionResult<OptionValue | null>> {
+    const {
+        success,
+        data: formdata,
+        errorsInArray,
+    } = processFormData(updateRestaurantSchema, formData, {
+        useDynamicValidation: true,
+    });
+
+    if (!success && errorsInArray) {
+        return {
+            status: 'error',
+            message: errorsInArray![0].message ?? 'Données manquantes ou mal formatées',
+        };
+    }
+    try {
+        console.log("Avant la requête", formdata)
+
+        const data = await apiClientHttp.request<OptionValue>({
+            endpoint: restaurantEndpoints.updateRestaurant.endpoint,
+            method: restaurantEndpoints.updateRestaurant.method,
+            data: formdata,
+            service: 'restaurant',
+        });
+
+        console.log("Après la requête", formdata)
+
+        return {
+            status: 'success',
+            message: "GéoLocalisation du restaurant modifiée avec succès",
+            data: data,
+        };
+    } catch (error: any) {
+        if (error?.response?.data && error.response?.data?.detail) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur Niveau 1",
+            };
+        } else if (error?.response?.data?.message) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur Niveau 2",
+            };
+        } else {
+            console.log(error)
+            return {
+                status: 'error',
+                message: "Erreur Niveau 3",
             };
         }
     }
