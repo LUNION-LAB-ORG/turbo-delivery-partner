@@ -26,3 +26,19 @@ export interface StatistiqueFileAttente {
   commandeEnAttente?: number;
   commandeTermine?: number;
 }
+
+export interface FilleAttenteHistoriqueVM {
+  restaurantId?: string
+  restaurant?: string
+  fileAttentes?: FilleAttenteVM[]
+}
+
+export interface FilleAttenteVM {
+  id?: string
+  avatar?: string;
+  nomComplet?: string;
+  position?: number;
+  dateJour?: string;
+  heureJour?: ILocalDataTime
+  statut: string;
+}
