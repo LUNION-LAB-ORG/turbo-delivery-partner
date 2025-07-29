@@ -2,13 +2,16 @@
 
 import { apiClientHttp } from '@/lib/api-client-http';
 import { FileAttenteLivreur, StatistiqueFileAttente } from '@/types/file-attente.model';
+import { FileAttenteStatistiqueVM, FilleAttenteHistoriqueVM } from '@/types/file-attente.model';
 
 const BASE_URL = '/api/restaurant';
 const fileAttenteEndpoints = {
     fetchFilleAttente: { endpoint: (restaurantId: string) => `${BASE_URL}/file-attente/${restaurantId}`, method: 'GET' },
     fetchStatistique: { endpoint: (id: string) => `${BASE_URL}/file-attente/${id}/statistique`, method: 'GET' },
     livreurIndisponible: { endpoint: (id: string) => `${BASE_URL}/file-attente/${id}/indisponible`, method: 'GET' },
+    statistiqueFileAttente: { endpoint: `${BASE_URL}/statistique`, method: "GET" }
 };
+
 
 export async function fetchFilleAttente(restaurantID: string): Promise<FileAttenteLivreur[]> {
     try {
@@ -45,6 +48,20 @@ export async function fetchStatistique(restaurantId: string): Promise<Statistiqu
         });
         return data;
     } catch (e) {
+        return null;
+    }
+}
+
+export async function fetchStatistiqueFilleAttente(): Promise<FileAttenteStatistiqueVM | null> {
+    try {
+        const data = await apiClientHttp.request<FileAttenteStatistiqueVM>({
+            endpoint: fileAttenteEndpoints.statistiqueFileAttente.endpoint,
+            method: fileAttenteEndpoints.statistiqueFileAttente.method,
+            service: 'backend',
+        });
+
+        return data;
+    } catch (error) {
         return null;
     }
 }

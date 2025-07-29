@@ -33,6 +33,13 @@ export interface FilleAttenteHistoriqueVM {
   fileAttentes?: FilleAttenteVM[]
 }
 
+interface ILocalDataTime {
+  hour?: number;
+  minute?: number;
+  second?: number;
+  nano?: number;
+}
+
 export interface FilleAttenteVM {
   id?: string
   avatar?: string;
@@ -42,3 +49,11 @@ export interface FilleAttenteVM {
   heureJour?: ILocalDataTime
   statut: string;
 }
+
+export interface FileAttenteStatistiqueVM {
+  coursier?: number;
+  restaurant?: number;
+  commandeEnAttente?: number;
+  commandeTermine?: number;
+}
+
