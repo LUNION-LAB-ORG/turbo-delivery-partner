@@ -246,3 +246,15 @@ export interface CourseExterne {
     total: number;
     commandes: CommandeCourseExterne[];
 }
+
+export interface LivreurDisponible {
+    livreurId: string;
+    avatarUrl: string;
+    nomComplet: string;
+    telephone: string;
+    position: {
+        longitude: number;
+        latitude: number;
+    };
+    course?: CourseExterne;
+}

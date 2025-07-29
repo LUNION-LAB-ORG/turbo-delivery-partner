@@ -321,7 +321,7 @@ export default function Content({ restaurant, initialData }: Props) {
                     ) : (dataFilter.length > 0) ? (
                         <>
                             {/* Stats rapides - Nouveau (basé sur les données filtrées) */}
-                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
                                 <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-primary">{dataFilter.length}</p>
@@ -330,6 +330,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                         </p>
                                     </CardBody>
                                 </Card>
+
                                 <Card className="bg-gradient-to-r from-success/10 to-success/5 border-success/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-success">
@@ -338,6 +339,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                         <p className="text-xs sm:text-sm text-default-600">Terminées</p>
                                     </CardBody>
                                 </Card>
+
                                 <Card className="bg-gradient-to-r from-warning/10 to-warning/5 border-warning/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-warning">
@@ -346,12 +348,22 @@ export default function Content({ restaurant, initialData }: Props) {
                                         <p className="text-xs sm:text-sm text-default-600">En cours</p>
                                     </CardBody>
                                 </Card>
+
                                 <Card className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-secondary">
                                             {dataFilter.filter(d => d.statut?.toUpperCase() === 'EN_ATTENTE').length}
                                         </p>
                                         <p className="text-xs sm:text-sm text-default-600">En attente</p>
+                                    </CardBody>
+                                </Card>
+
+                                <Card className="bg-gradient-to-r from-danger/10 to-danger/5 border-danger/20">
+                                    <CardBody className="p-3 sm:p-4 text-center">
+                                        <p className="text-lg sm:text-2xl font-bold text-danger">
+                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'ANNULER').length}
+                                        </p>
+                                        <p className="text-xs sm:text-sm text-default-600">Annulées</p>
                                     </CardBody>
                                 </Card>
                             </div>
