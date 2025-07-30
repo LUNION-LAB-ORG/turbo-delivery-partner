@@ -32,6 +32,7 @@ export default function Content({ data }: ContentProps) {
         setData: setLivreursAvecPosition 
     });
 
+
     // Dispatching initial des livreurs
     useEffect(() => {
         if (data.length > 0 && livreursAvecPosition.length === 0) {
@@ -73,7 +74,7 @@ export default function Content({ data }: ContentProps) {
     }, [livreursAvecPosition]);
 
     // Callbacks
-    const handleCourierSelect = useCallback((courierId: string) => {
+    const handleCourierSelect = useCallback((courierId: string | null) => {
         setSelectedCourierId(courierId);
     }, []);
 
