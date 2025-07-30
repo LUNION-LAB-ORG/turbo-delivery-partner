@@ -31,7 +31,7 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                 <div className="flex gap-4 w-full">
                     <SearchField onChange={onChange} searchKey={searchKey} />
                     <div className=''>
-                        <Link href={'#'}>
+                        <Link href={'/trafic'}>
                             <Badge className="rounded-full pr-4 cursor-pointer">
                                 <Map className="mr-4" size={30} /> Maps
                             </Badge>

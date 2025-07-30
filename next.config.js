@@ -29,6 +29,13 @@ const nextConfig = {
             },
         ],
     },
+    productionBrowserSourceMaps: false,
+    webpack(config, options) {
+        if (!options.dev) {
+        config.devtool = 'source-map';
+        }
+        return config;
+    }
 };
 
 module.exports = nextConfig;
