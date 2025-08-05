@@ -314,7 +314,7 @@ const MarkerAsync = ({
         onClick={handleClick}
         icon={{
           url: iconUrl,
-          scaledSize: new window.google.maps.Size(40, 52),
+          scaledSize: new window.google.maps.Size(70, 120),
           anchor: new google.maps.Point(20, 50),
         }}
       />

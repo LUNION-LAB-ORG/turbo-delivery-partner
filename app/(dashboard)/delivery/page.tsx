@@ -12,12 +12,10 @@ export default async function DeliveryPage() {
         redirect('/auth/signout');
     }
 
-    const data2 = await getPaginationCourseExterne(restaurant.id ?? '', 0, 5);
-    console.log(data2)
-
+    const courses_externes = await getPaginationCourseExterne(restaurant.id ?? '', 0, 5);
     return (
         <Suspense fallback={<Loading />}>
-            <Content initialData={data2} restaurant={restaurant} />
+            <Content initialData={courses_externes} restaurant={restaurant} />
         </Suspense>
     );
 }

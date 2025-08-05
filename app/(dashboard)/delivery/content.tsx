@@ -67,7 +67,7 @@ const getCommandeStatusColor = (statut: string) => {
 const getStatusBorderClass = (statut: string) => {
     switch (statut.toUpperCase()) {
         case 'VALIDER':
-            return 'border-l-4 sm:border-2 border-warning bg-warning/5';
+            return 'border-l-4 sm:border-2 border-sky-500 bg-sky-500/5';
         case 'TERMINER':
             return 'border-l-4 sm:border-2 border-success bg-success/5';
         case 'ANNULER':
@@ -85,7 +85,6 @@ interface Props {
 }
 
 export default function Content({ restaurant, initialData }: Props) {
-    // États
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('all');
     const [monthFilter, setMonthFilter] = useState('all'); // AJOUT : État pour le filtre par mois
@@ -321,7 +320,7 @@ export default function Content({ restaurant, initialData }: Props) {
                     ) : (dataFilter.length > 0) ? (
                         <>
                             {/* Stats rapides - Nouveau (basé sur les données filtrées) */}
-                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 sm:gap-4">
                                 <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-primary">{dataFilter.length}</p>
@@ -340,10 +339,19 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </CardBody>
                                 </Card>
 
+                                <Card className="bg-gradient-to-r from-sky-500/10 to-sky-500/5 border-sky-500/20">
+                                    <CardBody className="p-3 sm:p-4 text-center">
+                                        <p className="text-lg sm:text-2xl font-bold text-sky-500">
+                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'VALIDER').length}
+                                        </p>
+                                        <p className="text-xs sm:text-sm text-default-600">Valider</p>
+                                    </CardBody>
+                                </Card>
+
                                 <Card className="bg-gradient-to-r from-warning/10 to-warning/5 border-warning/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-warning">
-                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'VALIDER').length}
+                                            {dataFilter.filter(d => d.statut?.toUpperCase() === 'EN_COURS').length}
                                         </p>
                                         <p className="text-xs sm:text-sm text-default-600">En cours</p>
                                     </CardBody>
