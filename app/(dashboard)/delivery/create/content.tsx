@@ -19,6 +19,7 @@ import { SubmitButton } from '@/components/ui/form-ui/submit-button';
 import { MarkerData } from '@/types';
 import { ROUTE_COLORS } from '@/data';
 import { DeliveryFee } from '@/types/restaurant';
+import Tesseract from "tesseract.js";
 
 // Liste de 20 couleurs distinctes
 
@@ -47,11 +48,7 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
     const startCamera = async () => {
         try {
             setError('');
-            const stream = await navigator.mediaDevices.getUserMedia({ 
-                video: { 
-                facingMode: 'environment' // Caméra arrière sur mobile
-                } 
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
             streamRef.current = stream;
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
@@ -80,69 +77,80 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
             return;
         }
 
+        // Vérifier que la vidéo est prête et a des dimensions valides
+        if (video.videoWidth === 0 || video.videoHeight === 0) {
+            setError('La vidéo n\'est pas encore prête. Veuillez réessayer.');
+            return;
+        }
+
         const context = canvas.getContext('2d');
         if (!context) {
             setError('Impossible d\'initialiser le contexte canvas');
             return;
         }
 
+        // Définir les dimensions du canvas
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0);
+        
+        // Dessiner l'image de la vidéo sur le canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        canvas.toBlob((blob) => {
-            if (!blob) {
-                setError('Erreur lors de la création de l\'image');
-                return;
-            }
-            const imageUrl = URL.createObjectURL(blob);
-            setScannedImage(imageUrl);
-            processImage(blob);
-        }, 'image/jpeg', 0.8);
-
-        stopCamera();
+        // Convertir en blob avec une meilleure gestion d'erreur
+        try {
+            canvas.toBlob((blob) => {
+                if (!blob) {
+                    setError('Erreur lors de la création de l\'image. Veuillez réessayer.');
+                    return;
+                }
+                const imageUrl = URL.createObjectURL(blob);
+                setScannedImage(imageUrl);
+                processImage(blob);
+                stopCamera();
+            }, 'image/jpeg', 0.9);
+        } catch (error) {
+            console.error('Erreur canvas.toBlob:', error);
+            setError('Erreur lors de la capture. Veuillez réessayer.');
+        }
     };
 
     // Fonction pour traiter l'upload de fichier
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
-        const imageUrl = URL.createObjectURL(file);
-        setScannedImage(imageUrl);
-        processImage(file);
+            const imageUrl = URL.createObjectURL(file);
+            setScannedImage(imageUrl);
+            processImage(file);
         }
     };
 
-    // Fonction pour extraire le texte avec OCR (simulation)
+    // Fonction pour extraire le texte avec Tesseract.js
+    async function extractText(imageUrl: string) {
+        const { data: { text } } = await Tesseract.recognize(imageUrl, "fra"); // ou "eng"
+        return text;
+    }
+
+    // Fonction pour traiter l'image et extraire le texte
     const processImage = async (imageBlob: File | Blob) => {
         setIsProcessing(true);
-        setError('');    
+        setError('');
+        
         try {
-            // Simulation d'un traitement OCR
-            // En production, vous utiliseriez une vraie API OCR comme Tesseract.js ou Azure Cognitive Services
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Créer une URL pour l'image
+            const imageUrl = URL.createObjectURL(imageBlob);
             
-            // Texte simulé pour la démonstration
-            const simulatedText = `FACTURE N° 2024-001
-                Date: ${new Date().toLocaleDateString('fr-FR')}
-                Société: ABC Transport SARL
-                Adresse: 123 Rue de la Livraison, 75001 Paris
-
-                DÉTAIL DE LA PRESTATION:
-                - Transport express: 45,00 €
-                - Frais de livraison: 15,00 €
-                - TVA 20%: 12,00 €
-
-                TOTAL: 72,00 €
-
-                Mode de paiement: Espèces
-                Coursier: Jean Dupont`;
-
-            setExtractedText(simulatedText);
+            // Extraire le texte avec Tesseract.js
+            const extractedTextResult = await extractText(imageUrl);
+            
+            // Nettoyer l'URL de l'objet
+            URL.revokeObjectURL(imageUrl);
+            
+            setExtractedText(extractedTextResult);
         } catch (err) {
-        setError('Erreur lors de l\'extraction du texte. Veuillez réessayer.');
+            console.error('Erreur OCR:', err);
+            setError('Erreur lors de l\'extraction du texte. Veuillez réessayer.');
         } finally {
-        setIsProcessing(false);
+            setIsProcessing(false);
         }
     };
 
@@ -183,6 +191,7 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
             ],
         },
     });
+
     const { fields, append, remove } = useFieldArray({
         control: form.control,
         name: 'commandes',
