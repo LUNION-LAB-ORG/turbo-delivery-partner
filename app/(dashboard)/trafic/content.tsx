@@ -244,7 +244,7 @@ export default function Content({ data }: ContentProps) {
             </div>
 
             {/* Conteneur de la carte */}
-            <div className="relative flex-1">
+            <div className="relative flex-1 pb-20">
                 <MapContainer
                     couriers={livreursValides}
                     selectedCourierId={selectedCourierId}
@@ -256,39 +256,37 @@ export default function Content({ data }: ContentProps) {
                     <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
                         <Card className="p-4">
                             <CardBody className="text-center">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                                <p className="text-gray-600">
-                                    Dispatching des livreurs sur Abidjan...
-                                </p>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                            <p className="text-gray-600">Dispatching des livreurs sur Abidjan...</p>
                             </CardBody>
                         </Card>
                     </div>
                 )}
 
                 {/* Dashboard flottant */}
-                <div className="absolute -bottom-8 w-full">
+                <div className="absolute bottom-0 sm:-bottom-8 w-full z-10">
                     <AnimatePresence mode="wait">
-                        {!openDashboard ? (
-                            <motion.div
-                                key="open-button"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: 20 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full bg-background rounded-t-3xl p-2 flex justify-center"
-                            >
-                                <Button 
-                                    onClick={toggleDashboard}
-                                    isIconOnly 
-                                    startContent={<LayoutDashboard />}
-                                    variant="bordered" 
-                                    color="primary"
-                                    size="sm"
-                                />
-                            </motion.div>
-                        ) : (
-                            <DashboardPanel />
-                        )}
+                    {!openDashboard ? (
+                        <motion.div
+                        key="open-button"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 20 }}
+                        transition={{ duration: 0.3 }}
+                        className="w-full bg-background rounded-t-3xl p-2 flex justify-center"
+                        >
+                        <Button 
+                            onClick={toggleDashboard}
+                            isIconOnly 
+                            startContent={<LayoutDashboard />}
+                            variant="bordered" 
+                            color="primary"
+                            size="sm"
+                        />
+                        </motion.div>
+                    ) : (
+                        <DashboardPanel />
+                    )}
                     </AnimatePresence>
                 </div>
             </div>

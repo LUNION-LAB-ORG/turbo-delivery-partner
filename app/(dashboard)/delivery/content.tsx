@@ -4,7 +4,7 @@ import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
 import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button, Card, CardBody, CardHeader, Input, Chip, Divider, Pagination, Skeleton, Select, SelectItem } from "@heroui/react";
 import { IconPlus } from '@tabler/icons-react';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { SORT_OPTIONS } from '@/data';
 import DeliveryTools from './component/deliveryTools';
@@ -96,6 +96,29 @@ export default function Content({ restaurant, initialData }: Props) {
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
 
+    // === NOUVEAU ===
+    // Fonction fetchData optimisée, mémorisée avec useCallback
+    const fetchData = useCallback(async (page: number = currentPage) => {
+        setIsLoading(true);
+        try {
+            const newData = await getPaginationCourseExterne(restaurant.id ?? '', page - 1, pageSize);
+            setData(newData);
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [restaurant.id, currentPage, pageSize]);
+
+    // === Polling automatique toutes les 15s ===
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            fetchData(currentPage);
+        }, 15000); // 15000ms = 15s
+
+        return () => clearInterval(intervalId);
+    }, [fetchData, currentPage]);
+
     // Fonction pour filtrer les données
     const filteredData = useMemo(() => {
         let filtered = data?.content ?? [];
@@ -138,23 +161,6 @@ export default function Content({ restaurant, initialData }: Props) {
         setIsLoading(true);
         setStatusFilter(status);
         setIsLoading(false);
-    };
-
-    // Fonction de récupération des données
-    const fetchData = async (page: number) => {
-        setCurrentPage(page);
-        setIsLoading(true);
-        try {
-            const newData = await getPaginationCourseExterne(restaurant.id ?? '', page - 1, pageSize);
-            setData(newData);
-            setStatusFilter('all');
-            setMonthFilter('all'); // AJOUT : Réinitialiser le mois
-            setSearchTerm('');
-        } catch (error) {
-            console.error('Error fetching data:', error);
-        } finally {
-            setIsLoading(false);
-        }
     };
 
     // Handlers
@@ -378,7 +384,7 @@ export default function Content({ restaurant, initialData }: Props) {
 
                             {/* Liste des courses - Design amélioré */}
                             <div className="space-y-4 sm:space-y-6">
-                                {dataFilter.map((delivery) => (
+                                {filteredData.map((delivery) => (
                                     <Card key={delivery.id} className={`w-full transition-all duration-300 hover:shadow-lg ${getStatusBorderClass(delivery.statut)}`}>
                                         
                                         {/* Header de la carte - Mobile optimized */}
