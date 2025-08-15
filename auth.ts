@@ -22,7 +22,6 @@ export const { handlers, signIn, signOut, auth, unstable_update } = NextAuth({
 
                 if (res.ok) {
                     const data = await res.json();
-                    console.log("data----------------------------------------------", data)
                     return {
                         id: data?.user?.id,
                         name: data?.user?.username,

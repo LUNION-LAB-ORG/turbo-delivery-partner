@@ -27,31 +27,62 @@ export function LivreurTimeline({ livreurs: livreursEnCourse, handleCourierSelec
     };
     return (
         <div className="w-full mx-auto">
-            <h2 className="lg:text-xl font-bold text-primary mb-4">En circulation</h2>
-            <div className="relative mb-8 overflow-auto scrollbar-thin">
-                <div className="absolute inset-0 bg-gray-200 rounded-full h-fit flex flex-nowrap scrollbar-thin" />
-                {/* Base timeline */}
-                <div className="flex flex-nowrap">
-                    {livreursActifs.map((livreur, index) => {
-                        const colors = ['bg-indigo-700', 'bg-rose-500', 'bg-blue-500', 'bg-green-500', 'bg-orange-500'];
-
-                        return (
-                            <div key={livreur.livreurId} onClick={() => handleClick(livreur.livreurId)} className="flex flex-col justify-center gap-2 shrink-0 cursor-pointer">
+            <h2 className="lg:text-xl font-bold text-primary mb-4">
+                En circulation : Livreur(s) connecté(s)
+            </h2>
+        
+            {livreursActifs.length === 0 ? (
+                <p className="text-gray-500 italic">Aucun livreur</p>
+            ) : (
+                <>
+                    <div className="relative mb-8 overflow-auto scrollbar-thin">
+                        <div className="absolute inset-0 bg-gray-200 rounded-full h-fit flex flex-nowrap scrollbar-thin" />
+                        {/* Base timeline */}
+                        <div className="flex flex-nowrap">
+                            {livreursActifs.map((livreur, index) => {
+                                const colors = [
+                                'bg-indigo-700',
+                                'bg-rose-500',
+                                'bg-blue-500',
+                                'bg-green-500',
+                                'bg-orange-500',
+                                ];
+                
+                                return (
                                 <div
-                                    className={`h-3 w-10  ${!selectedDeliver ? colors[index % colors.length] : selectedDeliver.livreurId == livreur.livreurId ? 'bg-primary' : 'bg-gray-700'}  rounded-full`}
-                                />
-
-                                <Avatar
-                                    src={createUrlFile(livreur.avatarUrl, 'delivery')}
+                                    key={livreur.livreurId}
+                                    onClick={() => handleClick(livreur.livreurId)}
+                                    className="flex flex-col justify-center gap-2 shrink-0 cursor-pointer"
+                                >
+                                    <div
+                                    className={`h-3 w-10 ${
+                                        !selectedDeliver
+                                        ? colors[index % colors.length]
+                                        : selectedDeliver.livreurId === livreur.livreurId
+                                        ? 'bg-primary'
+                                        : 'bg-gray-700'
+                                    } rounded-full`}
+                                    />
+                
+                                    <Avatar
+                                    src={createUrlFile(livreur.avatarUrl, 'backend')}
                                     alt={livreur.nomComplet}
-                                    className={`w-10 h-10 border-2 ${selectedDeliver && selectedDeliver.livreurId == livreur.livreurId ? 'border-primary' : 'border-white'} shadow-sm`}
-                                />
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-            {selectedDeliver && <DeliveryProgress livreur={selectedDeliver} />}
+                                    className={`w-10 h-10 border-2 ${
+                                        selectedDeliver &&
+                                        selectedDeliver.livreurId === livreur.livreurId
+                                        ? 'border-primary'
+                                        : 'border-white'
+                                    } shadow-sm`}
+                                    />
+                                </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+            
+                    {selectedDeliver && <DeliveryProgress livreur={selectedDeliver} />}
+                </>
+            )}
         </div>
-    );
+    );      
 }

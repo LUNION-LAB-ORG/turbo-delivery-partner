@@ -16,6 +16,7 @@ import {
     formaterPositionLivreur,
     LivreurAvecPosition 
 } from './abidjanDispatching';
+import { getTraficLivreurs } from '@/src/actions/trafic.actions';
 
 interface ContentProps {
     data: LivreurDisponible[];
@@ -26,20 +27,32 @@ export default function Content({ data }: ContentProps) {
     const [livreursAvecPosition, setLivreursAvecPosition] = useState<LivreurAvecPosition[]>([]);
     const [openDashboard, setOpenDashboard] = useState<boolean>(false);
     const [simulationActive, setSimulationActive] = useState<boolean>(false);
-    
-    const { isConnected } = useRealTime({ 
-        data: livreursAvecPosition, 
-        setData: setLivreursAvecPosition 
-    });
+    const [traficLivreurs, setTraficLivreurs] = useState<LivreurAvecPosition[]>([]);
 
-
-    // Dispatching initial des livreurs
+    const { isConnected } = useRealTime({ data: livreursAvecPosition, setData: setLivreursAvecPosition });
     useEffect(() => {
-        if (data.length > 0 && livreursAvecPosition.length === 0) {
-            const livreursDispatches = dispatcherLivreursAbidjanPondere(data);
-            setLivreursAvecPosition(livreursDispatches);
-        }
-    }, [data, livreursAvecPosition.length]);
+        (async () => {
+            const data = await getTraficLivreurs();
+            setTraficLivreurs(data ?? []);
+        })();
+    }, []);
+
+    const livreursRestaurantAvecPosition = useMemo(() => {
+        return data.filter((livreurRestau: LivreurDisponible) =>
+            traficLivreurs.some((livreurActif: LivreurAvecPosition) => 
+                livreurActif.livreurId === livreurRestau.livreurId
+            )
+        );
+    }, [data, traficLivreurs]);
+      
+    const livreursRestaurantSansPosition = useMemo(() => {
+        return data.filter((livreurRestau: LivreurDisponible) =>
+            !traficLivreurs.some((livreurActif: LivreurAvecPosition) => 
+                livreurActif.livreurId === livreurRestau.livreurId
+            )
+        );
+    }, [data, traficLivreurs]);
+        
 
     // Simulation de mouvement des livreurs
     useEffect(() => {
@@ -60,18 +73,7 @@ export default function Content({ data }: ContentProps) {
             livreur.position?.latitude != null && 
             livreur.position?.longitude != null
         );
-    }, [livreursAvecPosition]);
-
-    // Statistiques par commune
-    const statsCommunales = useMemo(() => {
-        const stats = new Map<string, number>();
-        livreursAvecPosition.forEach(livreur => {
-            if (livreur.position?.commune) {
-                stats.set(livreur.position.commune, (stats.get(livreur.position.commune) || 0) + 1);
-            }
-        });
-        return Array.from(stats.entries()).sort((a, b) => b[1] - a[1]);
-    }, [livreursAvecPosition]);
+    }, [livreursAvecPosition]);    
 
     // Callbacks
     const handleCourierSelect = useCallback((courierId: string | null) => {
@@ -86,19 +88,19 @@ export default function Content({ data }: ContentProps) {
         setSimulationActive(prev => !prev);
     }, []);
 
-    const redistribuerLivreurs = useCallback(() => {
-        const nouveauxLivreurs = dispatcherLivreursAbidjanPondere(data);
-        setLivreursAvecPosition(nouveauxLivreurs);
-        setSelectedCourierId(null);
-    }, [data]);
-
     // Statistiques générales
     const stats = useMemo(() => {
-        const total = livreursAvecPosition.length;
-        const connectes = livreursValides.length;
-        
-        return { total, connectes };
-    }, [livreursAvecPosition, livreursValides]);
+        const avecPosition = data.filter((livreurRestau: LivreurDisponible) =>
+          traficLivreurs.some((livreurActif: LivreurAvecPosition) =>
+            livreurActif.livreurId === livreurRestau.livreurId
+          )
+        ).length;
+      
+        const total = data.length;
+        const sansPosition = total - avecPosition;
+      
+        return { total, avecPosition, sansPosition };
+    }, [data, traficLivreurs]);
 
     // Indicateur de connexion avec stats
     const ConnectionIndicator = () => (
@@ -117,7 +119,7 @@ export default function Content({ data }: ContentProps) {
                     />
                 </div>
                 <span className="text-sm font-medium">
-                    {isConnected ? 'Connecté' : 'Déconnecté'} • {stats.connectes}/{stats.total} livreurs
+                    {isConnected ? 'Connecté' : 'Déconnecté'} • {stats.avecPosition}/{stats.total} livreurs
                 </span>
             </div>
             
@@ -130,15 +132,6 @@ export default function Content({ data }: ContentProps) {
                     onClick={toggleSimulation}
                 >
                     {simulationActive ? "Simulation ON" : "Simulation OFF"}
-                </Button>
-                
-                <Button
-                    size="sm"
-                    variant="bordered"
-                    startContent={<RefreshCw size={16} />}
-                    onClick={redistribuerLivreurs}
-                >
-                    Redistribuer
                 </Button>
             </div>
         </div>
@@ -154,7 +147,7 @@ export default function Content({ data }: ContentProps) {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="w-full"
         >
-            <Card className="w-full max-w-6xl mx-auto">
+            <Card className="w-full max-w-full sm:max-w-6xl mx-auto rounded-t-2xl">
                 <CardHeader className="flex justify-center items-center pb-2">
                     <Button 
                         size="sm" 
@@ -164,7 +157,7 @@ export default function Content({ data }: ContentProps) {
                         variant="light" 
                     />
                 </CardHeader>
-                <CardBody className="space-y-6 px-6 pb-6">
+                <CardBody className="space-y-6 px-4 sm:px-6 pb-6">
                     {/* Statistiques générales */}
                     <div className="grid grid-cols-3 gap-4 text-center text-sm">
                         <div>
@@ -172,25 +165,12 @@ export default function Content({ data }: ContentProps) {
                             <div className="text-gray-500">Total</div>
                         </div>
                         <div>
-                            <div className="font-semibold text-xl text-green-600">{stats.connectes}</div>
-                            <div className="text-gray-500">Positionnés</div>
+                            <div className="font-semibold text-xl text-green-600">{stats.avecPosition}</div>
+                            <div className="text-gray-500">Connecté</div>
                         </div>
-                    </div>
-
-                    {/* Répartition par communes */}
-                    <div className="space-y-2">
-                        <h3 className="font-medium text-sm text-gray-600">Répartition par communes</h3>
-                        <div className="flex flex-wrap gap-2">
-                            {statsCommunales.map(([commune, count]) => (
-                                <Chip 
-                                    key={commune}
-                                    size="sm" 
-                                    variant="flat"
-                                    color="primary"
-                                >
-                                    {commune}: {count}
-                                </Chip>
-                            ))}
+                        <div>
+                            <div className="font-semibold text-xl text-red-600">{stats.sansPosition}</div>
+                            <div className="text-gray-500">Non Connecté</div>
                         </div>
                     </div>
                     
@@ -216,16 +196,16 @@ export default function Content({ data }: ContentProps) {
                                 );
                             })()}
                         </div>
-                    )}
-                    
-                    <LivreurTimeline 
-                        livreurs={livreursAvecPosition} 
-                        handleCourierSelect={handleCourierSelect} 
-                    />
-                    <LivreursListBottom 
-                        livreurs={livreursAvecPosition} 
-                        handleCourierSelect={handleCourierSelect} 
-                    />
+                    )}                    
+                    <LivreurTimeline  
+                        livreurs={livreursRestaurantAvecPosition}  
+                        handleCourierSelect={handleCourierSelect}  
+                    />  
+
+                    <LivreursListBottom  
+                        livreurs={livreursRestaurantSansPosition}  
+                        handleCourierSelect={handleCourierSelect}  
+                    />  
                 </CardBody>
             </Card>
         </motion.div>
@@ -235,8 +215,7 @@ export default function Content({ data }: ContentProps) {
         <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4">
             {/* En-tête avec contrôles */}
             <div className="flex items-center justify-between flex-wrap gap-4">
-                <ConnectionIndicator />
-                
+                <ConnectionIndicator />                
                 <SearchBar 
                     coursiers={livreursValides} 
                     handleCourierSelect={handleCourierSelect} 
@@ -246,22 +225,10 @@ export default function Content({ data }: ContentProps) {
             {/* Conteneur de la carte */}
             <div className="relative flex-1 pb-20">
                 <MapContainer
-                    couriers={livreursValides}
+                    couriers={livreursRestaurantAvecPosition}
                     selectedCourierId={selectedCourierId}
                     onMarkerClick={handleCourierSelect}
                 />
-
-                {/* Message de chargement */}
-                {livreursAvecPosition.length === 0 && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-lg">
-                        <Card className="p-4">
-                            <CardBody className="text-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                            <p className="text-gray-600">Dispatching des livreurs sur Abidjan...</p>
-                            </CardBody>
-                        </Card>
-                    </div>
-                )}
 
                 {/* Dashboard flottant */}
                 <div className="absolute bottom-0 sm:-bottom-8 w-full z-10">
@@ -285,7 +252,9 @@ export default function Content({ data }: ContentProps) {
                         />
                         </motion.div>
                     ) : (
-                        <DashboardPanel />
+                        <div className="absolute bottom-0 w-full z-10 px-2 sm:px-4">
+                            <DashboardPanel />
+                        </div>
                     )}
                     </AnimatePresence>
                 </div>

@@ -18,16 +18,35 @@ export function LivreursListBottom({ livreurs, handleCourierSelect }: LivreursLi
 
     return (
         <div className="w-full mx-auto mt-8">
-            <h2 className="lg:text-xl font-bold text-primary mb-4">Encore libre</h2>
-            <div className="flex gap-2 flex-nowrap overflow-auto scrollbar-thin">
+            <h2 className="lg:text-xl font-bold text-primary mb-4">
+                Encore Libre : Livreur(s) Non connecté(s)
+            </h2>
+
+            {livreursLibres.length === 0 ? (
+                <p className="text-gray-500 italic">Aucun livreur</p>
+            ) : (
+                <div className="flex gap-2 flex-nowrap overflow-auto scrollbar-thin">
                 {livreursLibres.map((livreur, index) => (
-                    <div onClick={() => handleClick(livreur.livreurId)} key={livreur.livreurId} className="shrink-0 flex items-center gap-2 cursor-pointer">
-                        <Avatar src={createUrlFile(livreur.avatarUrl, 'delivery')} alt={livreur.nomComplet} className="w-8 h-8 border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.15)]" />
-                        <span className="text-xs font-medium text-gray-800 text-center">{livreur.nomComplet}</span>
-                        {index !== livreursLibres.length - 1 && <Divider orientation="vertical" />}
+                    <div
+                    onClick={() => handleClick(livreur.livreurId)}
+                    key={livreur.livreurId}
+                    className="shrink-0 flex items-center gap-2 cursor-pointer"
+                    >
+                    <Avatar
+                        src={createUrlFile(livreur.avatarUrl, 'backend')}
+                        alt={livreur.nomComplet}
+                        className="w-8 h-8 border-[3px] border-white shadow-[0_2px_8px_rgba(0,0,0,0.15)]"
+                    />
+                    <span className="text-xs font-medium text-gray-800 text-center">
+                        {livreur.nomComplet}
+                    </span>
+                    {index !== livreursLibres.length - 1 && (
+                        <Divider orientation="vertical" />
+                    )}
                     </div>
                 ))}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

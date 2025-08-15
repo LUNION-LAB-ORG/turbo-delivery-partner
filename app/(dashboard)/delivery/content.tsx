@@ -1,4 +1,5 @@
 'use client';
+
 import { title } from '@/components/primitives';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
 import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
@@ -9,7 +10,6 @@ import Link from 'next/link';
 import { SORT_OPTIONS } from '@/data';
 import DeliveryTools from './component/deliveryTools';
 import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { courses_statuses_filters } from '@/data';
 import EmptyDataTable from '@/components/commons/EmptyDataTable';
 
@@ -192,7 +192,7 @@ export default function Content({ restaurant, initialData }: Props) {
             <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
                 <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
                     
-                    {/* Header */}
+                    {/* Header */}  
                     <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1">
                             <h1 className={title({ 

@@ -7,13 +7,11 @@ import { redirect } from 'next/navigation';
 export default async function Page() {
     const data = await findOneRestaurant();
     const restaurant = data?.restaurant;
-
-    const fraisLivraisons = await getAllFraisLivraison(restaurant?.id ?? '');
-    console.log(fraisLivraisons);
-    
+    const fraisLivraisons = await getAllFraisLivraison(restaurant?.id ?? '');    
     if (!restaurant) {
         redirect('/auth/signout');
     }
+
     return (
         <Suspense fallback={<Loading />}>
             <Content restaurant={restaurant} fraisLivraisons={fraisLivraisons} />
