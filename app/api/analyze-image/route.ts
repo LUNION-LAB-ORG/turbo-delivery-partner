@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "user", content: `Prompt: Extrait à partir de ce texte et retourne en json, le numéro commande, le numéro téléphone, le frais livraison et le total commande : ${prompt}` }
+        { role: "user", content: `Prompt: Extrait à partir de ce texte et retourne en json, le numéro commande, le numéro téléphone (Ce numéro ne devrait pas contenir le code pays), le frais livraison et le total commande : ${prompt}` }
       ]
     });
     return NextResponse.json({ result: response.choices[0].message?.content });
