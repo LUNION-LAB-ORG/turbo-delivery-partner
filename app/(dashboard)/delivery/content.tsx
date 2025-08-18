@@ -1,17 +1,19 @@
 'use client';
 
+import Link from 'next/link';
+import { QrCode } from 'lucide-react';
+import { SORT_OPTIONS } from '@/data';
+import { IconPlus } from '@tabler/icons-react';
 import { title } from '@/components/primitives';
+import { courses_statuses_filters } from '@/data';
+import DeliveryTools from './component/deliveryTools';
+import EmptyDataTable from '@/components/commons/EmptyDataTable';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
+import DeliveryQRCodeCommande from './component/delivery-qr-code-commande';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
 import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button, Card, CardBody, CardHeader, Input, Chip, Divider, Pagination, Skeleton, Select, SelectItem } from "@heroui/react";
-import { IconPlus } from '@tabler/icons-react';
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import Link from 'next/link';
-import { SORT_OPTIONS } from '@/data';
-import DeliveryTools from './component/deliveryTools';
-import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
-import { courses_statuses_filters } from '@/data';
-import EmptyDataTable from '@/components/commons/EmptyDataTable';
 
 type SortOption = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
 
@@ -92,6 +94,7 @@ export default function Content({ restaurant, initialData }: Props) {
     const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(5);
+    const [openQrCode, setOpenQrCode] = useState<boolean>(false);
     const [data, setData] = useState<PaginatedResponse<CourseExterne> | null>(initialData);
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
@@ -112,17 +115,14 @@ export default function Content({ restaurant, initialData }: Props) {
 
     // === Polling automatique toutes les 15s ===
     useEffect(() => {
-        const intervalId = setInterval(() => {
-            fetchData(currentPage);
-        }, 15000); // 15000ms = 15s
+        const intervalId = setInterval(() => fetchData(currentPage), 15000); // 15000ms = 15s
 
         return () => clearInterval(intervalId);
     }, [fetchData, currentPage]);
 
     // Fonction pour filtrer les données
     const filteredData = useMemo(() => {
-        let filtered = data?.content ?? [];
-        
+        let filtered = data?.content ?? [];        
         // Filtrage par statut
         if (statusFilter !== 'all') {
             filtered = filtered.filter((d) => d.statut?.toUpperCase() === statusFilter);
@@ -131,24 +131,19 @@ export default function Content({ restaurant, initialData }: Props) {
         // Filtrage par terme de recherche (code)
         if (searchTerm.trim()) {
             const searchLower = searchTerm.toLowerCase().trim();
-            filtered = filtered.filter((d) => 
-                d.code?.toLowerCase().includes(searchLower)
-            );
+            filtered = filtered.filter((d) => d.code?.toLowerCase().includes(searchLower) );
         }
 
         // AJOUT : Filtrage par mois
         if (monthFilter !== 'all') {
             filtered = filtered.filter((d) => {
-                if (!d.dateHeureDebut) return false;
-        
+                if (!d.dateHeureDebut) return false;        
                 // d.dateHeureDebut = '24/07/2025 16:46'
                 const [datePart] = d.dateHeureDebut.split(' '); // '24/07/2025'
-                const [, monthStr] = datePart.split('/');       // ['24', '07', '2025']
-        
+                const [, monthStr] = datePart.split('/');       // ['24', '07', '2025']        
                 return monthStr === monthFilter.padStart(2, '0'); // comparer '07' à '7' ou '07'
             });
-        }
-        
+        }        
         return filtered;
     }, [data?.content, statusFilter, searchTerm, monthFilter]); // AJOUT : Dépendance monthFilter
 
@@ -506,22 +501,30 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                 <Card key={commande.id} className="bg-default-25 border border-default-200">
                                                                     <CardHeader className="p-3 sm:p-4 pb-2">
                                                                         <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 w-full">
+                                                                            {/* Partie gauche : statut + numéro */}
                                                                             <div className="flex flex-col xs:flex-row xs:items-center gap-2">
-                                                                                <Chip 
-                                                                                    size="sm" 
-                                                                                    variant="flat" 
-                                                                                    color={getCommandeStatusColor(commande.statut)}
-                                                                                    className="w-fit"
-                                                                                >
-                                                                                    {commande.statut ?? 'EN_ATTENTE'}
-                                                                                </Chip>
-                                                                                <span className="text-default-600 font-medium text-sm">
-                                                                                    Commande #{commande.numero}
-                                                                                </span>
-                                                                            </div>
-                                                                            <Chip size="sm" variant="solid" color="primary">
-                                                                                {index + 1}
+                                                                            <Chip
+                                                                                size="sm"
+                                                                                variant="flat"
+                                                                                color={getCommandeStatusColor(commande.statut)}
+                                                                                className="w-fit"
+                                                                            >
+                                                                                {commande.statut ?? 'EN_ATTENTE'}
                                                                             </Chip>
+                                                                            <span className="text-default-600 font-medium text-sm">
+                                                                                Commande #{commande.numero}
+                                                                            </span>
+                                                                            </div>
+
+                                                                            {/* Partie droite : numéro + bouton QR */}
+                                                                            <div className="flex items-center gap-2">
+                                                                                <Chip size="sm" variant="solid" color="primary">{index + 1}</Chip>
+
+                                                                                {/* Bouton QR Code */}
+                                                                                <button onClick={() => setOpenQrCode(true)} className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
+                                                                                    <QrCode className="w-4 h-4 text-default-600" /> QR Code Commande
+                                                                                </button>
+                                                                            </div>
                                                                         </div>
                                                                     </CardHeader>
                                                                     
@@ -568,6 +571,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                             </div>
                                                                         </div>
                                                                     </CardBody>
+                                                                    <DeliveryQRCodeCommande restaurant={restaurant} delivery={delivery} commande={commande} open={openQrCode} setOpen={setOpenQrCode} />
                                                                 </Card>
                                                             ))}
                                                         </div>
