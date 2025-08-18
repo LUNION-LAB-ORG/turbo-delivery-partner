@@ -1,19 +1,19 @@
 {
     "name": "Turbo Delivery Partner",
-    "short_name": "TurboDelivery",
-    "description": "Application PWA pour la gestion des commandes",
+    "short_name": "TURBO PARTNER",
+    "description": "Application PWA Turbo Delivery Partner",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#0ea5e9",
     "icons": [
       {
-        "src": "/assets/images/Icons/icon-192x192.png",
+        "src": "/icon-192x192.png",
         "sizes": "192x192",
         "type": "image/png"
       },
       {
-        "src": "/assets/images/Icons/icon-512x512.png",
+        "src": "/icon-512x512.png",
         "sizes": "512x512",
         "type": "image/png"
       }
