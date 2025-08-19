@@ -7,6 +7,7 @@ import React, { Fragment } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 
 const DeliveryQRCodeCommande = ({ restaurant, delivery, commande, open, setOpen }: { restaurant: Restaurant; delivery: CourseExterne; commande: CommandeCourseExterne; open: boolean; setOpen: (open: boolean) => void }) => {
+    const qrData = { courseExterneId: delivery.id, commandeExterneId: commande.id };
     return (
         <Transition appear show={open} as={Fragment}>
             <Dialog as="div" open={open} onClose={() => setOpen(false)} className="relative z-50">
@@ -37,11 +38,11 @@ const DeliveryQRCodeCommande = ({ restaurant, delivery, commande, open, setOpen 
                                 <div className="flex flex-col items-center gap-6 p-8">
                                     <div className="bg-white p-1 rounded-lg shadow-sm">
                                         <QRCodeSVG
-                                            value={String(commande.id)}
+                                            value={JSON.stringify(qrData)}   // <- encodage JSON
                                             size={150}
                                             level="H"
                                             marginSize={4} // marge équivalente à includeMargin
-                                            imageSettings={{ src: "/assets/images/logo.png",  height: 25, width: 25, excavate: true }}
+                                            imageSettings={{ src: "/assets/images/logo.png", height: 25, width: 25, excavate: true }}
                                         />
                                     </div>
                                     <div className="text-center">

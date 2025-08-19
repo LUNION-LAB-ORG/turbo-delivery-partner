@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { QrCode } from 'lucide-react';
+import { QrCode, XCircle, CheckCircle } from 'lucide-react';
 import { SORT_OPTIONS } from '@/data';
 import { IconPlus } from '@tabler/icons-react';
 import { title } from '@/components/primitives';
@@ -9,7 +9,7 @@ import { courses_statuses_filters } from '@/data';
 import DeliveryTools from './component/deliveryTools';
 import EmptyDataTable from '@/components/commons/EmptyDataTable';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
+import { getPaginationCourseExterne, terminerCommandeExterne, cancelCommandeExterne } from '@/src/actions/courses.actions';
 import DeliveryQRCodeCommande from './component/delivery-qr-code-commande';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
 import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
@@ -503,17 +503,17 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                         <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 w-full">
                                                                             {/* Partie gauche : statut + numéro */}
                                                                             <div className="flex flex-col xs:flex-row xs:items-center gap-2">
-                                                                            <Chip
-                                                                                size="sm"
-                                                                                variant="flat"
-                                                                                color={getCommandeStatusColor(commande.statut)}
-                                                                                className="w-fit"
-                                                                            >
-                                                                                {commande.statut ?? 'EN_ATTENTE'}
-                                                                            </Chip>
-                                                                            <span className="text-default-600 font-medium text-sm">
-                                                                                Commande #{commande.numero}
-                                                                            </span>
+                                                                                <Chip
+                                                                                    size="sm"
+                                                                                    variant="flat"
+                                                                                    color={getCommandeStatusColor(commande.statut)}
+                                                                                    className="w-fit"
+                                                                                >
+                                                                                    {commande.statut ?? 'EN_ATTENTE'}
+                                                                                </Chip>
+                                                                                <span className="text-default-600 font-medium text-sm">
+                                                                                    Commande #{commande.numero}
+                                                                                </span>
                                                                             </div>
 
                                                                             {/* Partie droite : numéro + bouton QR */}
@@ -522,7 +522,25 @@ export default function Content({ restaurant, initialData }: Props) {
 
                                                                                 {/* Bouton QR Code */}
                                                                                 <button onClick={() => setOpenQrCode(true)} className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
-                                                                                    <QrCode className="w-4 h-4 text-default-600" /> QR Code Commande
+                                                                                    <QrCode className="w-4 h-4 text-default-600" /> QR Code 
+                                                                                </button>
+
+                                                                                {/* Bouton Annuler */}
+                                                                                <button
+                                                                                    onClick={() => cancelCommandeExterne(commande.id)}
+                                                                                    className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-red-100 transition"
+                                                                                >
+                                                                                    <XCircle className="w-4 h-4 text-red-600" /> {/* Icône à la place de l’emoji */}
+                                                                                    Annuler
+                                                                                </button>
+
+                                                                                {/* Bouton Terminer */}
+                                                                                <button
+                                                                                    onClick={() => terminerCommandeExterne(commande.id)}
+                                                                                    className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-green-100 transition"
+                                                                                >
+                                                                                    <CheckCircle className="w-4 h-4 text-green-600" /> {/* Icône pour terminer */}
+                                                                                    Terminer
                                                                                 </button>
                                                                             </div>
                                                                         </div>
