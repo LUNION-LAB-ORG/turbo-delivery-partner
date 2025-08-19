@@ -1,13 +1,18 @@
 'use server';
 import { ActionResult } from '@/types';
-import { CourseExterne, PaginatedResponse } from '@/types/models';
+import { CourseExterne, PaginatedResponse, CommandeCourseExterne } from '@/types/models';
 import { processFormData } from '@/utils/formdata-zod.utilities';
 import { courseExterneSchema } from '../schemas/courses.schema';
 import { apiClientHttp } from '@/lib/api-client-http';
 
 // Configuration
 const BASE_URL = '/api/restaurant/course-externe';
+const BASE_URL_COMMANDE = '/api/restaurant/commandes';
 
+const commandeEndpoints = {
+    terminerCommandeExterne: { endpoint: `${BASE_URL_COMMANDE}/terminer`, method: 'PUT' },
+    annulerCommandeExterne: { endpoint: `${BASE_URL_COMMANDE}/annuler`, method: 'PUT' },
+}
 const courseEndpoints = {
     createCourseExterne: { endpoint: BASE_URL, method: 'POST' },
     updateCourseExterne: { endpoint: BASE_URL, method: 'PUT' },
@@ -169,6 +174,72 @@ export async function cancelCourseExterne(courseId: string, restaurantId: string
         return {
             status: 'success',
             message: 'Course Annulée',
+            data,
+        };
+    } catch (error: any) {
+        if (error?.response?.data && error.response?.data?.detail) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors du traitement",
+            };
+        } else if (error?.response?.data?.message) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors du traitement",
+            };
+        } else {
+            return {
+                status: 'error',
+                message: "Erreur lors du traitement",
+            };
+        }
+    }
+}
+
+export async function terminerCommandeExterne(commandeId: string): Promise<ActionResult<CommandeCourseExterne>> {
+    try {
+        const data = await apiClientHttp.request<CommandeCourseExterne>({
+            endpoint: commandeEndpoints.terminerCommandeExterne.endpoint,
+            method: commandeEndpoints.terminerCommandeExterne.method,
+            data: { commandeId, },
+        });
+
+        return {
+            status: 'success',
+            message: 'Course Terminée',
+            data: data,
+        };
+    } catch (error: any) {
+        if (error?.response?.data && error.response?.data?.detail) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors du traitement",
+            };
+        } else if (error?.response?.data?.message) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors du traitement",
+            };
+        } else {
+            return {
+                status: 'error',
+                message: "Erreur lors du traitement",
+            };
+        }
+    }
+}
+
+export async function cancelCommandeExterne(commandeId: string): Promise<ActionResult<CommandeCourseExterne>> {
+    try {
+        const data = await apiClientHttp.request<CommandeCourseExterne>({
+            endpoint: commandeEndpoints.annulerCommandeExterne.endpoint,
+            method: commandeEndpoints.annulerCommandeExterne.method,
+            data: { commandeId },
+        });
+
+        return {
+            status: 'success',
+            message: 'Commande Annulée',
             data,
         };
     } catch (error: any) {

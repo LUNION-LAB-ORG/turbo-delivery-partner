@@ -100,10 +100,10 @@ export function OptionsSection({ dish, options, onUpdate }: OptionsSectionProps)
                         formData.append('maxSeleteted', option.maxSelected.toString());
                         formData.append('platId', dish.platM.id);
                         formData.append('optionId', option.id);
-                        // const response = await updateOption(formData);
-                        // if (response.status !== 'success') {
-                        //     toast.error(`Erreur lors de la mise à jour de l'option ${option.libelle}`);
-                        // }
+                        const response = await updateOption(formData);
+                        if (response.status !== 'success') {
+                            toast.error(`Erreur lors de la mise à jour de l'option ${option.libelle}`);
+                        }
                     }
 
                     // Gérer les valeurs de l'option
@@ -126,10 +126,10 @@ export function OptionsSection({ dish, options, onUpdate }: OptionsSectionProps)
                                 formData.append('valeur', value.valeur);
                                 formData.append('prixSup', value.prixSup.toString());
                                 formData.append('optionId', option.id ?? '');
-                                // const response = await updateOptionValue(formData);
-                                // if (response.status !== 'success') {
-                                //     toast.error(`Erreur lors de la mise à jour de la valeur ${value.valeur}`);
-                                // }
+                                const response = await updateOptionValue(formData);
+                                if (response.status !== 'success') {
+                                    toast.error(`Erreur lors de la mise à jour de la valeur ${value.valeur}`);
+                                }
                             }
                         }
                     }
