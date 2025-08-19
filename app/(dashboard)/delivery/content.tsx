@@ -535,13 +535,15 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                                 </button>
 
                                                                                 {/* Bouton Terminer */}
-                                                                                <button
-                                                                                    onClick={() => terminerCommandeExterne(commande.id)}
-                                                                                    className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-green-100 transition"
-                                                                                >
-                                                                                    <CheckCircle className="w-4 h-4 text-green-600" /> {/* Icône pour terminer */}
-                                                                                    Terminer
-                                                                                </button>
+                                                                                {commande.statut === 'EN_ATTENTE_VERSEMENT' && (
+                                                                                    <button
+                                                                                        onClick={() => terminerCommandeExterne(commande.id)}
+                                                                                        className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-green-100 transition"
+                                                                                    >
+                                                                                        <CheckCircle className="w-4 h-4 text-green-600" /> {/* Icône pour terminer */}
+                                                                                        Terminer
+                                                                                    </button>
+                                                                                )}
                                                                             </div>
                                                                         </div>
                                                                     </CardHeader>
