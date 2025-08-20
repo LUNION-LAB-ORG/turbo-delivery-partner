@@ -177,10 +177,35 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
       const total = parseInt(data.total_commande || '0', 10);
 
       setExtractedText(`Voici les données extraites : Numero Commande: ${numeroCommande ?? 'Aucune Donnée'} | Numero Telephone: ${contact ?? 'Aucune Donnée'} | Frais Livraison: ${fraisLivraison ?? 'Aucune Donnée'} | Total Commande: ${total ?? 'Aucune Donnée'}`);
-      form.setValue('commandes.0.numero', numeroCommande);
-      form.setValue('commandes.0.destinataire.contact', contact);
-      form.setValue('commandes.0.prix', total);
-      form.setValue('commandes.0.zoneId', zoneSelectionnee?.id ?? '');
+      // form.setValue('commandes.0.numero', numeroCommande);
+      // form.setValue('commandes.0.destinataire.contact', contact);
+      // form.setValue('commandes.0.prix', total);
+      // form.setValue('commandes.0.zoneId', zoneSelectionnee?.id ?? '');
+
+      // Récupère le tableau des commandes
+      const commandes = form.getValues('commandes') || [];
+
+      // Trouve le premier index vide (ou crée un nouveau)
+      let index = commandes.findIndex( cmd => !cmd || cmd.numero === undefined || cmd.numero === '' || cmd.prix === undefined || cmd.prix === null );
+      if (index === -1) {
+        index = commandes.length;
+      }
+
+      // Prépare la nouvelle commande
+      const nouvelleCommande = {
+        numero: numeroCommande as string,
+        destinataire: { contact: contact as string },
+        prix: total,
+        zoneId: zoneSelectionnee?.id ?? '',
+        lieuRecuperation: { address: '', longitude: 0, latitude: 0 }, // ou tes valeurs réelles
+        lieuLivraison: { address: '', longitude: 0, latitude: 0 },    // ou tes valeurs réelles
+        modePaiement: 'ESPECE' as "ESPECE" | "WAVE",
+        livraisonPaye: false
+      };
+
+      // Insère la commande dans le formulaire
+      form.setValue(`commandes.${index}`, nouvelleCommande);
+      console.log(nouvelleCommande, index, form.getValues('commandes'));
     } catch (err) {
       console.error('Erreur lors du parsing du JSON OpenAI:', err);
       setError('Impossible d\'interpréter la réponse OpenAI');
@@ -192,9 +217,11 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
     setError('');
     try {
       const imageUrl = URL.createObjectURL(imageBlob);
-      const extractedTextResult = await extractText(imageUrl);
+      let extractedTextResult = await extractText(imageUrl);
       URL.revokeObjectURL(imageUrl);
-
+      extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: le numéro commande, 
+        le numéro téléphone (Ce numéro ne devrait pas contenir le code pays), 
+        le frais livraison et le total commande(Si le frais de livraison est identifié avant le total des commandes dans ce cas il est inclus dans le total et il faudra le soustraire du total pour trouver le total des commandes exacte) : ${extractedTextResult}`;
       const resultJson = await analyzeWithOpenAI(extractedTextResult);
       fillFormFromText(resultJson);
     } catch (err: any) {
@@ -274,17 +301,18 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
                         Cliquez sur un des boutons ci-dessous pour capturer ou uploader un document.
                     </p>
                     <div className="flex justify-center gap-4">
-                        <button 
+                        {/* <button 
                             onClick={startCamera}
                             className="bg-primary text-white py-2 px-6 rounded-md hover:bg-primary transition-colors flex items-center gap-2"
                         >
                             <Camera className="h-5 w-5" /> Ouvrir la caméra
-                        </button>
+                        </button> */}
                         <button 
                             onClick={() => fileInputRef.current?.click()}
-                            className="bg-gray-600 text-white py-2 px-6 rounded-md hover:bg-gray-700 transition-colors flex items-center gap-2"
+                            className="bg-primary text-white py-2 px-6 rounded-md hover:bg-primary transition-colors flex items-center gap-2"
                         >
-                            <Upload className="h-5 w-5" /> Choisir un fichier
+                            {/* <Upload className="h-5 w-5" /> */}
+                            <Camera className="h-5 w-5" /> Choisir un fichier / Ouvrir la caméra
                         </button>
                     </div>
                 </div>
