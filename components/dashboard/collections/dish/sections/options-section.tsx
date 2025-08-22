@@ -37,18 +37,14 @@ export function OptionsSection({ dish, options, onUpdate }: OptionsSectionProps)
         setEditedOptions(updated);
     };
 
-    const handleAddOption = () => {
-        setEditedOptions([...editedOptions, { id: '', libelle: '', isRequired: false, maxSelected: 1, optionValeurs: [] }]);
-    };
+    const handleAddOption = () => setEditedOptions([...editedOptions, { id: '', libelle: '', isRequired: false, maxSelected: 1, optionValeurs: [] }]);
 
     const handleAddValue = (optionIndex: number) => {
         const updated = editedOptions.map((option, i) => (i === optionIndex ? { ...option, optionValeurs: [...option.optionValeurs, { valeur: '', prixSup: 0, id: '' }] } : option));
         setEditedOptions(updated);
     };
 
-    const handleDelete = (optionIndex: number, valueIndex?: number) => {
-        setDeleteIndex({ option: optionIndex, value: valueIndex });
-    };
+    const handleDelete = (optionIndex: number, valueIndex?: number) =>  setDeleteIndex({ option: optionIndex, value: valueIndex });
 
     const confirmDelete = () => {
         if (deleteIndex !== null) {
@@ -62,6 +58,7 @@ export function OptionsSection({ dish, options, onUpdate }: OptionsSectionProps)
             setDeleteIndex(null);
         }
     };
+
     const handleSave = async () => {
         try {
             // 1. Ajouter les nouvelles options
@@ -127,9 +124,9 @@ export function OptionsSection({ dish, options, onUpdate }: OptionsSectionProps)
                                 formData.append('prixSup', value.prixSup.toString());
                                 formData.append('optionId', option.id ?? '');
                                 const response = await updateOptionValue(formData);
-                                if (response.status !== 'success') {
-                                    toast.error(`Erreur lors de la mise à jour de la valeur ${value.valeur}`);
-                                }
+                                // if (response.status !== 'success') {
+                                //     toast.error(`Erreur lors de la mise à jour de la valeur ${value.valeur}`);
+                                // }
                             }
                         }
                     }

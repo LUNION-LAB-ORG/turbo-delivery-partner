@@ -5,7 +5,8 @@ const serveFile = (folder: string, file: string) => `/api/serve/file/${folder}/$
 function createUrlFile(path: string, service: 'restaurant' | 'erp' | 'delivery' | 'client' | 'backend') {
     let base_url = '';
     if (service === 'restaurant') {
-        base_url = process.env.NEXT_PUBLIC_API_RESTO_URL ?? '';
+        // base_url = process.env.NEXT_PUBLIC_API_RESTO_URL ?? '';
+        base_url = 'https://resto.turbodeliveryapp.com';
     }
     if (service === 'erp') {
         base_url = process.env.NEXT_PUBLIC_API_ERP_URL ?? '';
