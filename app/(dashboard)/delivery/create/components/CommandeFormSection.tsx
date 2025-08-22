@@ -206,9 +206,9 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             {/* Icône cliquable */}
                             <Camera className="h-16 w-16 mx-auto text-primary mb-2 hover:text-primary transition-colors" />
                         
-                            <h3 className="text-lg font-semibold text-gray-700">Scanner ou uploader un document</h3>
+                            <h3 className="text-lg font-semibold text-gray-700">Scanner ou uploader un ticket</h3>
                             <p className="text-gray-600 mb-4">
-                                Cliquez sur l’icône caméra pour capturer ou uploader un document.
+                                Cliquez sur l’icône caméra pour capturer ou uploader un ticket.
                             </p>                       
                         </div>                      
                     )}
