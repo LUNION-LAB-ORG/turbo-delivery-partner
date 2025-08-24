@@ -45,7 +45,7 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
           lieuLivraison: { address: '', longitude: 0, latitude: 0 },
           modePaiement: 'ESPECE',
           prix: 0,
-          livraisonPaye: false,
+          livraisonPaye: true,
           zoneId: '',
         },
       ],
@@ -53,8 +53,6 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
   });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: 'commandes' });
-
-  
 
   /** --------------------- FORMULAIRE & MAP --------------------- */
   const handleAddressSelect = useCallback(
@@ -121,26 +119,26 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
                         {fields.map((field, index) => (
-                        <CommandeFormSection key={field.id} index={index} form={form} remove={remove} handleAddressSelect={handleAddressSelect} restaurant={restaurant} fraisLivraisons={fraisLivraisons} />
+                          <CommandeFormSection key={field.id} index={index} form={form} remove={remove} handleAddressSelect={handleAddressSelect} restaurant={restaurant} fraisLivraisons={fraisLivraisons} />
                         ))}
 
                         <Button type="button" onClick={() => append({
-                        numero: '',
-                        destinataire: { contact: '' },
-                        lieuRecuperation: { address: restaurant.localisation ?? '', longitude: restaurant.longitude ?? 0, latitude: restaurant.latitude ?? 0 },
-                        lieuLivraison: { address: '', longitude: 0, latitude: 0 },
-                        modePaiement: 'ESPECE',
-                        prix: 0,
-                        livraisonPaye: false,
-                        zoneId: '',
+                          numero: '',
+                          destinataire: { contact: '' },
+                          lieuRecuperation: { address: restaurant.localisation ?? '', longitude: restaurant.longitude ?? 0, latitude: restaurant.latitude ?? 0 },
+                          lieuLivraison: { address: '', longitude: 0, latitude: 0 },
+                          modePaiement: 'ESPECE',
+                          prix: 0,
+                          livraisonPaye: true,
+                          zoneId: '',
                         })} className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 transition-colors">
-                        <PlusIcon className="h-4 w-4" /> Ajouter une commande
+                          <PlusIcon className="h-4 w-4" /> Ajouter une commande
                         </Button>
 
                         <MapComponent markers={markers} restaurant={restaurant} />
 
                         <SubmitButton color="primary" className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition-colors" disabled={isSubmitting}>
-                        {isSubmitting ? 'Envoi en cours...' : isEditing ? 'Mettre à jour' : 'Créer'}
+                          {isSubmitting ? 'Envoi en cours...' : isEditing ? 'Mettre à jour' : 'Créer'}
                         </SubmitButton>
                     </form>
                 </Form>
