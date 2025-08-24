@@ -179,7 +179,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             URL.revokeObjectURL(imageUrl);
             extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: le numéro commande, 
                 le numéro téléphone (Ce numéro ne devrait pas contenir le code pays), 
-                le frais livraison et le total commande(Il faut prendre celui qui est précédé du terme «Facture» ou «code Check ou Check» ou «N°». Si le frais de livraison est identifié avant le total des commandes dans ce cas il est inclus dans le total et il faudra le soustraire du total pour trouver le total des commandes exacte) : ${extractedTextResult}`;
+                le frais livraison et le total commande(Si Y’a deux codes, il faut prendre celui qui est précédé du terme «Facture» ou «code Check ou Check» ou «N°». Si le frais de livraison est identifié avant le total des commandes dans ce cas il est inclus dans le total et il faudra le soustraire du total pour trouver le total des commandes exacte) : ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) {
