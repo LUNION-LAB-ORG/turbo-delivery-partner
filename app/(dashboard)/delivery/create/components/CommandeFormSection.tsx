@@ -358,7 +358,6 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                     <select
                                         {...field}
                                         className="w-full h-8 border rounded px-2 text-sm"
-                                        value={field.value ?? fraisLivraisons?.[0]?.id ?? ""}
                                         onChange={(e) => field.onChange(Number(e.target.value))}
                                     >
                                         {fraisLivraisons?.map((zone) => (

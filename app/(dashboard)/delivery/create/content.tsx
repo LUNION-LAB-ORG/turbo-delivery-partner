@@ -46,7 +46,7 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
           modePaiement: 'ESPECE',
           prix: 0,
           livraisonPaye: true,
-          zoneId: '',
+          zoneId: fraisLivraisons.length > 0 ? String(fraisLivraisons[0].id) : "",
         },
       ],
     },
@@ -130,7 +130,7 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
                           modePaiement: 'ESPECE',
                           prix: 0,
                           livraisonPaye: true,
-                          zoneId: '',
+                          zoneId: fraisLivraisons.length > 0 ? String(fraisLivraisons[0].id) : "",
                         })} className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 transition-colors">
                           <PlusIcon className="h-4 w-4" /> Ajouter une commande
                         </Button>
