@@ -98,6 +98,7 @@ export default function Content({ restaurant, initialData }: Props) {
     const [data, setData] = useState<PaginatedResponse<CourseExterne> | null>(initialData);
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
+    const [openQrCodeId, setOpenQrCodeId] = useState<string | null>(null);
 
     // === NOUVEAU ===
     // Fonction fetchData optimisée, mémorisée avec useCallback
@@ -521,7 +522,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                                 <Chip size="sm" variant="solid" color="primary">{index + 1}</Chip>
 
                                                                                 {/* Bouton QR Code */}
-                                                                                <button onClick={() => setOpenQrCode(true)} className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
+                                                                                <button onClick={() => setOpenQrCodeId(commande.id)}  className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
                                                                                     <QrCode className="w-4 h-4 text-default-600" /> QR Code 
                                                                                 </button>
 
@@ -591,7 +592,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                             </div>
                                                                         </div>
                                                                     </CardBody>
-                                                                    <DeliveryQRCodeCommande restaurant={restaurant} delivery={delivery} commande={commande} open={openQrCode} setOpen={setOpenQrCode} />
+                                                                    <DeliveryQRCodeCommande restaurant={restaurant} delivery={delivery} commande={commande} open={openQrCodeId === commande.id} setOpen={() => setOpenQrCodeId(null)}  />
                                                                 </Card>
                                                             ))}
                                                         </div>
