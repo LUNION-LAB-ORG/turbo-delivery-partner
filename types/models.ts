@@ -258,3 +258,24 @@ export interface LivreurDisponible {
     };
     course?: CourseExterne;
 }
+
+export interface LivreurRestau {
+    id: string;
+    avatarUrl: string;
+    birthDay: string; // format "YYYY-MM-DD"
+    cniUrlR: string;
+    cniUrlV: string;
+    deleted: boolean;
+    email: string;
+    gender: "HOMME" | "FEMME" | string; // si tu veux typer plus strict
+    habitation: string;
+    immatriculation: string;
+    matricule: string;
+    nom: string;
+    numeroCni: string;
+    prenoms: string;
+    status: number;
+    telephone: string;
+    type: string; // ex: "TURBO"
+}
+  
