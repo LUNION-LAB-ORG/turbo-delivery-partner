@@ -178,8 +178,8 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
             extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: le numéro commande, 
-                le numéro téléphone (Ce numéro ne devrait pas contenir le code pays), 
-                le frais livraison et le total commande(Si Y’a deux codes, il faut prendre celui qui est précédé du terme «Facture» ou «code Check ou Check» ou «N°». Si le frais de livraison est identifié avant le total des commandes dans ce cas il est inclus dans le total et il faudra le soustraire du total pour trouver le total des commandes exacte) : ${extractedTextResult}`;
+                le numéro téléphone (Si Ce numéro contient le code pays supprime et precède par +225, sinon precède par +225), 
+                le frais livraison et le total commande(Si Y’a deux codes, Prends celui précédé du terme «Facture» ou «code Check ou Check» ou «N°». Si le frais de livraison est identifié avant le total commande, total commande = total commande, sinon total commande = total commande - frais de livraison) : ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) {
@@ -401,7 +401,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 name={`commandes.${index}.livraisonPaye`}
                                 render={({ field }) => (
                                     <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-2 shadow-sm bg-muted/50 dark:bg-muted">
-                                        <FormLabel className="text-sm">Frais Livraison Inclus</FormLabel>
+                                        <FormLabel className="text-sm">Total + livraison incluse</FormLabel>
                                         <FormControl>
                                             <Switch
                                                 isSelected={field.value}
