@@ -18,9 +18,7 @@ export function LivreursListBottom({ livreurs, handleCourierSelect }: LivreursLi
 
     return (
         <div className="w-full mx-auto mt-8">
-            <h2 className="lg:text-xl font-bold text-primary mb-4">
-                Encore Libre : Livreur(s) Non connecté(s)
-            </h2>
+            <h2 className="lg:text-xl font-bold text-primary mb-4">Livreurs Non Connectés</h2>
 
             {livreursLibres.length === 0 ? (
                 <p className="text-gray-500 italic">Aucun livreur</p>

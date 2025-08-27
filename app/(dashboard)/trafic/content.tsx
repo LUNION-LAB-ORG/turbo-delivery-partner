@@ -17,6 +17,7 @@ import {
     LivreurAvecPosition 
 } from './abidjanDispatching';
 import { getTraficLivreurs } from '@/src/actions/trafic.actions';
+import { Data } from '@react-google-maps/api';
 
 interface ContentProps {
     data: LivreurDisponible[];
@@ -32,27 +33,26 @@ export default function Content({ data }: ContentProps) {
     const { isConnected } = useRealTime({ data: livreursAvecPosition, setData: setLivreursAvecPosition });
     useEffect(() => {
         (async () => {
-            const data = await getTraficLivreurs();
-            setTraficLivreurs(data ?? []);
+            const positions = (await getTraficLivreurs()).filter(
+                (livreur: LivreurAvecPosition) =>
+                  livreur.position && !(livreur.position.latitude === 0 && livreur.position.longitude === 0)
+            );              
+            setTraficLivreurs(positions ?? [])
         })();
     }, []);
 
     const livreursRestaurantAvecPosition = useMemo(() => {
-        return data.filter((livreurRestau: LivreurDisponible) =>
-            traficLivreurs.some((livreurActif: LivreurAvecPosition) => 
-                livreurActif.livreurId === livreurRestau.livreurId
+        return traficLivreurs.filter((livreurRestau: LivreurDisponible) =>
+            data.some((livreurActif: LivreurAvecPosition) =>
+              livreurActif.livreurId === livreurRestau.livreurId
             )
         );
     }, [data, traficLivreurs]);
       
     const livreursRestaurantSansPosition = useMemo(() => {
-        return data.filter((livreurRestau: LivreurDisponible) =>
-            !traficLivreurs.some((livreurActif: LivreurAvecPosition) => 
-                livreurActif.livreurId === livreurRestau.livreurId
-            )
-        );
+        return data.filter((livreurRestau: LivreurDisponible) => !traficLivreurs.some((livreurActif: LivreurAvecPosition) => livreurActif.livreurId === livreurRestau.livreurId ) );
     }, [data, traficLivreurs]);
-        
+    
 
     // Simulation de mouvement des livreurs
     useEffect(() => {
@@ -113,13 +113,11 @@ export default function Content({ data }: ContentProps) {
                         }`}
                     />
                     <span 
-                        className={`relative inline-flex h-[6px] w-[6px] rounded-full ${
-                            isConnected ? 'bg-green-500' : 'bg-red-500'
-                        }`} 
+                        className={`relative inline-flex h-[6px] w-[6px] rounded-full ${ isConnected ? 'bg-green-500' : 'bg-red-500' }`} 
                     />
                 </div>
                 <span className="text-sm font-medium">
-                    {isConnected ? 'Connecté' : 'Déconnecté'} • {stats.avecPosition}/{stats.total} livreurs
+                    {isConnected ? 'Connecté(s)' : 'Déconnecté(s)'} • {stats.avecPosition}/{stats.total} livreurs
                 </span>
             </div>
             
@@ -166,11 +164,11 @@ export default function Content({ data }: ContentProps) {
                         </div>
                         <div>
                             <div className="font-semibold text-xl text-green-600">{stats.avecPosition}</div>
-                            <div className="text-gray-500">Connecté</div>
+                            <div className="text-gray-500">Connecté(s)</div>
                         </div>
                         <div>
                             <div className="font-semibold text-xl text-red-600">{stats.sansPosition}</div>
-                            <div className="text-gray-500">Non Connecté</div>
+                            <div className="text-gray-500">Non Connecté(s)</div>
                         </div>
                     </div>
                     
