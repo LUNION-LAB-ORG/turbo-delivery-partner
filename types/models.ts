@@ -177,7 +177,7 @@ export interface Drink {
     label: string;
     price: number;
     volume: string;
-    platId?: string;
+    // platId?: string;
 }
 
 export interface Dish {

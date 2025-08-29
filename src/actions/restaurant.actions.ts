@@ -40,6 +40,7 @@ const BASE_URL = '';
 
 const restaurantEndpoints = {
     create: { endpoint: `/api/V1/turbo/restaurant/create`, method: 'POST' },
+    getBoisson: { endpoint: `/api/V1/turbo/resto/boisson/get`, method: 'GET' },
     update: { endpoint: `/api/V1/turbo/restaurant/update`, method: 'POST' },
     info: { endpoint: `/api/V1/turbo/restaurant/info`, method: 'GET' },
     getCollection: { endpoint: `/api/turbo/resto/collection/get`, method: 'GET' },
@@ -311,6 +312,20 @@ export async function getCollections(): Promise<Collection[]> {
         const data = await apiClientHttp.request<Collection[]>({
             endpoint: restaurantEndpoints.getCollection.endpoint,
             method: restaurantEndpoints.getCollection.method,
+            service: 'restaurant',
+        });
+
+        return data;
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getBoissons(): Promise<Drink[]> {
+    try {
+        const data = await apiClientHttp.request<Drink[]>({
+            endpoint: restaurantEndpoints.getBoisson.endpoint,
+            method: restaurantEndpoints.getBoisson.method,
             service: 'restaurant',
         });
 

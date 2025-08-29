@@ -177,9 +177,12 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             const imageUrl = URL.createObjectURL(imageBlob);
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
-            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: le numéro commande, 
-                le numéro téléphone (Si Ce numéro contient le code pays supprime et precède par +225, sinon precède par +225), 
-                le frais livraison et le total commande(Si Y’a deux codes, Prends celui précédé du terme «Facture» ou «code Check ou Check» ou «N°». Si le frais de livraison est identifié avant le total commande, total commande = total commande - frais de livraison, sinon total commande = total commande) : ${extractedTextResult}`;
+            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: 
+                le numéro commande(Prends celui précédé des terme : «Facture», «code Check», «Check», «N°» ou «ticket»), 
+                le numéro téléphone (Prend tjrs celui precedé par «tel». Si Ce numéro contient le code pays supprime et precède par +225, sinon precède par +225), 
+                le frais livraison et 
+                le total commande(Si le frais de livraison est identifié avant le total commande, total commande = total commande - frais de livraison, sinon total commande = total commande) : 
+                ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) {

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Bell, Home, Menu, Gauge, Settings, Pizza, MessageSquare, ShoppingBag, TicketCheck, Hammer } from 'lucide-react';
+import { Bell, Home, Menu, Gauge, Settings, Pizza, MessageSquare, ShoppingBag, TicketCheck, Hammer, Wine } from 'lucide-react';
 
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { DashboardNavItems } from '@/components/dashboard/dashboard-nav-items';
@@ -36,7 +36,11 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
             href: '/collections',
             icon: <Pizza className="h-5 w-5" />,
             label: 'Collections',
-            // badge: 6,
+        },
+        {
+            href: '/boissons',
+            icon: <Wine className="h-5 w-5" />,
+            label: 'Boissons',
         },
         {
             href: '/delivery',
