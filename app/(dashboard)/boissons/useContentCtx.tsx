@@ -8,6 +8,7 @@ export const columns = [
     { name: 'Libelle', uid: 'libelle' },
     { name: 'Prix', uid: 'price' },
     { name: 'Volume', uid: 'volume' },
+    { name: 'Actions', uid: 'actions' },
 ];
 
 interface Props {
@@ -37,6 +38,8 @@ export default function useContentCtx({ initialData }: Props) {
             case 'price':
                 return <p>{String(cellValue)}</p>;
             case 'volume':
+                return <p>{String(cellValue)}</p>;
+            case 'actions':
                 return <p>{String(cellValue)}</p>;
             default:
                 return cellValue;

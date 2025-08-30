@@ -92,6 +92,7 @@
         "react-flatpickr": "^3.10.13",
         "react-geo-picker": "^0.2.4",
         "react-hook-form": "^7.56.2",
+        "react-hot-toast": "^2.6.0",
         "react-i18next": "^15.5.1",
         "react-icons": "^5.5.0",
         "react-images-uploading": "^3.1.7",
