@@ -40,6 +40,7 @@ const BASE_URL = '';
 
 const restaurantEndpoints = {
     create: { endpoint: `/api/V1/turbo/restaurant/create`, method: 'POST' },
+    getBoisson: { endpoint: `/api/V1/turbo/resto/boisson/get`, method: 'GET' },
     update: { endpoint: `/api/V1/turbo/restaurant/update`, method: 'POST' },
     info: { endpoint: `/api/V1/turbo/restaurant/info`, method: 'GET' },
     getCollection: { endpoint: `/api/turbo/resto/collection/get`, method: 'GET' },
@@ -86,6 +87,7 @@ const restaurantEndpoints = {
         method: 'GET',
     },
     addBoisson: { endpoint: `/api/V1/turbo/resto/boisson/create`, method: 'POST' },
+    deleteBoisson: { endpoint: (id: string) => `/api/V1/turbo/resto/boisson/delete/${id}`, method: "GET" },
     listBoisson: { endpoint: `/api/V1/turbo/resto/boisson/get`, method: 'GET' },
     addHoraire: { endpoint: `/api/V1/turbo/restaurant/add/horaire`, method: 'POST' },
     getHoraires: { endpoint: `/api/V1/turbo/restaurant/get/hours`, method: 'GET' },
@@ -311,6 +313,20 @@ export async function getCollections(): Promise<Collection[]> {
         const data = await apiClientHttp.request<Collection[]>({
             endpoint: restaurantEndpoints.getCollection.endpoint,
             method: restaurantEndpoints.getCollection.method,
+            service: 'restaurant',
+        });
+
+        return data;
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getBoissons(): Promise<Drink[]> {
+    try {
+        const data = await apiClientHttp.request<Drink[]>({
+            endpoint: restaurantEndpoints.getBoisson.endpoint,
+            method: restaurantEndpoints.getBoisson.method,
             service: 'restaurant',
         });
 
@@ -652,6 +668,40 @@ export async function updateBoisson(id: string, formData: FormData): Promise<Act
         }
     }
 }
+
+export async function deleteBoisson(id: string): Promise<ActionResult<Drink | null>> {
+    try {
+        const data = await apiClientHttp.request<Drink>({
+            endpoint: restaurantEndpoints.deleteBoisson.endpoint(id), // ⚡ doit retourner `/boisson/delete/${id}`
+            method: restaurantEndpoints.deleteBoisson.method, // ⚡ ici ce sera "GET"
+            service: 'restaurant',
+        });
+
+        return {
+            status: 'success',
+            message: 'Boisson supprimée avec succès',
+            data: data,
+        };
+    } catch (error: any) {
+        if (error?.response?.data && error.response?.data?.detail) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors de la suppression de la boisson",
+            };
+        } else if (error?.response?.data?.message) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.message ?? "Erreur lors de la suppression de la boisson",
+            };
+        } else {
+            return {
+                status: 'error',
+                message: "Erreur lors de la suppression de la boisson",
+            };
+        }
+    }
+}
+
 
 export async function addOption(formData: FormData): Promise<ActionResult<Option | null>> {
     const {

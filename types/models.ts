@@ -174,10 +174,10 @@ export interface Option {
 
 export interface Drink {
     id: string;
-    label: string;
+    libelle: string;
     price: number;
     volume: string;
-    platId?: string;
+    // platId?: string;
 }
 
 export interface Dish {
