@@ -14,6 +14,8 @@ import DeliveryQRCodeCommande from './component/delivery-qr-code-commande';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
 import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
 import { Button, Card, CardBody, CardHeader, Input, Chip, Divider, Pagination, Skeleton, Select, SelectItem } from "@heroui/react";
+import { formatDate } from '@/utils/date-formate';
+import dayjs from 'dayjs';
 
 type SortOption = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
 
@@ -94,7 +96,6 @@ export default function Content({ restaurant, initialData }: Props) {
     const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(5);
-    const [openQrCode, setOpenQrCode] = useState<boolean>(false);
     const [data, setData] = useState<PaginatedResponse<CourseExterne> | null>(initialData);
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
@@ -123,28 +124,28 @@ export default function Content({ restaurant, initialData }: Props) {
 
     // Fonction pour filtrer les données
     const filteredData = useMemo(() => {
-        let filtered = data?.content ?? [];        
+        let filtered = data?.content ?? [];
         // Filtrage par statut
         if (statusFilter !== 'all') {
             filtered = filtered.filter((d) => d.statut?.toUpperCase() === statusFilter);
         }
-        
+
         // Filtrage par terme de recherche (code)
         if (searchTerm.trim()) {
             const searchLower = searchTerm.toLowerCase().trim();
-            filtered = filtered.filter((d) => d.code?.toLowerCase().includes(searchLower) );
+            filtered = filtered.filter((d) => d.code?.toLowerCase().includes(searchLower));
         }
 
         // AJOUT : Filtrage par mois
         if (monthFilter !== 'all') {
             filtered = filtered.filter((d) => {
-                if (!d.dateHeureDebut) return false;        
-                // d.dateHeureDebut = '24/07/2025 16:46'
-                const [datePart] = d.dateHeureDebut.split(' '); // '24/07/2025'
-                const [, monthStr] = datePart.split('/');       // ['24', '07', '2025']        
-                return monthStr === monthFilter.padStart(2, '0'); // comparer '07' à '7' ou '07'
+                if (!d.createdAt) return false;
+              
+                // Extraire le mois (1-12) depuis createdAt ISO
+                const month = dayjs(d.createdAt).month() + 1; // month() retourne 0-11
+                return month === Number(monthFilter);
             });
-        }        
+        }
         return filtered;
     }, [data?.content, statusFilter, searchTerm, monthFilter]); // AJOUT : Dépendance monthFilter
 
@@ -160,17 +161,15 @@ export default function Content({ restaurant, initialData }: Props) {
     };
 
     // Handlers
-    const handleReset = () => {
+    const handleReset = useCallback((): void => {
         setSearchTerm('');
         setSortBy(SORT_OPTIONS.DATE_DESC);
         setCurrentPage(1);
         setStatusFilter('all');
-        setMonthFilter('all'); // AJOUT : Réinitialiser le filtre par mois
-    };
+        setMonthFilter('all');
+    }, [setSearchTerm, setSortBy, setCurrentPage, setStatusFilter, setMonthFilter]);      
 
-    const handleSearchChange = (value: string) => {
-        setSearchTerm(value);
-    };
+    const handleSearchChange = (value: string) => setSearchTerm(value);
 
     const handleMonthChange = (keys: any) => {
         // HeroUI Select renvoie un Set, nous prenons le premier élément ou 'all' par défaut
@@ -179,21 +178,19 @@ export default function Content({ restaurant, initialData }: Props) {
         setMonthFilter(selectedKey || 'all');
     };
 
-    const toggleExpand = (deliveryId: string) => {
-        setExpandedDelivery(expandedDelivery === deliveryId ? null : deliveryId);
-    };
+    const toggleExpand = (deliveryId: string) => setExpandedDelivery(expandedDelivery === deliveryId ? null : deliveryId);
 
     return (
         <div className="w-full min-h-screen bg-background">
             <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
                 <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
-                    
-                    {/* Header */}  
+
+                    {/* Header */}
                     <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1">
-                            <h1 className={title({ 
-                                size: 'h3', 
-                                class: 'text-primary text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold' 
+                            <h1 className={title({
+                                size: 'h3',
+                                class: 'text-primary text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold'
                             })}>
                                 Mes Courses
                             </h1>
@@ -201,10 +198,10 @@ export default function Content({ restaurant, initialData }: Props) {
                                 Gérez vos demandes de coursier
                             </p>
                         </div>
-                        <Button 
-                            as={Link} 
-                            href="/delivery/create" 
-                            color="primary" 
+                        <Button
+                            as={Link}
+                            href="/delivery/create"
+                            color="primary"
                             size="lg"
                             startContent={<IconPlus className="h-4 w-4 sm:h-5 sm:w-5" />}
                             className="w-full sm:w-auto font-medium shadow-lg hover:shadow-xl transition-all duration-200"
@@ -218,7 +215,7 @@ export default function Content({ restaurant, initialData }: Props) {
                     <div className="bg-default-50 rounded-xl p-3 sm:p-4 lg:p-6 border border-default-200">
                         <div className="space-y-3 sm:space-y-4">
                             <h3 className="text-base sm:text-lg font-semibold text-default-700">Filtrer les courses</h3>
-                            
+
                             {/* AJOUT : Conteneur flex pour la recherche et le filtre par mois */}
                             <div className="flex flex-col sm:flex-row gap-3">
                                 <Input
@@ -237,7 +234,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     isClearable
                                     onClear={() => setSearchTerm('')}
                                 />
-                                
+
                                 {/* AJOUT : Champ de filtre par mois */}
                                 <Select
                                     label="Filtre par mois"
@@ -259,7 +256,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     ))}
                                 </Select>
                             </div>
-                            
+
                             {/* Filtres par statut */}
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
                                 {courses_statuses_filters.map((category) => (
@@ -283,9 +280,9 @@ export default function Content({ restaurant, initialData }: Props) {
                                 </div>
                                 {/* AJOUT : Condition mise à jour pour inclure le filtre par mois */}
                                 {(searchTerm || statusFilter !== 'all' || monthFilter !== 'all') && (
-                                    <Button 
-                                        size="sm" 
-                                        variant="flat" 
+                                    <Button
+                                        size="sm"
+                                        variant="flat"
                                         color="default"
                                         onPress={handleReset}
                                         className="w-full xs:w-auto"
@@ -382,16 +379,16 @@ export default function Content({ restaurant, initialData }: Props) {
                             <div className="space-y-4 sm:space-y-6">
                                 {filteredData.map((delivery) => (
                                     <Card key={delivery.id} className={`w-full transition-all duration-300 hover:shadow-lg ${getStatusBorderClass(delivery.statut)}`}>
-                                        
+
                                         {/* Header de la carte - Mobile optimized */}
                                         <CardHeader className="p-4 sm:p-6">
                                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 w-full">
-                                                
+
                                                 {/* Info principale */}
                                                 <div className="flex flex-col space-y-2 flex-1 min-w-0">
                                                     <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-3">
-                                                        <Chip 
-                                                            color={getStatusColor(delivery.statut)} 
+                                                        <Chip
+                                                            color={getStatusColor(delivery.statut)}
                                                             variant="flat"
                                                             size="sm"
                                                             className="w-fit font-medium"
@@ -402,7 +399,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                             Code: {delivery.code}
                                                         </span>
                                                     </div>
-                                                    
+
                                                     {/* Info restaurant mobile */}
                                                     <div className="flex items-center gap-2 sm:hidden">
                                                         <Store className="text-default-400 h-4 w-4 flex-shrink-0" />
@@ -415,16 +412,16 @@ export default function Content({ restaurant, initialData }: Props) {
                                                 {/* Actions */}
                                                 <div className="flex items-center gap-2 sm:gap-3 self-end xs:self-auto">
                                                     <DeliveryTools restaurant={restaurant} delivery={delivery} />
-                                                    <Button 
-                                                        isIconOnly 
-                                                        color="primary" 
-                                                        variant="light" 
+                                                    <Button
+                                                        isIconOnly
+                                                        color="primary"
+                                                        variant="light"
                                                         onClick={() => toggleExpand(delivery.id)}
                                                         size="sm"
                                                         className="hover:bg-primary/10 transition-colors"
                                                     >
-                                                        {expandedDelivery === delivery.id ? 
-                                                            <ChevronUp className="h-4 w-4" /> : 
+                                                        {expandedDelivery === delivery.id ?
+                                                            <ChevronUp className="h-4 w-4" /> :
                                                             <ChevronDown className="h-4 w-4" />
                                                         }
                                                     </Button>
@@ -434,7 +431,7 @@ export default function Content({ restaurant, initialData }: Props) {
 
                                         <CardBody className="p-4 sm:p-6 pt-0">
                                             <div className="space-y-4 sm:space-y-5">
-                                                
+
                                                 {/* Info restaurant desktop */}
                                                 <div className="hidden sm:flex items-start gap-3">
                                                     <Store className="text-default-500 mt-1 h-5 w-5 flex-shrink-0" />
@@ -470,25 +467,51 @@ export default function Content({ restaurant, initialData }: Props) {
 
                                                 {/* Horaires - Design compact */}
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                                    {/* Début */}
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="text-success h-4 w-4 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="text-xs text-default-500">Début</p>
                                                             <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.dateHeureDebut}
+                                                                {formatDate(delivery.createdAt)}
                                                             </p>
                                                         </div>
                                                     </div>
+
+                                                    {/* Pickup (prise en charge) */}
                                                     <div className="flex items-center gap-2">
-                                                        <Clock className="text-warning h-4 w-4 flex-shrink-0" />
+                                                        <Clock className="text-blue-500 h-4 w-4 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
-                                                            <p className="text-xs text-default-500">Fin</p>
+                                                            <p className="text-xs text-default-500">Prise en charge</p>
                                                             <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.dateHeureFin ?? 'En cours...'}
+                                                                {delivery.pickupAt ? formatDate(delivery.pickupAt) : 'En attente...'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Delivered (livraison) */}
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="text-indigo-500 h-4 w-4 flex-shrink-0" />
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-xs text-default-500">Livraison</p>
+                                                            <p className="text-sm font-medium text-default-700 truncate">
+                                                                {delivery.deliveredAt ? formatDate(delivery.deliveredAt) : 'Non livré'}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Payout (reversement) */}
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="text-purple-500 h-4 w-4 flex-shrink-0" />
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-xs text-default-500">Reversement</p>
+                                                            <p className="text-sm font-medium text-default-700 truncate">
+                                                                {delivery.payoutAt ? formatDate(delivery.payoutAt) : 'En attente...'}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </div>
+
 
                                                 {/* Section détails expandable - Améliorée */}
                                                 {expandedDelivery === delivery.id && (
@@ -496,7 +519,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                         <h4 className="text-base sm:text-lg font-semibold text-default-700 mb-3 sm:mb-4">
                                                             Détails des commandes ({delivery.commandes.length})
                                                         </h4>
-                                                        
+
                                                         <div className="space-y-3 sm:space-y-4 max-h-96 overflow-y-auto">
                                                             {delivery.commandes.map((commande, index) => (
                                                                 <Card key={commande.id} className="bg-default-25 border border-default-200">
@@ -522,8 +545,8 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                                 <Chip size="sm" variant="solid" color="primary">{index + 1}</Chip>
 
                                                                                 {/* Bouton QR Code */}
-                                                                                <button onClick={() => setOpenQrCodeId(commande.id)}  className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
-                                                                                    <QrCode className="w-4 h-4 text-default-600" /> QR Code 
+                                                                                <button onClick={() => setOpenQrCodeId(commande.id)} className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
+                                                                                    <QrCode className="w-4 h-4 text-default-600" /> QR Code
                                                                                 </button>
 
                                                                                 {/* Bouton Annuler */}
@@ -548,10 +571,10 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                             </div>
                                                                         </div>
                                                                     </CardHeader>
-                                                                    
+
                                                                     <CardBody className="p-3 sm:p-4 pt-0">
                                                                         <div className="space-y-3">
-                                                                            
+
                                                                             {/* Destinataire */}
                                                                             <div className="flex items-start gap-2">
                                                                                 <User className="text-default-500 mt-0.5 h-4 w-4 flex-shrink-0" />
@@ -592,7 +615,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                                             </div>
                                                                         </div>
                                                                     </CardBody>
-                                                                    <DeliveryQRCodeCommande restaurant={restaurant} delivery={delivery} commande={commande} open={openQrCodeId === commande.id} setOpen={() => setOpenQrCodeId(null)}  />
+                                                                    <DeliveryQRCodeCommande restaurant={restaurant} delivery={delivery} commande={commande} open={openQrCodeId === commande.id} setOpen={() => setOpenQrCodeId(null)} />
                                                                 </Card>
                                                             ))}
                                                         </div>
@@ -606,14 +629,14 @@ export default function Content({ restaurant, initialData }: Props) {
                         </>
                     ) : (
                         <div className="flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] text-center p-6 sm:p-8">
-                            <EmptyDataTable 
+                            <EmptyDataTable
                                 title="Aucune course trouvée"
                                 message="Il semble qu'il n'y ait aucune course correspondant à vos critères de recherche ou de filtre."
                             />
                             <div className="mt-4 space-y-2">
                                 {(searchTerm || statusFilter !== 'all' || monthFilter !== 'all') && (
-                                    <Button 
-                                        color="default" 
+                                    <Button
+                                        color="default"
                                         variant="flat"
                                         size="sm"
                                         onPress={handleReset}
@@ -621,10 +644,10 @@ export default function Content({ restaurant, initialData }: Props) {
                                         Effacer les filtres
                                     </Button>
                                 )}
-                                <Button 
-                                    as={Link} 
-                                    href="/delivery/create" 
-                                    color="primary" 
+                                <Button
+                                    as={Link}
+                                    href="/delivery/create"
+                                    color="primary"
                                     variant="flat"
                                     size="sm"
                                 >
@@ -633,7 +656,7 @@ export default function Content({ restaurant, initialData }: Props) {
                             </div>
                         </div>
                     )}
-                    
+
                     {/* Pagination */}
                     {data && data.totalPages > 1 && !searchTerm && monthFilter === 'all' && statusFilter === 'all' && (
                         <div className="flex justify-center pt-4 sm:pt-6">

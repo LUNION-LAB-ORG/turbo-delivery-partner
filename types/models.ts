@@ -238,12 +238,16 @@ export interface CommandeCourseExterne {
 export interface CourseExterne {
     id: string;
     code: string;
+    total: number;
     statut: string;
-    dateHeureDebut: string;
-    dateHeureFin: string;
+
+    payoutAt: string;
+    pickupAt: string;
+    deliveredAt: string;
+
+    createdAt: string;
     restaurant: Restaurant;
     nombreCommande: number;
-    total: number;
     commandes: CommandeCourseExterne[];
 }
 

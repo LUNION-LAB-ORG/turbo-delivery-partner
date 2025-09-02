@@ -6,3 +6,4 @@ export function formatDate(
 ) {
   return dayjs(dateString).format(format);
 }
+
