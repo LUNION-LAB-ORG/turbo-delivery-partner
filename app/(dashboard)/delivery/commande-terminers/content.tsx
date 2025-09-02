@@ -191,8 +191,8 @@ export default function Content({ restaurant, initialData }: Props) {
                                         <div className="flex items-center gap-2">
                                             <Clock className="text-default-500" />
                                             <div>
-                                                <p className="text-default-600">Début: {delivery.dateHeureDebut}</p>
-                                                <p className="text-default-600">Fin: {delivery.dateHeureFin ?? '---'}</p>
+                                                <p className="text-default-600">Début: {formatDate(delivery.createdAt)}</p>
+                                                <p className="text-default-600">Fin: {delivery.payoutAt ? formatDate(delivery.payoutAt) : '---'}</p>
                                             </div>
                                         </div>
                                     </div>
