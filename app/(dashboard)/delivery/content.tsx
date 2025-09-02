@@ -140,7 +140,7 @@ export default function Content({ restaurant, initialData }: Props) {
         if (monthFilter !== 'all') {
             filtered = filtered.filter((d) => {
                 if (!d.createdAt) return false;
-              
+
                 // Extraire le mois (1-12) depuis createdAt ISO
                 const month = dayjs(d.createdAt).month() + 1; // month() retourne 0-11
                 return month === Number(monthFilter);
@@ -167,7 +167,7 @@ export default function Content({ restaurant, initialData }: Props) {
         setCurrentPage(1);
         setStatusFilter('all');
         setMonthFilter('all');
-    }, [setSearchTerm, setSortBy, setCurrentPage, setStatusFilter, setMonthFilter]);      
+    }, [setSearchTerm, setSortBy, setCurrentPage, setStatusFilter, setMonthFilter]);
 
     const handleSearchChange = (value: string) => setSearchTerm(value);
 
@@ -466,52 +466,51 @@ export default function Content({ restaurant, initialData }: Props) {
                                                 </div>
 
                                                 {/* Horaires - Design compact */}
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                                                <div className="grid grid-cols-4 gap-3 sm:gap-4">
                                                     {/* Début */}
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="text-success h-4 w-4 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="text-xs text-default-500">Début</p>
                                                             <p className="text-sm font-medium text-default-700 truncate">
-                                                                {formatDate(delivery.createdAt)}
+                                                                {formatDate(delivery.createdAt, 'DD/MM/YYYY HH:mm:ss')}
                                                             </p>
                                                         </div>
                                                     </div>
 
-                                                    {/* Pickup (prise en charge) */}
+                                                    {/* Pickup */}
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="text-blue-500 h-4 w-4 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="text-xs text-default-500">Prise en charge</p>
                                                             <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.pickupAt ? formatDate(delivery.pickupAt) : 'En attente...'}
+                                                                {delivery.pickupAt ? formatDate(delivery.pickupAt, 'DD/MM/YYYY HH:mm:ss') : 'En attente...'}
                                                             </p>
                                                         </div>
                                                     </div>
 
-                                                    {/* Delivered (livraison) */}
+                                                    {/* Delivered */}
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="text-indigo-500 h-4 w-4 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="text-xs text-default-500">Livraison</p>
                                                             <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.deliveredAt ? formatDate(delivery.deliveredAt) : 'Non livré'}
+                                                                {delivery.deliveredAt ? formatDate(delivery.deliveredAt, 'DD/MM/YYYY HH:mm:ss') : 'Non livré'}
                                                             </p>
                                                         </div>
                                                     </div>
 
-                                                    {/* Payout (reversement) */}
+                                                    {/* Payout */}
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="text-purple-500 h-4 w-4 flex-shrink-0" />
                                                         <div className="min-w-0 flex-1">
                                                             <p className="text-xs text-default-500">Reversement</p>
                                                             <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.payoutAt ? formatDate(delivery.payoutAt) : 'En attente...'}
+                                                                {delivery.payoutAt ? formatDate(delivery.payoutAt, 'DD/MM/YYYY HH:mm:ss') : 'En attente...'}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </div>
-
 
                                                 {/* Section détails expandable - Améliorée */}
                                                 {expandedDelivery === delivery.id && (
