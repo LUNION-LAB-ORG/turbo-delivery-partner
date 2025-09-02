@@ -11,6 +11,7 @@ import { Link, ChevronUp, ChevronDown, Store, Package, User, MapPin, CreditCard,
 import DeliveryTools from "../component/deliveryTools";
 import { useContentCtx } from "./useContentCtx";
 import { title } from '@/components/primitives';
+import { formatDate } from '@/utils/date-formate';
 
 interface Props {
     restaurant: Restaurant;
