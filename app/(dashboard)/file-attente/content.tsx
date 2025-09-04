@@ -1,9 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { Map, Bike, Database } from 'lucide-react';
+import { Map, Bike, Database, Clock } from 'lucide-react';
 import { PageWrapper } from '@/components/commons/page-wrapper';
 import { CardHeader } from '@/components/commons/card-header';
-import { Card, CardBody, Input } from "@heroui/react";
+import { Card, CardBody } from "@heroui/react";
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { NextUICard } from '@/components/commons/next-ui-card';
@@ -18,72 +18,82 @@ interface Props {
     restaurantId?: string;
     livreurIndisponibles: FileAttenteLivreur[]
 }
+
 export default function Content({ initialData, stattitiqueFileAttente, restaurantId, livreurIndisponibles }: Props) {
     const ctrl = useFileAttenteController(initialData, stattitiqueFileAttente, livreurIndisponibles, restaurantId)
     const [searchKey, setSearchKey] = useState("");
-    const onChange = (event: any) => {
-        setSearchKey(event.target.value)
-    }
+
     return (
         <PageWrapper>
-            <CardHeader title='Courses' />
-            <div className="space-y-4">
-                <div className="flex gap-4 w-full">
-                    <SearchField onChange={onChange} searchKey={searchKey} />
-                    <div className=''>
-                        <Link href={'/trafic'}>
-                            <Badge className="rounded-full pr-4 cursor-pointer">
-                                <Map className="mr-4" size={30} /> Maps
-                            </Badge>
-                        </Link>
-                    </div>
+            {/* HEADER */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                <CardHeader title="File d'Attente" />
+                <div className="flex gap-3">
+                    <SearchField onChange={(e: any) => setSearchKey(e.target.value)} searchKey={searchKey} />
+                    <Link href={'/trafic'}>
+                        <Badge className="rounded-full px-5 py-2 cursor-pointer hover:scale-105 transition">
+                            <Map className="mr-2" size={20} /> Maps
+                        </Badge>
+                    </Link>
                 </div>
             </div>
-            <div className='grid grid-cols-1 gap-2  lg:grid-cols-4 md:grid-cols-3 xl:grid-cols-4 sm:grid-cols-1'>
-                <NextUICard title={'Flotte de coursiers'} nombreCommande={`${ctrl.statistiqueCommandes ? ctrl.statistiqueCommandes.coursier : 0}`}
-                    status={"en attente"} icon={<Bike size={"20"} />}
-                    titleClassName='bg-warning-500 rounded-md pl-4 pr-4 text-sm text-white font-bold pb-1' />
 
-                <NextUICard title={'Nombre de commandes'} nombreCommande={`${ctrl.statistiqueCommandes ? ctrl.statistiqueCommandes.commandeEnAttente : 0}`}
+            {/* STATS CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <NextUICard
+                    title={'Flotte de coursiers'}
+                    nombreCommande={`${ctrl.statistiqueCommandes?.coursier ?? 0}`}
+                    status={"En attente"}
+                    icon={<Bike size={20} />}
+                    titleClassName='bg-yellow-500 rounded-md px-4 py-1 text-sm text-white font-bold'
+                />
+
+                <NextUICard
+                    title={'Commandes en attente'}
+                    nombreCommande={`${ctrl.statistiqueCommandes?.commandeEnAttente ?? 0}`}
                     icon={<Database size={20} />}
-                    titleClassName='bg-red-500 rounded-md pl-4 pr-4 text-sm text-white font-bold pb-1' />
+                    titleClassName='bg-red-500 rounded-md px-4 py-1 text-sm text-white font-bold'
+                />
 
                 <Link href="/tikets-terminers/chiffre-affaire">
                     <NextUICard
                         title={'Commandes terminées'}
-                        nombreCommande={`${ctrl.statistiqueCommandes ? ctrl.statistiqueCommandes.commandeTermine : 0}`}
+                        nombreCommande={`${ctrl.statistiqueCommandes?.commandeTermine ?? 0}`}
                         icon={<Database size={20} />}
-                        titleClassName='bg-green-400 rounded-md pl-4 pr-4 text-sm text-white font-bold pb-1'
+                        titleClassName='bg-green-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                     />
                 </Link>
 
-                <Card className={`py-1 border-2  bg-purple-800 text-white border-gary-500`}>
-                    <div className="pb-0 pt-2 px-4 flex-col items-start card">
-                        <p className={`"text-white" font-bold text-md`}>
-                            {
-                                ctrl.currentDelivery?.commande ? ctrl.currentDelivery.commande?.numero : `En attente d'une commande prête`
-                            }
+                {/* TIMER CARD */}
+                <Card className="py-4 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl">
+                    <CardBody className="flex flex-col items-center justify-center gap-3">
+                        <p className="font-bold text-lg text-center">
+                            {ctrl.currentDelivery?.commande
+                                ? `Commande #${ctrl.currentDelivery.commande?.numero}`
+                                : `En attente d'une commande prête`}
                         </p>
-                    </div>
-                    <CardBody className="overflow-visible py-2">
-                        <div className="mt-3 ">
-                            <div className={`text-md text-gray-500 items-center  text-white font-bold `}>Temps de recupération</div>
-                            <div className='flex flex-wrap lg:flex-nowrap xl:flex-nowrap gap-4 justify-between items-center'>
-                                <div className={`pt-2 text-gray-400 text-2xl text-white font-bold`}>
-                                    {String(ctrl.minutes).padStart(2, "0")} : {String(ctrl.seconds).padStart(2, "0")}
-                                </div>
-
-                                <div className='bg-primary mr-1 p-1 rounded-full pl-4 pr-4 text-center text-md flex gap-1'>Position: <span className='font-bold text-1xl'>{ctrl.currentDelivery?.position} 5</span></div>
-                            </div>
+                        <div className="flex items-center gap-2 text-3xl font-bold">
+                            <Clock size={26} />
+                            {String(ctrl.minutes).padStart(2, "0")} : {String(ctrl.seconds).padStart(2, "0")}
+                        </div>
+                        <div className="bg-primary px-4 py-1 rounded-full text-sm">
+                            Position : <span className="font-bold">{ctrl.currentDelivery?.position ?? "-"} / 5</span>
                         </div>
                     </CardBody>
                 </Card>
             </div>
-            <FileAttenteTab data={ctrl.fileAttentes} searchKey={searchKey}
-                timeProgressions={ctrl.timeProgressions}
-                currentDelivery={ctrl.currentDelivery}
-                livreurIndisponibles={ctrl.livreurIndispoData}
-                restaurantId={restaurantId} />
+
+            {/* TABLE / TAB */}
+            <div className="mt-8">
+                <FileAttenteTab
+                    data={ctrl.fileAttentes}
+                    searchKey={searchKey}
+                    timeProgressions={ctrl.timeProgressions}
+                    currentDelivery={ctrl.currentDelivery}
+                    livreurIndisponibles={ctrl.livreurIndispoData}
+                    restaurantId={restaurantId}
+                />
+            </div>
         </PageWrapper>
     );
 }

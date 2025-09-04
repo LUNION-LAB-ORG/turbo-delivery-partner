@@ -162,7 +162,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             // Mets à jour le form avec la nouvelle liste
             form.setValue(`commandes.${index}.prix`, total);
             form.setValue(`commandes.${index}.numero`, numeroCommande);
-            form.setValue(`commandes.${index}.zoneId`, zoneSelectionnee?.id);
+            form.setValue(`commandes.${index}.zoneId`, String(zoneSelectionnee?.id ?? ""));
             form.setValue(`commandes.${index}.destinataire.contact`, contact);
         } catch (err) {
             console.error('Erreur lors du parsing du JSON OpenAI:', err);
@@ -361,12 +361,14 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                     <select
                                         {...field}
                                         className="w-full h-8 border rounded px-2 text-sm"
-                                        onChange={(e) => field.onChange(Number(e.target.value))}
+                                        value={field.value ?? ""} // ← s'assurer qu'il y a toujours une valeur
+                                        onChange={(e) => field.onChange(e.target.value)} // ← garder en string
                                     >
+                                        <option value="" disabled>-- Sélectionnez une zone --</option>
                                         {fraisLivraisons?.map((zone) => (
-                                            <option key={zone.id} value={zone.id}>
-                                                {zone.name}
-                                            </option>
+                                        <option key={zone.id} value={zone.id}>
+                                            {zone.name}
+                                        </option>
                                         ))}
                                     </select>
                                     <FormMessage />
