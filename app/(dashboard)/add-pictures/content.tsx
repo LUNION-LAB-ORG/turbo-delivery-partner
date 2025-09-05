@@ -42,6 +42,7 @@ export default function FileUploadForm() {
     const {
         formState: { errors },
         control,
+        setValue,
     } = useForm<_addPictureSchema>({
         resolver: zodResolver(addPictureSchema),
         defaultValues: {
@@ -67,6 +68,10 @@ export default function FileUploadForm() {
         const files = Array.from(e.dataTransfer.files);
         if (files && files.length > 0) {
             handleFiles(files);
+
+            const dt = new DataTransfer();
+            files.forEach((f) => dt.items.add(f));
+            setValue("pictures", Array.from(dt.files) as [File, ...File[]], { shouldValidate: true });
         }
     }, []);
 
@@ -123,8 +128,8 @@ export default function FileUploadForm() {
                                                     onChange={(e) => {
                                                         const files = Array.from(e.target.files || []);
                                                         handleFiles(files);
-                                                        // onChange(e.target.files);
-                                                        onChange(files);
+                                                        onChange(e.target.files);
+                                                        // onChange(files);
                                                     }}
                                                 />
                                                 <label htmlFor="file-upload" className="cursor-pointer text-primary hover:text-primary/80">
