@@ -123,7 +123,8 @@ export default function FileUploadForm() {
                                                     onChange={(e) => {
                                                         const files = Array.from(e.target.files || []);
                                                         handleFiles(files);
-                                                        onChange(e.target.files);
+                                                        // onChange(e.target.files);
+                                                        onChange(files);
                                                     }}
                                                 />
                                                 <label htmlFor="file-upload" className="cursor-pointer text-primary hover:text-primary/80">

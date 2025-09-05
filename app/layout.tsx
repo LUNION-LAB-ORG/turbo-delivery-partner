@@ -126,9 +126,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <html lang="en" className="light">
                 <head>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
                     <link rel="manifest" href="/manifest.json" />
-                    <link rel="icon" href="/assets/images/Icons/icon-192x192.png" />
-                    <meta name="theme-color" content="#0ea5e9" />
+                    <meta name="theme-color" content="#317EFB" />
+                    <link rel="apple-touch-icon" href="/icon-192x192.png" />
                 </head>
                 <body className={nunito.variable}>
                     <ProviderComponent>{children}</ProviderComponent>

@@ -3,6 +3,7 @@ const withPWA = require('next-pwa')({
     dest: 'public',      // où sera généré le service worker
     register: true,      // auto-enregistrer le service worker
     skipWaiting: true,   // active immédiatement le nouveau SW
+    // disable: process.env.NODE_ENV === "local",
 });
   
 const nextConfig = withPWA({
