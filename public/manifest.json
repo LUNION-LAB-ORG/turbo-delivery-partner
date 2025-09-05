@@ -1,11 +1,12 @@
 {
-    "name": "Turbo Delivery Partner",
-    "short_name": "TURBO PARTNER",
-    "description": "Application PWA Turbo Delivery Partner",
+    "name": "TURBO-DELIVERY-ERP",
+    "short_name": "TURBO-ERP",
+    "description": "ERP Gestion Commandes et Livraison",
     "start_url": "/",
     "display": "standalone",
     "background_color": "#ffffff",
-    "theme_color": "#0ea5e9",
+    "theme_color": "#317EFB",
+    "orientation": "portrait",
     "icons": [
       {
         "src": "/icon-192x192.png",

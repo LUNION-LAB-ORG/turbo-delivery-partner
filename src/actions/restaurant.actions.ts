@@ -261,7 +261,7 @@ export async function addPicture(formData: FormData): Promise<ActionResult<any>>
         };
     }
 
-    try {
+    try {  
         // Create a new FormData object to ensure we're sending multipart/form-data
 
         const sendFormData = createFormData(formdata);
