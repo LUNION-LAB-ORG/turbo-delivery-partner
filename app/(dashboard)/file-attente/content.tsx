@@ -10,23 +10,24 @@ import { NextUICard } from '@/components/commons/next-ui-card';
 import { FileAttenteTab } from './file-attente-tab/file-attente-tab';
 import { SearchField } from '@/components/commons/form/search-field';
 import { useFileAttenteController } from './controller';
-import { FileAttenteLivreur, StatistiqueFileAttente } from '@/types/file-attente.model';
+import { ArchiveFileAttente, FileAttenteLivreur, StatistiqueFileAttente } from '@/types/file-attente.model';
 
 interface Props {
     initialData: FileAttenteLivreur[];
     stattitiqueFileAttente: StatistiqueFileAttente | null;
     restaurantId?: string;
-    livreurIndisponibles: FileAttenteLivreur[]
+    livreurIndisponibles: FileAttenteLivreur[],
+    archives: ArchiveFileAttente[]
 }
 
-export default function Content({ initialData, stattitiqueFileAttente, restaurantId, livreurIndisponibles }: Props) {
+export default function Content({ initialData, stattitiqueFileAttente, restaurantId, livreurIndisponibles, archives }: Props) {
     const ctrl = useFileAttenteController(initialData, stattitiqueFileAttente, livreurIndisponibles, restaurantId)
     const [searchKey, setSearchKey] = useState("");
 
     return (
         <PageWrapper>
             {/* HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
                 <CardHeader title="File d'Attente" />
                 <div className="flex gap-3">
                     <SearchField onChange={(e: any) => setSearchKey(e.target.value)} searchKey={searchKey} />
@@ -39,7 +40,8 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
             </div>
 
             {/* STATS CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Première ligne : 3 cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <NextUICard
                     title={'Flotte de coursiers'}
                     nombreCommande={`${ctrl.statistiqueCommandes?.coursier ?? 0}`}
@@ -63,9 +65,11 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                         titleClassName='bg-green-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                     />
                 </Link>
+            </div>
 
-                {/* TIMER CARD */}
-                <Card className="py-4 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl">
+            {/* Deuxième ligne : le timer card */}
+            <div className="mt-1">
+                <Card className="py-2 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl">
                     <CardBody className="flex flex-col items-center justify-center gap-3">
                         <p className="font-bold text-lg text-center">
                             {ctrl.currentDelivery?.commande
@@ -83,6 +87,7 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                 </Card>
             </div>
 
+
             {/* TABLE / TAB */}
             <div className="mt-8">
                 <FileAttenteTab
@@ -92,6 +97,7 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                     currentDelivery={ctrl.currentDelivery}
                     livreurIndisponibles={ctrl.livreurIndispoData}
                     restaurantId={restaurantId}
+                    archives={archives}
                 />
             </div>
         </PageWrapper>
