@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useState } from 'react';
 import { Map, Bike, Database, Clock } from 'lucide-react';
 import { PageWrapper } from '@/components/commons/page-wrapper';
@@ -27,12 +27,17 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
     return (
         <PageWrapper>
             {/* HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-3">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4 w-full">
                 <CardHeader title="File d'Attente" />
-                <div className="flex gap-3">
-                    <SearchField onChange={(e: any) => setSearchKey(e.target.value)} searchKey={searchKey} />
-                    <Link href={'/trafic'}>
-                        <Badge className="rounded-full px-5 py-2 cursor-pointer hover:scale-105 transition">
+
+                <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <SearchField
+                        onChange={(e: any) => setSearchKey(e.target.value)}
+                        searchKey={searchKey}
+                        className="w-full sm:w-64"
+                    />
+                    <Link href={'/trafic'} className="w-full sm:w-auto">
+                        <Badge className="rounded-full px-5 py-2 cursor-pointer hover:scale-105 transition w-full sm:w-auto flex items-center justify-center">
                             <Map className="mr-2" size={20} /> Maps
                         </Badge>
                     </Link>
@@ -40,8 +45,7 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
             </div>
 
             {/* STATS CARDS */}
-            {/* Première ligne : 3 cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
                 <NextUICard
                     title={'Flotte de coursiers'}
                     nombreCommande={`${ctrl.statistiqueCommandes?.coursier ?? 0}`}
@@ -57,7 +61,7 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                     titleClassName='bg-red-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                 />
 
-                <Link href="/tikets-terminers/chiffre-affaire">
+                <Link href="/tikets-terminers/chiffre-affaire" className="block">
                     <NextUICard
                         title={'Commandes terminées'}
                         nombreCommande={`${ctrl.statistiqueCommandes?.commandeTermine ?? 0}`}
@@ -67,11 +71,11 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                 </Link>
             </div>
 
-            {/* Deuxième ligne : le timer card */}
-            <div className="mt-1">
-                <Card className="py-2 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl">
-                    <CardBody className="flex flex-col items-center justify-center gap-3">
-                        <p className="font-bold text-lg text-center">
+            {/* TIMER CARD */}
+            <div className="mt-6 w-full max-w-lg mx-auto">
+                <Card className="py-4 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl w-full">
+                    <CardBody className="flex flex-col items-center justify-center gap-3 text-center">
+                        <p className="font-bold text-lg">
                             {ctrl.currentDelivery?.commande
                                 ? `Commande #${ctrl.currentDelivery.commande?.numero}`
                                 : `En attente d'une commande prête`}
@@ -87,9 +91,8 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                 </Card>
             </div>
 
-
             {/* TABLE / TAB */}
-            <div className="mt-8">
+            <div className="mt-8 w-full overflow-x-auto">
                 <FileAttenteTab
                     data={ctrl.fileAttentes}
                     searchKey={searchKey}
