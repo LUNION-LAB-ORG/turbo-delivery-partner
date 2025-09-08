@@ -21,6 +21,17 @@ export interface FileAttenteLivreur {
   commande?: Partial<CommandeCourseExterne>,
 }
 
+export interface ArchiveFileAttente {
+  id: string;
+  livreurId: string;
+  nomComplet: string;
+  avatarUrl: string;
+  restaurantId: string;
+  gotoffAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface StatistiqueFileAttente {
   coursier?: number;
   commandeEnAttente?: number;
