@@ -113,7 +113,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     const analyzeWithOpenAI = async (prompt: string): Promise<string> => {
         setIsProcessing(true);
         try {
-            const res = await fetch('/api/analyze-image', {
+            const res = await fetch('/api/analyze-prompt', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ prompt }),
