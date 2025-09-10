@@ -13,7 +13,7 @@ interface Props {
 
 export function NextUICard(props: Props) {
     return (
-        <Card className={`py-1 w-full cursor-pointer ${props.className ?? ""}`}>
+        <Card className={`py-1 w-full cursor-pointer rounded-md ${props.className ?? ""}`}>
             <CardHeader className="pb-0 pt-2 px-4 flex items-center justify-between">
                 <p className={props.titleClassName}>{props.title}</p>
                 {props.icon && <div>{props.icon}</div>}

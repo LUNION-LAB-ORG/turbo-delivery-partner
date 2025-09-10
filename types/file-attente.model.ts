@@ -36,6 +36,7 @@ export interface StatistiqueFileAttente {
   coursier?: number;
   commandeEnAttente?: number;
   commandeTermine?: number;
+  commandeAnnule?: number;
 }
 
 export interface FilleAttenteHistoriqueVM {

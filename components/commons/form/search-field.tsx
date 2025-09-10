@@ -17,7 +17,7 @@ export function SearchField(props: SearchFieldProps) {
                     placeholder="Rechercher"
                     value={props.searchKey}
                     onChange={props.onChange}
-                    className="w-3/4 pl-10 pr-4 py-2 border-2 rounded-full bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="w-3/4 pl-10 pr-4 py-2 border-2 rounded-md bg-white focus:bg-white focus:outline-none focus:ring-2 focus:ring-gray-300"
                 />
             </div>
         </div>

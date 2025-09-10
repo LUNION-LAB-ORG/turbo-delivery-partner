@@ -2,6 +2,7 @@
 import EmptyDataTable from "@/components/commons/EmptyDataTable";
 import { useCoursiersPasActiviteController } from "./controller"
 import { FileAttenteLivreur } from "@/types/file-attente.model";
+import createUrlFile from "@/utils/createUrlFile";
 
 interface CoursisersPasActiviteProps {
     data: FileAttenteLivreur[];
@@ -30,7 +31,7 @@ export function CoursisersPasActivite({ data, searchKey }: CoursisersPasActivite
                                             <div className="flex items-center gap-2 text-sm font-bold">
                                                 <div className="w-10 h-10 rounded-full overflow-hidden">
                                                     <img
-                                                        src={"/assets/images/photos/avatar-2.png"}
+                                                        src={item.avatar ? createUrlFile(item.avatar, 'backend') : '/assets/images/avatar.png'}
                                                         alt={"Avatar"}
                                                         className="w-full h-full object-cover"
                                                     />

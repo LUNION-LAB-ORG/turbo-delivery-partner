@@ -21,8 +21,5 @@ export function useCoursiersPasActiviteController({ searchKey, data }: Props) {
         }
     }, [searchKey]);
 
-    return {
-        filterData
-
-    }
+    return { filterData }
 }
