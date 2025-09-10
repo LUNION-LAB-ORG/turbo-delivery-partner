@@ -45,20 +45,20 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
             </div>
 
             {/* STATS CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
                 <NextUICard
                     title={'Flotte de coursiers'}
                     nombreCommande={`${ctrl.statistiqueCommandes?.coursier ?? 0}`}
                     status={"En attente"}
                     icon={<Bike size={20} />}
-                    titleClassName='bg-yellow-500 rounded-md px-4 py-1 text-sm text-white font-bold'
+                    titleClassName='bg-blue-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                 />
 
                 <NextUICard
                     title={'Commandes en attente'}
                     nombreCommande={`${ctrl.statistiqueCommandes?.commandeEnAttente ?? 0}`}
                     icon={<Database size={20} />}
-                    titleClassName='bg-red-500 rounded-md px-4 py-1 text-sm text-white font-bold'
+                    titleClassName='bg-yellow-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                 />
 
                 <Link href="/tikets-terminers/chiffre-affaire" className="block">
@@ -67,6 +67,15 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                         nombreCommande={`${ctrl.statistiqueCommandes?.commandeTermine ?? 0}`}
                         icon={<Database size={20} />}
                         titleClassName='bg-green-500 rounded-md px-4 py-1 text-sm text-white font-bold'
+                    />
+                </Link>
+
+                <Link href="/tikets-terminers/chiffre-affaire" className="block">
+                    <NextUICard
+                        title={'Commandes Annulées'}
+                        nombreCommande={`${ctrl.statistiqueCommandes?.commandeTermine ?? 0}`}
+                        icon={<Database size={20} />}
+                        titleClassName='bg-red-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                     />
                 </Link>
             </div>
