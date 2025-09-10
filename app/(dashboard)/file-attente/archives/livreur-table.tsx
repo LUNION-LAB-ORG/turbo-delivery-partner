@@ -55,7 +55,9 @@ export function LivreurTable({ data, itemsPerPage = 5 }: Props) {
             case "createdAt":
                 return formatDate(item.createdAt, "DD/MM/YYYY HH:mm:ss");
             case "gotoffAt":
-                return item.gotoffAt != null ? formatDate(item.gotoffAt, "DD/MM/YYYY HH:mm:ss") : "-";
+                return item.gotoffAt
+                    ? formatDate(new Date(item.gotoffAt), "dd/MM/yyyy HH:mm:ss")
+                    : "-";
             default:
                 return null;
         }

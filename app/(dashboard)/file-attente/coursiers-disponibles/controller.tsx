@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 interface Props {
     data: FileAttenteLivreur[];
     searchKey?: string;
-    restaurantId?: string
+    restaurantId?: string   
 }
 
 export function useCoursiersDisponibleController({ searchKey, data, restaurantId }: Props) {
@@ -80,7 +80,5 @@ export function useCoursiersDisponibleController({ searchKey, data, restaurantId
         errorDisclosure,
         retirerLivreurs,
         confirm
-
-
     }
 }
