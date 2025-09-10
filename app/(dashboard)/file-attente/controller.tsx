@@ -91,29 +91,40 @@ export function useFileAttenteController(
     };
 
     useEffect(() => {
-        if (!haseError && stattitiqueFileAttente?.commandeEnAttente !== 0 && stattitiqueFileAttente?.coursier !== 0 && fileAttentes.length > 0) {
+        if (
+            !haseError &&
+            stattitiqueFileAttente?.commandeEnAttente !== 0 &&
+            stattitiqueFileAttente?.coursier !== 0 &&
+            fileAttentes.length > 0
+        ) {
             setCurrentDelivery(fileAttentes[0]);
-            if (tempRecuperation === 1) {
-                repositionLivreur(fileAttentes[0]?.livreurId);
-                fetchFileAttenteLivreur();
-            }
+    
             const timer = setInterval(() => {
-                if (!loading && !haseError) {
-                    setTempRecuperation((prevTime) => {
-                        const newTime = prevTime - 1;
-                        // ✅ Mise à jour de localStorage en continu
-                        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-                            startTime: Date.now() - ((3 * 60 - newTime) * 1000),
-                            duration: 3 * 60
-                        }));
-                        return newTime;
-                    });
-                    setTimeProgression((prev) => prev + 0.55);
-                }
+                setTempRecuperation((prevTime) => {
+                    if (prevTime <= 1) {
+                        // ⏳ Quand on arrive à 0 → reposition et reset
+                        repositionLivreur(fileAttentes[0]?.livreurId);
+                        fetchFileAttenteLivreur();
+                        return 3 * 60;
+                    }
+    
+                    const newTime = prevTime - 1;
+    
+                    // ✅ Sauvegarde locale du timer
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                        startTime: Date.now() - ((3 * 60 - newTime) * 1000),
+                        duration: 3 * 60
+                    }));
+    
+                    return newTime;
+                });
+    
+                setTimeProgression((prev) => prev + 0.55);
             }, 1000);
+    
             return () => clearInterval(timer);
         }
-    }, [tempRecuperation, stattitiqueFileAttente?.commandeEnAttente, loading]);
+    }, [haseError, stattitiqueFileAttente?.commandeEnAttente, stattitiqueFileAttente?.coursier, fileAttentes.length, loading]);
 
     const minutes = Math.floor(tempRecuperation / 60);
     const seconds = tempRecuperation % 60;
