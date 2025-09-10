@@ -55,9 +55,9 @@ export function LivreurTable({ data, itemsPerPage = 5 }: Props) {
             case "createdAt":
                 return formatDate(item.createdAt, "DD/MM/YYYY HH:mm:ss");
             case "gotoffAt":
-                return item.gotoffAt
-                    ? formatDate(item.gotoffAt.replace(/\.\d+Z$/, "Z"), "dd/mm/YYYY HH:mm:ss")
-                    : "-";
+                return item.gotoffAt !== '-'
+                    ? formatDate(new Date(item.gotoffAt.replace(/\.\d+Z$/, "Z")), "DD/MM/YYYY HH:mm:ss")
+                    : "❌";
             default:
                 return null;
         }
@@ -78,7 +78,7 @@ export function LivreurTable({ data, itemsPerPage = 5 }: Props) {
             />
 
             {/* Tableau */}
-            <Table aria-label="Liste des livreurs">
+            <Table aria-label="Liste des livreurs" className="rounded-md">
                 <TableHeader columns={columns}>
                     {(column) => (
                         <TableColumn key={String(column.uid)} align="start">

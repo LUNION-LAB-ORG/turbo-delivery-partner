@@ -7,6 +7,7 @@ import { Textarea } from "@heroui/react";
 import EmptyDataTable from "@/components/commons/EmptyDataTable";
 import { FileAttenteLivreur } from "@/types/file-attente.model";
 import { ConfirmDialog } from "@/components/commons/confirm-dialog";
+import createUrlFile from "@/utils/createUrlFile";
 
 interface CoursiersDiaponibleProps {
     data: FileAttenteLivreur[];
@@ -42,7 +43,7 @@ export function CoursiersDiaponible({ data, searchKey, timeProgressions, current
                                                 <div className="flex items-center gap-2 text-sm font-bold relative z-10">
                                                     <div className="w-10 h-10 rounded-full overflow-hidden">
                                                         <img
-                                                            src={"/assets/images/photos/avatar-2.png"}
+                                                            src={item.avatar ? createUrlFile(item.avatar, 'backend') : '/assets/images/avatar.png'}
                                                             alt={"Avatar"}
                                                             className="w-full h-full object-cover"
                                                         />

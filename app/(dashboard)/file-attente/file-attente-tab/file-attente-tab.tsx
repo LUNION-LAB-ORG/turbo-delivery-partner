@@ -57,7 +57,7 @@ export function FileAttenteTab({
     };
 
     return (
-        <div className="mt-4 w-full">
+        <div className="w-full">
             {/* Dropdown pour mobile */}
             <div className="sm:hidden mb-4">
                 <select
@@ -75,40 +75,46 @@ export function FileAttenteTab({
 
             {/* Tabs pour tablette/desktop */}
             <div className="hidden sm:block">
-                <Tabs items={items}>
-                    {(item) => (
-                        <Tab
+                <div className="bg-white shadow rounded-lg p-2">
+                    <div className="flex justify-center gap-4">
+                    {items.map((item) => (
+                        <button
                             key={item.kay}
-                            title={
-                                <span className="flex items-center px-4 py-2">
-                                    {item.icon}
-                                    {item.title}
-                                </span>
-                            }
+                            onClick={() => setActiveTab(item.kay)}
+                            className={`
+                                flex items-center px-4 py-2 rounded-md font-medium transition
+                                ${activeTab === item.kay
+                                ? "bg-primary text-white shadow"
+                                : "text-gray-600 hover:bg-gray-100"}
+                            `}
                         >
-                            {item.kay === "disponible" ? (
-                                <CoursiersDiaponible
-                                    data={data}
-                                    searchKey={searchKey}
-                                    timeProgressions={timeProgressions}
-                                    currentDelivery={currentDelivery}
-                                    restaurantId={restaurantId}
-                                />
-                            ) : item.kay === "indisponible" ? (
-                                <CoursisersPasActivite
-                                    data={livreurIndisponibles}
-                                    searchKey={searchKey}
-                                />
-                            ) : (
-                                <Archive
-                                    data={archives}
-                                    searchKey={searchKey}
-                                />
-                            )}
-                        </Tab>
+                            {item.icon}
+                            {item.title}
+                        </button>
+                    ))}
+                    </div>
+                </div>
+
+                <div className="mt-2 bg-white shadow rounded-lg p-3">
+                    {activeTab === "disponible" ? (
+                        <CoursiersDiaponible
+                            data={data}
+                            searchKey={searchKey}
+                            timeProgressions={timeProgressions}
+                            currentDelivery={currentDelivery}
+                            restaurantId={restaurantId}
+                        />
+                    ) : activeTab === "indisponible" ? (
+                        <CoursisersPasActivite
+                            data={livreurIndisponibles}
+                            searchKey={searchKey}
+                        />
+                    ) : (
+                        <Archive data={archives} searchKey={searchKey} />
                     )}
-                </Tabs>
+                </div>
             </div>
+
 
             {/* Contenu mobile */}
             <div className="sm:hidden mt-4">
