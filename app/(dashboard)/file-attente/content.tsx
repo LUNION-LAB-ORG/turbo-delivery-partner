@@ -54,6 +54,33 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                     titleClassName='bg-blue-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                 />
 
+                {/* TIMER CARD */}
+                <Card className="py-4 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl w-full">
+                    <CardBody className="flex flex-col items-center justify-center gap-3 text-center">
+                        <p className="font-bold text-lg">
+                            {ctrl.currentDelivery?.commande
+                                ? `Commande #${ctrl.currentDelivery.commande?.numero}`
+                                : `En attente d'une commande prête`}
+                        </p>
+                        <div className="flex items-center gap-2 text-3xl font-bold">
+                            <Clock size={26} />
+                            {String(ctrl.minutes).padStart(2, "0")} : {String(ctrl.seconds).padStart(2, "0")}
+                        </div>
+                        <div className="bg-primary px-4 py-1 rounded-full text-sm">
+                            Position : <span className="font-bold">{ctrl.currentDelivery?.position ?? "-"} / 5</span>
+                        </div>
+                    </CardBody>
+                </Card>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+                <NextUICard
+                    title={'Flotte de coursiers'}
+                    nombreCommande={`${ctrl.statistiqueCommandes?.coursier ?? 0}`}
+                    status={"En attente"}
+                    icon={<Bike size={20} />}
+                    titleClassName='bg-blue-500 rounded-md px-4 py-1 text-sm text-white font-bold'
+                />
+
                 <NextUICard
                     title={'Commandes en attente'}
                     nombreCommande={`${ctrl.statistiqueCommandes?.commandeEnAttente ?? 0}`}
@@ -78,27 +105,10 @@ export default function Content({ initialData, stattitiqueFileAttente, restauran
                         titleClassName='bg-red-500 rounded-md px-4 py-1 text-sm text-white font-bold'
                     />
                 </Link>
-            </div>
+            </div>            
 
-            {/* TIMER CARD */}
-            <div className="mt-6 w-full max-w-lg mx-auto">
-                <Card className="py-4 border-0 bg-gradient-to-br from-purple-700 to-purple-900 text-white shadow-xl rounded-2xl w-full">
-                    <CardBody className="flex flex-col items-center justify-center gap-3 text-center">
-                        <p className="font-bold text-lg">
-                            {ctrl.currentDelivery?.commande
-                                ? `Commande #${ctrl.currentDelivery.commande?.numero}`
-                                : `En attente d'une commande prête`}
-                        </p>
-                        <div className="flex items-center gap-2 text-3xl font-bold">
-                            <Clock size={26} />
-                            {String(ctrl.minutes).padStart(2, "0")} : {String(ctrl.seconds).padStart(2, "0")}
-                        </div>
-                        <div className="bg-primary px-4 py-1 rounded-full text-sm">
-                            Position : <span className="font-bold">{ctrl.currentDelivery?.position ?? "-"} / 5</span>
-                        </div>
-                    </CardBody>
-                </Card>
-            </div>
+            {/* <div className="mt-6 w-full max-w-lg mx-auto">                
+            </div> */}
 
             {/* TABLE / TAB */}
             <div className="mt-8 w-full overflow-x-auto">
