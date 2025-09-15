@@ -1,5 +1,5 @@
 "use client";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Map, Bike, Database, Clock } from 'lucide-react';
 import { PageWrapper } from '@/components/commons/page-wrapper';
 import { CardHeader } from '@/components/commons/card-header';
@@ -11,6 +11,8 @@ import { FileAttenteTab } from './file-attente-tab/file-attente-tab';
 import { SearchField } from '@/components/commons/form/search-field';
 import { useFileAttenteController } from './controller';
 import { ArchiveFileAttente, FileAttenteLivreur, StatistiqueFileAttente } from '@/types/file-attente.model';
+import { fetchFilleAttente } from '@/src/actions/file-attente.actions';
+import { auth } from '@/auth';
 
 interface Props {
     initialData: FileAttenteLivreur[];

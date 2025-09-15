@@ -126,6 +126,25 @@ export function useFileAttenteController(
         }
     }, [haseError, stattitiqueFileAttente?.commandeEnAttente, stattitiqueFileAttente?.coursier, fileAttentes.length, loading]);
 
+    useEffect(() => {
+        if (!restaurantId) return;
+    
+        // 🔄 Rafraîchissement automatique toutes les 15 minutes
+        const interval = setInterval(async () => {
+            try {
+                const updatedData = await fetchFilleAttente(restaurantId);
+                if (updatedData) {
+                    setFileAttentes(updatedData);
+                }
+            } catch (error) {
+                console.error("Erreur lors du rafraîchissement de la file d'attente:", error);
+            }
+        }, 15 * 1000); // 15 minutes en millisecondes
+    
+        return () => clearInterval(interval); // cleanup à la destruction du composant
+    }, [restaurantId]);
+    
+
     const minutes = Math.floor(tempRecuperation / 60);
     const seconds = tempRecuperation % 60;
 

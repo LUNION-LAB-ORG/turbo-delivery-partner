@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 import Loading from '@/components/layouts/loading';
 import { archiveFileAttente, fetchFilleAttente, fetchStatistique, livreurIndisponible } from '@/src/actions/file-attente.actions';
 
-export default async function Page() {
+export default async function Page() {  
     const session = await auth();
     const data = await fetchFilleAttente(session?.user?.restauranID ?? '');
     const stattitiqueFileAttente = await fetchStatistique(session?.user.restauranID ?? '');
