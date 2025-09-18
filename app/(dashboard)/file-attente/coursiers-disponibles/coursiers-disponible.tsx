@@ -36,7 +36,7 @@ export function CoursiersDiaponible({ data, searchKey, timeProgressions, current
                                             className={`cursor-pointer cursor-not-allowed flex items-center`}>
                                             <td className=" py-4 min-w-[140px]">
                                                 <div className="flex items-center rounded-lg  py-1 text-sm border p-1 border-gray-400">
-                                                    Position : {item.position + index}
+                                                    Position : {item.position}
                                                 </div>
                                             </td>
                                             <td className="min-w-[30%] relative items-center">
