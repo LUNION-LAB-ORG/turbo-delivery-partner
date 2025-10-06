@@ -37,23 +37,6 @@ export default function Content({ restaurant }: { restaurant: FindOneRestaurant 
                     Il regroupe toutes les fonctionnalites nécessaires: commandes, facturation, ventes, stocks, personnel, gestion comptable.
                 </div>
             </div>
-            {/* --- Ici on ajoute les boutons --- */}
-            <div className="flex justify-center gap-2 mt-4">
-                <Button 
-                    variant={activeSection === 'turbo' ? 'solid' : 'flat'} 
-                    size="sm" 
-                    onPress={() => setActiveSection('turbo')}
-                >
-                    Demande de TURBOY
-                </Button>
-                <Button 
-                    variant={activeSection === 'orders' ? 'solid' : 'flat'} 
-                    size="sm" 
-                    onPress={() => setActiveSection('orders')}
-                >
-                    Suivre mes commandes
-                </Button>
-            </div>
             <div>
                 <div className='flex justify-between'>
                     <span className='text-gray-500 ' style={{ fontSize: 10 }}>Restaurant</span>

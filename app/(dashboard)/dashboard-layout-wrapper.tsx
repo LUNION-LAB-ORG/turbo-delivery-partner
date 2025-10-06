@@ -2,15 +2,15 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Bell, Gauge, Pizza, ShoppingBag, TicketCheck, Hammer, Menu } from 'lucide-react';
+import { Logo } from '@/components/icons';
+import { useRouter } from 'next/navigation';
+import { Image, Button } from '@heroui/react';
 import { TbTruckDelivery } from 'react-icons/tb';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Image, Button } from '@heroui/react';
+import Notifications from '@/components/dashboard/notifications/notifications';
 import { DashboardNavItems } from '@/components/dashboard/dashboard-nav-items';
 import { DashboardUserDropdown } from '@/components/dashboard/dashboard-user-dropdown';
-import { Logo } from '@/components/icons';
-import Notifications from '@/components/dashboard/notifications/notifications';
+import { Bell, Gauge, Pizza, ShoppingBag, TicketCheck, Hammer, Menu } from 'lucide-react';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -19,7 +19,7 @@ interface DashboardLayoutProps {
 }
 
 export default function DashboardLayoutWrapper({ children, session, restaurant }: DashboardLayoutProps) {
-    const pathname = usePathname();
+    const router = useRouter();
     const [sheetOpen, setSheetOpen] = useState(false);
     const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');
 
@@ -102,7 +102,10 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                                 variant={activeSection === 'turbo' ? 'solid' : 'flat'}
                                 size="lg"
                                 color="primary"
-                                onPress={() => setActiveSection('turbo')}
+                                onPress={() => {
+                                    setActiveSection('turbo'); // si tu veux garder cet état
+                                    router.push('/delivery');      // redirection
+                                }}
                                 className={`w-full sm:w-1/2 px-6 py-3 rounded-md font-semibold transition-transform duration-150 flex items-center justify-center gap-3 ${
                                     activeSection === 'turbo'
                                     ? 'shadow-md scale-105'
@@ -117,7 +120,9 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                                 variant={activeSection === 'orders' ? 'solid' : 'flat'}
                                 size="lg"
                                 color="secondary"
-                                onPress={() => setActiveSection('orders')}
+                                onPress={() => {
+                                    setActiveSection('orders')
+                                }}
                                 className={`w-full sm:w-1/2 px-6 py-3 font-semibold rounded-md transition-transform duration-150 flex items-center justify-center gap-3 ${
                                     activeSection === 'orders'
                                     ? 'shadow-md scale-105'
