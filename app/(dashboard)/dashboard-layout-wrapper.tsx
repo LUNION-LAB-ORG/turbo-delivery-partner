@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from '@/components/icons';
-import { useRouter } from 'next/navigation';
-import { Image, Button } from '@heroui/react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Button } from '@heroui/react';
 import { TbTruckDelivery } from 'react-icons/tb';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Notifications from '@/components/dashboard/notifications/notifications';
@@ -20,6 +20,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayoutWrapper({ children, session, restaurant }: DashboardLayoutProps) {
     const router = useRouter();
+    const pathname = usePathname();
     const [sheetOpen, setSheetOpen] = useState(false);
     const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');
 
@@ -32,7 +33,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
     ];
 
     const ordersNav = [
-        { href: '/orders', icon: <ShoppingBag className="h-5 w-5" />, label: 'Mes Commandes' },
+        { href: '/mes-commandes', icon: <ShoppingBag className="h-5 w-5" />, label: 'Mes Commandes' },
         { 
             href: '', 
             icon: <Pizza className="h-5 w-5" />, 
@@ -46,6 +47,15 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
     ];
 
     const navItems = activeSection === 'turbo' ? turboNav : ordersNav;
+
+    // 🔹 Synchroniser activeSection avec le chemin actuel au chargement / changement de route
+    useEffect(() => {
+        if (turboNav.some(nav => pathname.startsWith(nav.href))) {
+            setActiveSection('turbo');
+        } else {
+            setActiveSection('orders');
+        }
+    }, [pathname]);
 
     return (
         <div className="grid relative mx-auto w-full max-w-screen-2xl h-screen md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -82,7 +92,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                         </SheetContent>
                     </Sheet>
 
-                    <div className="md:hidden lg:hidden xl:hidden">
+                    <div className="md:hidden">
                         <Notifications />
                     </div>
 
@@ -94,40 +104,31 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                 </header>
 
                 <main className="relative p-2 lg:p-4 w-full bg-muted h-full max-h-[calc(100vh-60px)] overflow-y-auto">
-                    {/* bloc sticky doit être directement dans main */}
+                    {/* bloc sticky */}
                     <div className="sticky top-0 z-40 bg-muted/60 backdrop-blur-md pt-2 pb-2">
                         <div className="bg-white dark:bg-muted rounded-md shadow-lg p-6 w-full border border-gray-200 dark:border-muted">
                             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
                                 <Button
-                                variant={activeSection === 'turbo' ? 'solid' : 'flat'}
-                                size="lg"
-                                color="primary"
-                                onPress={() => {
-                                    setActiveSection('turbo'); // si tu veux garder cet état
-                                    router.push('/delivery');      // redirection
-                                }}
-                                className={`w-full sm:w-1/2 px-6 py-3 rounded-md font-semibold transition-transform duration-150 flex items-center justify-center gap-3 ${
-                                    activeSection === 'turbo'
-                                    ? 'shadow-md scale-105'
-                                    : 'hover:scale-105 hover:shadow-sm'
-                                }`}
+                                    variant={activeSection === 'turbo' ? 'solid' : 'flat'}
+                                    size="lg"
+                                    color="primary"
+                                    onPress={() => router.push('/delivery')}
+                                    className={`w-full sm:w-1/2 px-6 py-3 rounded-md font-semibold transition-transform duration-150 flex items-center justify-center gap-3 ${
+                                        activeSection === 'turbo' ? 'shadow-md scale-105' : 'hover:scale-105 hover:shadow-sm'
+                                    }`}
                                 >
                                     <TbTruckDelivery className="h-5 w-5" />
                                     <span>Demande de TURBOY</span>
                                 </Button>
 
                                 <Button
-                                variant={activeSection === 'orders' ? 'solid' : 'flat'}
-                                size="lg"
-                                color="secondary"
-                                onPress={() => {
-                                    setActiveSection('orders')
-                                }}
-                                className={`w-full sm:w-1/2 px-6 py-3 font-semibold rounded-md transition-transform duration-150 flex items-center justify-center gap-3 ${
-                                    activeSection === 'orders'
-                                    ? 'shadow-md scale-105'
-                                    : 'hover:scale-105 hover:shadow-sm'
-                                }`}
+                                    variant={activeSection === 'orders' ? 'solid' : 'flat'}
+                                    size="lg"
+                                    color="secondary"
+                                    onPress={() => router.push('/mes-commandes')}
+                                    className={`w-full sm:w-1/2 px-6 py-3 font-semibold rounded-md transition-transform duration-150 flex items-center justify-center gap-3 ${
+                                        activeSection === 'orders' ? 'shadow-md scale-105' : 'hover:scale-105 hover:shadow-sm'
+                                    }`}
                                 >
                                     <ShoppingBag className="h-5 w-5" />
                                     <span>Suivi De Commandes</span>
@@ -136,10 +137,8 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                         </div>
                     </div>
 
-                    {/* contenu scrollable dessous */}
-                    <div className="mt-4">
-                        {children}
-                    </div>
+                    {/* contenu scrollable */}
+                    <div className="mt-4">{children}</div>
                 </main>
             </div>
         </div>
