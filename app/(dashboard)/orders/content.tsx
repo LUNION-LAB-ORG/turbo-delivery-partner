@@ -40,35 +40,6 @@ export default function Content({ commandesInitiales, session }: { commandesInit
                         <Orders commandesInitiales={commandes} session={session} />
                     </CardBody>
                 </Card>
-
-                {/* <Card className="w-full col-span-12 rounded-md" shadow="sm">
-                    <CardBody>
-                        <CardHeader>
-                            <h2 className="text-xl font-bold text-red-500">Progression Hebdomadaire</h2>
-                        </CardHeader>
-                        <ChartContainer config={chartConfig} className="w-full">
-                            <AreaChart
-                                accessibilityLayer
-                                data={[]}
-                                margin={{ left: 12, right: 12 }}
-                            >
-                                <CartesianGrid vertical={false} />
-                                <XAxis dataKey="day" tickLine={false} axisLine={false} tickMargin={8} tickFormatter={(v) => v.slice(0, 3)} />
-                                <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="line" />} />
-                                <Area dataKey="orders" type="natural" fill="hsl(var(--chart-1))" fillOpacity={0.4} stroke="hsl(var(--primary))" />
-                            </AreaChart>
-                        </ChartContainer>
-                    </CardBody>
-                </Card> */}
-
-                {/* <Card className="w-full col-span-12" shadow="sm">
-                    <InWorking
-                        titre="Notre Nouvelle Fonctionnalité Arrive Bientôt"
-                        message="Notre équipe travaille actuellement sur cette page pour vous offrir une meilleure expérience"
-                        datePrevue="1er Août 2025"
-                        showDate={true}
-                    />
-                </Card> */}
             </div>
         </div>
     );

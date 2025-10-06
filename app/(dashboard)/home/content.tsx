@@ -1,16 +1,17 @@
 'use client';
 
+import Link from 'next/link';
 import { useState } from 'react';
 import { title } from '@/components/primitives';
-import { Image, CircularProgress, Button, Chip } from "@heroui/react";
-import { Card, CardBody, CardHeader, Progress } from "@heroui/react";
-import { Clock, Pizza, ChevronRight, Star } from 'lucide-react';
+import { Clock, Pizza, Star } from 'lucide-react';
+import { FindOneRestaurant } from '@/types/models';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { categories, foodItems, bestSellers, orders } from '@/data';
-import { FindOneRestaurant } from '@/types/models';
-import Link from 'next/link';
+import { Card, CardBody, CardHeader, Progress } from "@heroui/react";
+import { Image, CircularProgress, Button, Chip } from "@heroui/react";
 
 export default function Content({ restaurant }: { restaurant: FindOneRestaurant | null }) {
+    const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');
 
     return (
         <div className="w-full h-full flex flex-1 flex-col gap-4 lg:gap-6 mb-10">
@@ -35,6 +36,23 @@ export default function Content({ restaurant }: { restaurant: FindOneRestaurant 
                     regroupant des fonctionnalités de haut gamme dans une seule application.
                     Il regroupe toutes les fonctionnalites nécessaires: commandes, facturation, ventes, stocks, personnel, gestion comptable.
                 </div>
+            </div>
+            {/* --- Ici on ajoute les boutons --- */}
+            <div className="flex justify-center gap-2 mt-4">
+                <Button 
+                    variant={activeSection === 'turbo' ? 'solid' : 'flat'} 
+                    size="sm" 
+                    onPress={() => setActiveSection('turbo')}
+                >
+                    Demande de TURBOY
+                </Button>
+                <Button 
+                    variant={activeSection === 'orders' ? 'solid' : 'flat'} 
+                    size="sm" 
+                    onPress={() => setActiveSection('orders')}
+                >
+                    Suivre mes commandes
+                </Button>
             </div>
             <div>
                 <div className='flex justify-between'>
@@ -73,29 +91,6 @@ export default function Content({ restaurant }: { restaurant: FindOneRestaurant 
                     </CardBody>
                 </Card>
             </div>
-
-            {/* <div className="flex items-center">
-                <h1 className={title({ size: 'h3', class: 'text-primary' })}>Accueil</h1>
-            </div>
-            <div className="grid grid-cols-12 gap-6 lg:gap-4 justify-center">
-                <Card className="w-full col-span-12 lg:col-span-8 2xl:col-span-7" shadow="sm">
-                    <CardBody>
-                        <Collection />
-                    </CardBody>
-                </Card>
-                <Card className="w-full col-span-12 lg:col-span-4 2xl:col-span-5" shadow="sm">
-                    <CardBody>
-                        <CollectionMoreSell />
-                    </CardBody>
-                </Card>
-            </div>
-            <div className="grid grid-cols-1 gap-6 lg:gap-4 ">
-                <Card className="w-full col-span-12 lg:col-span-8 2xl:col-span-7" shadow="sm">
-                    <CardBody>
-                        <Orders />
-                    </CardBody>
-                </Card>
-            </div> */}
         </div>
     );
 }
@@ -130,35 +125,6 @@ export function Collection() {
     );
 }
 
-// export function Collectionx() {
-//     const [selectedCategory, setSelectedCategory] = useState('all');
-
-//     return (
-//         <div className="w-full h-full p-4 space-y-6">
-//             <ScrollArea className="w-full whitespace-nowrap pb-2">
-//                 {categories.map((category) => (
-//                     <Button
-//                         key={category.id}
-//                         className="flex-shrink-0 mx-2"
-//                         variant={selectedCategory === category.id ? 'solid' : 'flat'}
-//                         color={selectedCategory === category.id ? 'primary' : 'default'}
-//                         onPress={() => setSelectedCategory(category.id)}
-//                         size="sm"
-//                     >
-//                         {category.name}
-//                     </Button>
-//                 ))}
-//                 <ScrollBar orientation="horizontal" className="h-0" />
-//             </ScrollArea>
-
-//             <div className="grid grid-cols-1 gap-4">
-//                 {foodItems.map((item, index) => (
-//                     <CardContent key={index} {...item} />
-//                 ))}
-//             </div>
-//         </div>
-//     );
-// }
 export function CollectionMoreSell() {
     return (
         <div className="w-full h-full p-4 space-y-6">
@@ -200,28 +166,6 @@ export function Orders() {
         </div>
     );
 }
-
-// export function Ordersx() {
-//     return (
-//         <div className="w-full h-full p-4 space-y-6">
-//             <h2 className={title({ size: 'h4', class: 'text-primary mb-4' })}>Un clin d&apos;œil sur les commandes</h2>
-//             <ScrollArea className="w-full whitespace-nowrap pb-2">
-//                 {['#218099', '#215568', '#216987', '#217965', '#21200'].map((orderId: string, index: number) => (
-//                     <Button size="sm" key={orderId} className="flex-shrink-0 rounded-full mx-2" color={index % 2 === 0 ? 'success' : 'primary'}>
-//                         {orderId}
-//                     </Button>
-//                 ))}
-//                 <ScrollBar orientation="horizontal" className="h-0" />
-//             </ScrollArea>
-//             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
-//                 {orders.map((order) => (
-//                     <OrderCard key={order.id} {...order} />
-//                 ))}
-//             </div>
-//         </div>
-//     );
-// }
-
 
 export function CardContent({ name, image, recipes, progress }: { name: string; image: string; recipes: number; progress: number }) {
     return (
@@ -265,49 +209,6 @@ export function CardContent({ name, image, recipes, progress }: { name: string; 
         </Card>
     );
 }
-
-// export function CardContentx({ name, image, recipes, progress }: { name: string; image: string; recipes: number; progress: number }) {
-//     return (
-//         <Card className="w-full" shadow="sm">
-//             <CardBody>
-//                 <div className="flex items-center gap-4">
-//                     <Image alt={name} className="object-cover w-24 h-24 rounded-lg" src={image} />
-//                     <div className="flex-1">
-//                         <h3 className={title({ size: 'h4' })}>{name}</h3>
-//                         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-//                             <Pizza className="w-5 h-5 text-gray-500" />
-//                             <p className="text-sm text-gray-500">{recipes} recettes</p>
-//                         </div>
-//                     </div>
-//                     <div className="hidden sm:flex items-center gap-2">
-//                         <CircularProgress
-//                             classNames={{
-//                                 svg: 'w-28 h-28 md:w-36 md:h-36 drop-shadow-md',
-//                                 indicator: 'stroke-primary',
-//                                 track: 'stroke-secondary/50',
-//                                 value: 'text-xl md:text-2xl font-semibold',
-//                             }}
-//                             value={progress}
-//                             strokeWidth={4}
-//                             showValueLabel={true}
-//                         />
-//                         <ChevronRight className="text-gray-400" />
-//                     </div>
-//                 </div>
-//                 <Progress
-//                     value={progress}
-//                     color="primary"
-//                     classNames={{
-//                         base: 'w-full mt-4 sm:hidden',
-//                         indicator: 'bg-primary',
-//                         track: 'bg-secondary/50',
-//                     }}
-//                     showValueLabel={true}
-//                 />
-//             </CardBody>
-//         </Card>
-//     );
-// }
 
 export function CardMore({ name, image, description, time, rating }: { name: string; image: string; description: string; time: string; rating: number }) {
     return (

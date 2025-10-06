@@ -22,7 +22,7 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
             <div className="flex items-center justify-between">
                 <h1 className={title({ size: 'h3', class: 'text-primary' })}>Gestions des tickets</h1>
             </div>
-            <Table aria-label="Example table with custom cells">
+            <Table aria-label="Example table with custom cells rounded-md">
                 <TableHeader columns={columns}>
                     {(column) => (
                         <TableColumn key={column.uid} align={column.uid === 'actions' ? 'center' : 'start'}>

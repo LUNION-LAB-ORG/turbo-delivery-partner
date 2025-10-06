@@ -104,15 +104,12 @@ export default function Content({ restaurant, initialData }: Props) {
     // === NOUVEAU ===
     // Fonction fetchData optimisée, mémorisée avec useCallback
     const fetchData = useCallback(async (page: number = currentPage) => {
-        setIsLoading(true);
         try {
             const newData = await getPaginationCourseExterne(restaurant.id ?? '', page - 1, pageSize);
             setData(newData);
         } catch (error) {
             console.error('Error fetching data:', error);
-        } finally {
-            setIsLoading(false);
-        }
+        } 
     }, [restaurant.id, currentPage, pageSize]);
 
     // === Polling automatique toutes les 15s ===
