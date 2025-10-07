@@ -37,7 +37,7 @@ export default function Content({ restaurant }: { restaurant: FindOneRestaurant 
                     Il regroupe toutes les fonctionnalites nécessaires: commandes, facturation, ventes, stocks, personnel, gestion comptable.
                 </div>
             </div>
-            <div>
+            {/* <div>
                 <div className='flex justify-between'>
                     <span className='text-gray-500 ' style={{ fontSize: 10 }}>Restaurant</span>
                     <Link href={"/gestion-restaurant"} className='text-gray-500 font-bold'>Tout voir</Link>
@@ -73,7 +73,7 @@ export default function Content({ restaurant }: { restaurant: FindOneRestaurant 
                         <Orders />
                     </CardBody>
                 </Card>
-            </div>
+            </div> */}
         </div>
     );
 }
