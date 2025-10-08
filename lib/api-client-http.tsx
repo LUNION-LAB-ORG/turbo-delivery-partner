@@ -91,7 +91,7 @@ class ApiClientHttp {
                     restaurant: process.env.NEXT_PUBLIC_API_RESTO_URL,
                     livreur: process.env.NEXT_PUBLIC_API_DELIVERY_URL,
                     client: process.env.NEXT_PUBLIC_API_CLIENT_URL,
-                    backend: process.env.NEXT_PUBLIC_API_BACKEND_URL,
+                    backend: process.env.NEXT_PUBLIC_API_BACKEND_URL,  
                 }[service] || '';
 
             const headers = await this.getHeaders(service);

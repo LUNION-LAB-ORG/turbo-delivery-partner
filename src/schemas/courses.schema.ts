@@ -44,10 +44,8 @@ export const locationSchema = z.object({
 });
 
 export const commandeSchema = z.object({
-    // libelle: z.string().optional(),
     numero: z.string().min(1, 'Le numéro est requis'),
     destinataire: z.object({
-        // nomComplet: z.string().min(1, 'Le nom est requis'),
         contact: z.string().min(1, 'Le contact est requis'),
     }),
     lieuRecuperation: locationSchema,
@@ -56,7 +54,13 @@ export const commandeSchema = z.object({
     prix: z.number().min(0, 'Le prix doit être positif'),
     livraisonPaye: z.boolean(),
     zoneId: z.string().min(1, "Vous devez selectionner une zone !"),
+    statut: z.string().min(1, 'Le Statut est requis'),
+    // ✅ Nouveau champ temps de préparation en minutes
+    tempsPreparation: z.number()
+        .min(1, 'Le temps de préparation doit être au moins 1 minute')
+        .optional()
 });
+
 
 export const AllCommandeSchema = z.object({
     commandes: z.array(commandeSchema).min(1, 'Au moins une commande est requise'),

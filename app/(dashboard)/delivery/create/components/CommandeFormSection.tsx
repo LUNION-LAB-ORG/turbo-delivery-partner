@@ -1,5 +1,7 @@
+import Select from 'react-select';
 import Tesseract from 'tesseract.js';
-import { TrashIcon } from 'lucide-react';
+import { useWatch } from "react-hook-form";
+import { TrashIcon, Camera, FileText, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import 'react-phone-number-input/style.css';
 import { Restaurant } from '@/types/models';
@@ -9,7 +11,6 @@ import { AddressFields } from './AddressFields';
 import { DeliveryFee } from '@/types/restaurant';
 import { useState, useEffect, useRef } from "react";
 import { InputPhone } from '@/components/ui/form-ui/input-phone';
-import { Camera, Upload, X, FileText, Loader2 } from 'lucide-react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 // Options de mode de paiement
@@ -38,10 +39,11 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
 
+    /** Initialisation des valeurs par défaut */
     useEffect(() => {
         form.setValue(`commandes.${index}.modePaiement`, modePaiementOptions[0]?.value ?? "");
-    }, [form, index, modePaiementOptions]);
-      
+        form.setValue(`commandes.${index}.statut`, "EN_ATTENTE_RECUPERATION"); // Déjà prête par défaut
+    }, [form, index]);
 
     /** --------------------- CAMERA --------------------- */
     const startCamera = async () => {
@@ -52,31 +54,21 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             streamRef.current = stream;
             setIsScanning(true);
         } catch (err: any) {
-            setError(err.message || 'Impossible d\'accéder à la caméra');
+            setError(err.message || "Impossible d'accéder à la caméra");
         }
     };
-
     const stopCamera = () => {
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach((track) => track.stop());
-        }
+        streamRef.current?.getTracks().forEach(track => track.stop());
         setIsScanning(false);
     };
-
     const capturePhoto = () => {
-        if (!videoRef.current || !canvasRef.current) {
-            setError('Erreur lors de la capture de l\'image');
-            return;
-        }
+        if (!videoRef.current || !canvasRef.current) return;
         const video = videoRef.current;
         const canvas = canvasRef.current;
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
-        if (!ctx) {
-            setError('Impossible d\'initialiser le canvas');
-            return;
-        }
+        if (!ctx) return;
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(async (blob) => {
             if (blob) {
@@ -87,16 +79,14 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             }
         }, 'image/jpeg', 0.9);
     };
-
-    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
         if (file && file.type.startsWith('image/')) {
             const imageUrl = URL.createObjectURL(file);
             setScannedImage(imageUrl);
             await processImage(file);
         }
     };
-
     const resetScanner = () => {
         setScannedImage(null);
         setExtractedText('');
@@ -106,10 +96,9 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
 
     /** --------------------- OCR & OpenAI --------------------- */
     const extractText = async (imageUrl: string): Promise<string> => {
-        const { data } = await Tesseract.recognize(imageUrl, 'fra', { logger: (m) => true });
+        const { data } = await Tesseract.recognize(imageUrl, 'fra', { logger: () => null });
         return data.text;
     };
-
     const analyzeWithOpenAI = async (prompt: string): Promise<string> => {
         setIsProcessing(true);
         try {
@@ -119,57 +108,33 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                 body: JSON.stringify({ prompt }),
             });
             const data = await res.json();
-            if (data.error) {
-                setError(data.error);
-                return '';
-            }
+            if (data.error) setError(data.error);
             return JSON.stringify(data.result || {});
         } catch (err: any) {
-            setError(err.message || 'Erreur serveur');
+            setError(err.message || "Erreur serveur");
             return '';
-        } finally {
-            setIsProcessing(false);
-        }
+        } finally { setIsProcessing(false); }
     };
-
-    function extractJsonFromString(str: string) {
-        // Cherche un bloc ```json ... ```
+    const extractJsonFromString = (str: string) => {
         const match = str.match(/```json([\s\S]*?)```/i);
-        if (!match) return null; // Aucun JSON trouvé
-    
-        try {
-            return JSON.parse(match[1]); // On parse le contenu trouvé
-        } catch (error) {
-            console.log("Erreur parsing JSON:", error);
-            return null;
-        }
-    }
-
-    /** --------------------- EXTRACTION AUTOMATIQUE --------------------- */
+        if (!match) return null;
+        try { return JSON.parse(match[1]); } catch { return null; }
+    };
     const fillFormFromText = (jsonString: string) => {
         try {
             const data = extractJsonFromString(JSON.parse(jsonString));
             const numeroCommande = data.numero_commande || '';
             const contact = data.numero_telephone || '';
             const fraisLivraison = parseInt(data.frais_livraison || '0', 10);
-            const zoneSelectionnee = fraisLivraisons.find((zone) => zone.prix == fraisLivraison);
+            const zoneSelectionnee = fraisLivraisons.find(z => z.prix == fraisLivraison);
             const total = parseInt(data.total_commande || '0', 10);
-        
-            setExtractedText(
-                `Voici les données extraites : N° Commande: ${numeroCommande ?? 'Aucune Donnée'} | N° Telephone: ${contact ?? 'Aucune Donnée'} | Frais Livraison: ${fraisLivraison ?? 'Aucune Donnée'} | Total Commande: ${total ?? 'Aucune Donnée'}`
-            );
-           
-            // Mets à jour le form avec la nouvelle liste
+            setExtractedText(`N° Commande: ${numeroCommande} | N° Tel: ${contact} | Frais Livraison: ${fraisLivraison} | Total: ${total}`);
             form.setValue(`commandes.${index}.prix`, total);
             form.setValue(`commandes.${index}.numero`, numeroCommande);
             form.setValue(`commandes.${index}.zoneId`, String(zoneSelectionnee?.id ?? ""));
             form.setValue(`commandes.${index}.destinataire.contact`, contact);
-        } catch (err) {
-            console.error('Erreur lors du parsing du JSON OpenAI:', err);
-            setError("Impossible d'interpréter la réponse OpenAI");
-        }
+        } catch (err) { setError("Impossible d'interpréter la réponse OpenAI"); }
     };
-
     const processImage = async (imageBlob: File | Blob) => {
         setIsProcessing(true);
         setError('');
@@ -177,251 +142,334 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             const imageUrl = URL.createObjectURL(imageBlob);
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
-            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: 
-                le numéro commande(Prends celui précédé des terme : «Facture», «code Check», «Check», «N°» ou «ticket»), 
-                le numéro téléphone (Prend tjrs celui precedé par «tel». Si Ce numéro contient le code pays supprime et precède par +225, sinon precède par +225), 
-                le frais livraison et 
-                le total commande(Si le frais de livraison est identifié avant le total commande, total commande = total commande - frais de livraison, sinon total commande = total commande) : 
-                ${extractedTextResult}`;
+            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
-        } catch (err: any) {
-            setError(err.message || 'Erreur lors du traitement de l\'image');
-        } finally {
-            setIsProcessing(false);
-        }
+        } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }
+        finally { setIsProcessing(false); }
     };
 
     return (
-        <Card className="p-3 space-y-3 bg-background border-l-4 border-l-primary">
-            <div className="flex justify-between items-center bg-muted/50 dark:bg-muted p-2 rounded-lg">
-                <h3 className="text-base font-semibold text-primary">Commande {index + 1}</h3>
-                {index > 0 && (
-                    <Button type="button" variant="bordered" color="danger" size="sm" onClick={() => remove(index)} className="hover:bg-destructive/10 dark:hover:bg-destructive/20 h-6 min-h-0">
-                        <TrashIcon className="h-3 w-3" />
+        <Card className="p-4 space-y-4 rounded-xl bg-background border-l-4 border-l-primary shadow-md">
+            {/* Header avec scanner à droite */}
+            <div className="flex justify-between items-center bg-muted/30 dark:bg-muted p-3 rounded-md">
+                <div className="flex items-center gap-2">
+                    <h3 className="text-lg font-semibold text-primary">Commande {index + 1}</h3>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    {/* Bouton scanner compact */}
+                    <Button
+                        type="button"
+                        variant="flat"
+                        color="primary"
+                        size="sm"
+                        onPress={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1 h-7 min-h-0"
+                    >
+                        <Camera className="h-4 w-4" />
+                        <span>Scanner</span>
                     </Button>
-                )}
+
+                    {/* Supprimer commande */}
+                    {index > 0 && (
+                        <Button
+                            type="button"
+                            variant="bordered"
+                            color="danger"
+                            size="sm"
+                            onPress={() => remove(index)}
+                            className="h-7 min-h-0"
+                        >
+                            <TrashIcon className="h-3 w-3" />
+                        </Button>
+                    )}
+                </div>
+
+                {/* Input invisible pour uploader l’image */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    capture="environment"
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                />
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-                <div className="lg:col-span-3 space-y-3">
-                    {!scannedImage && !isScanning && (
-                        <div 
-                            onClick={() => fileInputRef.current?.click()} 
-                            className="text-center py-4 bg-gray-50 rounded-lg cursor-pointer">
-                                
-                            {/* Icône cliquable */}
-                            <Camera className="h-16 w-16 mx-auto text-primary mb-2 hover:text-primary transition-colors" />
-                        
-                            <h3 className="text-lg font-semibold text-gray-700">Scanner ou uploader un ticket</h3>
-                            <p className="text-gray-600 mb-4">
-                                Cliquez sur l’icône caméra pour capturer ou uploader un ticket.
-                            </p>                       
-                        </div>                      
-                    )}
-                    <input 
-                        ref={fileInputRef}
-                        type="file" 
-                        capture="environment"
-                        accept="image/*" 
-                        onChange={handleFileUpload}
-                        className="hidden" 
-                    />
-
-                    {/* Scanner */}
-                    {isScanning && (
-                        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-                            <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="text-lg font-semibold">Scanner le document</h3>
-                                    <button onClick={stopCamera} className="text-gray-500 hover:text-gray-700">
-                                        <X className="h-6 w-6" />
-                                    </button>
-                                </div>
-                                <div className="relative">
-                                    <video ref={videoRef} autoPlay playsInline className="w-full rounded-lg" />
-                                    <div className="absolute inset-0 border-4 border-dashed border-primary rounded-lg pointer-events-none"></div>
-                                </div>
-                                <div className="flex gap-3 mt-4">
-                                    <button onClick={capturePhoto} className="flex-1 bg-primary text-white py-3 px-4 rounded-md hover:bg-primary transition-colors flex items-center justify-center gap-2">
-                                        <Camera className="h-5 w-5" /> Capturer
-                                    </button>
-                                    <button onClick={() => fileInputRef.current?.click()} className="flex-1 bg-gray-600 text-white py-3 px-4 rounded-md hover:bg-gray-700 transition-colors flex items-center justify-center gap-2">
-                                        <Upload className="h-5 w-5" /> Upload
-                                    </button>
-                                </div>
-                            </div>
+            {/* Scanner */}
+            {(isScanning || scannedImage || error) && (
+                <div className="mt-2 space-y-2">
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md">
+                            {error}
                         </div>
                     )}
 
-                    <canvas ref={canvasRef} className="hidden" />
-                    <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-
-                    {/* Erreurs */}
-                    {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">{error}</div>}
-
-                    {/* Image et texte */}
                     {scannedImage && (
-                        <div className="grid md:grid-cols-2 gap-6">
+                        <div className="grid md:grid-cols-2 gap-4">
                             <div>
-                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><Camera className="h-5 w-5" /> Ticket Scanné</h3>
-                                <img src={scannedImage} alt="Document scanné" className="w-full rounded-lg border shadow-md" />
-                                <button onClick={resetScanner} className="mt-3 bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 w-full">Scanner un autre ticket</button>
+                                <img
+                                    src={scannedImage}
+                                    alt="Document scanné"
+                                    className="w-full rounded-lg border shadow-sm"
+                                />
+                                <Button
+                                    variant="bordered"
+                                    className="mt-2 w-full"
+                                    onPress={resetScanner}
+                                >
+                                    Scanner un autre ticket
+                                </Button>
                             </div>
                             <div>
-                                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2"><FileText className="h-5 w-5" /> Données extraites {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />}</h3>
-                                { isProcessing ? (
-                                    <div className="bg-gray-50 border rounded-lg p-4 text-center">
-                                        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                                        <p className="text-gray-600">Extraction du texte en cours...</p>
+                                <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                    <FileText className="h-5 w-5" /> Données extraites
+                                </h4>
+                                {isProcessing ? (
+                                    <div className="bg-gray-50 p-4 rounded-lg text-center">
+                                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                                        <p className="mt-2 text-gray-500">Extraction en cours...</p>
                                     </div>
                                 ) : (
                                     extractedText && (
-                                        <div className="bg-gray-50 border rounded-lg p-4">
-                                            <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">{extractedText}</pre>
-                                        </div>
+                                        <pre className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-800">
+                                            {extractedText}
+                                        </pre>
                                     )
                                 )}
                             </div>
                         </div>
                     )}
                 </div>
-                <div className="lg:col-span-2 space-y-3">
-                    <div className="bg-card p-2 rounded-lg shadow-sm border border-border grid grid-cols-1 md:grid-cols-2 gap-2">
+            )}
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Infos Commande */}
+                <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm">
+                    <Card className="p-4 space-y-4 rounded-md bg-card border border-border shadow-sm">
+                        <h3 className="text-lg font-semibold text-primary mb-3">Infos Commande</h3>
+
+                        {/* Montant Commande */}
                         <FormField
                             control={form.control}
                             name={`commandes.${index}.prix`}
-                            render={({ field }) => (
-                                <FormItem className="space-y-1">
-                                    <FormLabel className="text-sm">Montant Commande</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} type="number" min="0" step="0.01" onChange={(e) => field.onChange(parseFloat(e.target.value))} className="h-8" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name={`commandes.${index}.numero`}
-                            render={({ field }) => (
-                                <FormItem className="space-y-1">
-                                    <FormLabel className="text-sm">N° Commande</FormLabel>
-                                    <FormControl>
-                                        <Input {...field} className="h-8" />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </div>
+                            render={({ field }) => {
+                                // Fonction pour formater le montant (espaces entre milliers)
+                                const formatMontant = (value: string | number) => {
+                                const num = parseFloat(String(value).replace(/\s/g, ''));
+                                if (isNaN(num)) return '';
+                                return num.toLocaleString('fr-FR');
+                                };
 
-                    <div className="bg-card p-3 rounded-lg shadow-sm border border-border space-y-2">
-                        <h4 className="font-semibold text-green-600 dark:text-green-400">Destinataire</h4>
-                        <div className="grid grid-cols-1 gap-2">
+                                // Fonction appelée à chaque saisie
+                                const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                const inputValue = e.target.value.replace(/\s/g, ''); // Supprime les espaces
+                                if (!/^\d*$/.test(inputValue)) return; // Bloque tout sauf chiffres
+                                field.onChange(inputValue ? parseFloat(inputValue) : 0); // Stocke nombre brut dans le form
+                                e.target.value = formatMontant(inputValue); // Réécrit la valeur affichée formatée
+                                };
+
+                                return (
+                                <FormItem className="space-y-1">
+                                    <FormLabel>Montant Commande</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="text"
+                                            inputMode="numeric"
+                                            defaultValue={formatMontant(field.value ?? '')}
+                                            placeholder="Ex: 2 000"
+                                            className="w-full h-10"
+                                            onChange={handleChange}
+                                            onBlur={(e) => e.target.value = formatMontant(field.value ?? '')}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                );
+                            }}
+                        />
+
+                        {/* N° Commande */}
+                        <FormField control={form.control} name={`commandes.${index}.numero`} render={({ field }) => (
+                            <FormItem className="space-y-1">
+                                <FormLabel>N° Commande</FormLabel>
+                                <FormControl>
+                                    <Input {...field} className="w-full h-10" placeholder="Ex: 12345" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+
+                        {/* Statut Commande */}
+                        <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
                             <FormField
                                 control={form.control}
-                                name={`commandes.${index}.destinataire.contact`}
+                                name={`commandes.${index}.statut`}
                                 render={({ field }) => (
                                     <FormItem className="space-y-1">
-                                        <FormLabel className="text-sm">N° Client</FormLabel>
+                                        <FormLabel>Statut Commande</FormLabel>
                                         <FormControl>
-                                            <InputPhone
-                                                value={field.value ?? ''}
-                                                setValue={(value: any) => field.onChange(value)}
-                                                variant="bordered"
-                                                isInvalid={!!form.formState.errors?.commandes?.[index]?.destinataire?.contact}
-                                                errorMessage={form.formState.errors?.commandes?.[index]?.destinataire?.contact?.message}
-                                                className="min-h-8"
-                                            />
+                                            <div
+                                                className="flex items-center gap-2 cursor-pointer select-none"
+                                                onClick={() =>
+                                                    field.onChange(
+                                                        field.value === "EN_PREPARATION"
+                                                            ? "EN_ATTENTE_RECUPERATION"
+                                                            : "EN_PREPARATION"
+                                                    )
+                                                }
+                                            >
+                                                <Switch
+                                                    isSelected={field.value === "EN_ATTENTE_RECUPERATION"}
+                                                    onChange={() =>
+                                                        field.onChange(
+                                                            field.value === "EN_PREPARATION"
+                                                                ? "EN_ATTENTE_RECUPERATION"
+                                                                : "EN_PREPARATION"
+                                                        )
+                                                    }
+                                                    className="scale-90"
+                                                />
+                                                <span className="font-medium">
+                                                    {field.value === "EN_PREPARATION" ? "En Préparation" : "Déjà Prête"}
+                                                </span>
+                                            </div>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
                                 )}
                             />
                         </div>
-                        <div className="bg-green-50/50 dark:bg-green-950/30 p-2 rounded-lg shadow-sm border border-green-100 dark:border-green-900">
-                            <AddressFields index={index} type="lieuLivraison" label="Aidez-nous à localiser le client" form={form} handleAddressSelect={handleAddressSelect} />
-                        </div>
-                    </div>
-                </div>
 
-                <div className="space-y-3">
-                    <div className="bg-card p-2 rounded-lg shadow-sm border border-border space-y-2">
-                        <div className="bg-primary/5 dark:bg-primary/10 p-2 rounded-lg">
+                        <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
                             <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} handleAddressSelect={handleAddressSelect} />
                         </div>
 
-                        <FormField
-                            control={form.control}
-                            name={`commandes.${index}.zoneId`}
-                            render={({ field }) => (
+                        {form.watch(`commandes.${index}.statut`) === "EN_PREPARATION" && (
+                            <FormField
+                                control={form.control}
+                                name={`commandes.${index}.tempsPreparation`}
+                                render={({ field }) => (
                                 <FormItem className="space-y-1">
-                                    <FormLabel className="text-sm">Zone de livraison</FormLabel>
-                                    <select
+                                    <FormLabel>Temps de préparation (minutes)</FormLabel>
+                                    <FormControl>
+                                    <Input
+                                        type="number"
+                                        min={0}
                                         {...field}
-                                        className="w-full h-8 border rounded px-2 text-sm"
-                                        value={field.value ?? ""} // ← s'assurer qu'il y a toujours une valeur
-                                        onChange={(e) => field.onChange(e.target.value)} // ← garder en string
-                                    >
-                                        <option value="" disabled>-- Sélectionnez une zone --</option>
-                                        {fraisLivraisons?.map((zone) => (
-                                        <option key={zone.id} value={zone.id}>
-                                            {zone.name}
-                                        </option>
-                                        ))}
-                                    </select>
+                                        value={field.value ?? 0}
+                                        onChange={(e) => field.onChange(Number(e.target.value))} // ⚡ convertit en number
+                                    />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
-                        />
-                    </div>
-
-                    <div className="bg-card p-2 rounded-lg shadow-sm border border-border space-y-2">
-                        <h4 className="text-sm font-medium text-muted-foreground">Autres Informations</h4>
-                        <div className="grid grid-cols-1 gap-2">
-                            <FormField
-                                control={form.control}
-                                name={`commandes.${index}.modePaiement`}
-                                render={({ field }) => (
-                                    <FormItem className="space-y-1">
-                                        <FormLabel className="text-sm">Mode de Paiement</FormLabel>
-                                        <select
-                                            {...field}
-                                            className="h-8 w-full border rounded px-2"
-                                        >
-                                            {modePaiementOptions.map((mode) => (
-                                            <option key={mode.value} value={mode.value}>
-                                                {mode.label}
-                                            </option>
-                                            ))}
-                                        </select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name={`commandes.${index}.livraisonPaye`}
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-border p-2 shadow-sm bg-muted/50 dark:bg-muted">
-                                        <FormLabel className="text-sm">Total + livraison incluse</FormLabel>
-                                        <FormControl>
-                                            <Switch
-                                                isSelected={field.value}
-                                                onChange={field.onChange} 
-                                                id={`livraisonPaye-${index}`}
-                                                aria-label="Frais Livraison Inclus"
-                                                className="scale-75"
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-                    </div>
+                          />
+                          
+                        )}
+                    </Card>
                 </div>
+
+                {/* Destinataire */}
+                <div className="rounded-md shadow-sm space-y-4">
+                    <Card className="p-4 space-y-5 rounded-md bg-card border border-border shadow-sm">
+                        <h3 className="text-lg font-semibold text-green-600 mb-3">Destinataire / Client</h3>
+                        <FormField control={form.control} name={`commandes.${index}.destinataire.contact`} render={({ field }) => (
+                            <FormItem className="space-y-1">
+                                <FormLabel>N° Téléphone</FormLabel>
+                                <FormControl>
+                                    <InputPhone value={field.value ?? ''} setValue={field.onChange} className="h-10" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+
+                        <FormField control={form.control} name={`commandes.${index}.zoneId`} render={({ field }) => (
+                            <FormItem className="space-y-1">
+                                <FormLabel>Zone de livraison</FormLabel>
+                                <Select
+                                    value={fraisLivraisons.map(z => ({ value: z.id, label: z.name })).find(z => z.value === field.value) || null}
+                                    onChange={(option: any) => field.onChange(option?.value ?? "")}
+                                    options={fraisLivraisons.map(z => ({ value: z.id, label: z.name }))}
+                                    placeholder="-- Sélectionnez une zone --"
+                                    isClearable
+                                />
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+
+                        {/* Mode de Paiement */}
+                        <FormField control={form.control} name={`commandes.${index}.modePaiement`} render={({ field }) => (
+                            <FormItem className="space-y-1">
+                                <FormLabel>Mode de Paiement</FormLabel>
+                                <select {...field} className="w-full h-10 border rounded px-2">
+                                    {modePaiementOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                                </select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+
+                        <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
+                            <AddressFields index={index} type="lieuLivraison" label="Adresse de Livraison" form={form} handleAddressSelect={handleAddressSelect} />
+                        </div>
+
+                        <FormField control={form.control} name={`commandes.${index}.livraisonPaye`} render={({ field }) => (
+                            <FormItem className="flex justify-between items-center p-2 border rounded-lg bg-muted/50">
+                                <FormLabel>Ce client a déjà reglé sa facture (Commande & Livraison)</FormLabel>
+                                <FormControl>
+                                    <Switch isSelected={field.value} onChange={field.onChange} className="scale-75" />
+                                </FormControl>
+                            </FormItem>
+                        )} />
+                    </Card>
+                </div>
+            </div>
+            <div className="grid grid-cols-1 space-y-2">
+                
+
+
+                <FormField
+                    control={form.control}
+                    name={`commandes.${index}.zoneId`}
+                    render={({ field }) => {
+                        // ✅ On observe en direct les valeurs nécessaires
+                        const montantCommande = useWatch({
+                            control: form.control,
+                            name: `commandes.${index}.prix`,
+                        });
+
+                        const zoneId = useWatch({
+                            control: form.control,
+                            name: `commandes.${index}.zoneId`,
+                        });
+
+                        // ✅ Zone sélectionnée et calculs
+                        const zoneSelectionnee = fraisLivraisons.find(z => z.id === zoneId);
+                        const montant = parseFloat(montantCommande || 0) || 0;
+                        const fraisLivraison =
+                            typeof zoneSelectionnee?.prix === "number"
+                                ? zoneSelectionnee.prix
+                                : parseFloat(zoneSelectionnee?.prix ?? "0");
+
+                        const totalCommande = montant + fraisLivraison;
+
+                        return montant > 0 ? (
+                            <FormItem className="space-y-2">
+                                <div className="bg-green-50/50 p-2 rounded-md border border-green-200 font-medium text-gray-800">
+                                    <p>Montant Commande : {montant.toLocaleString()} XOF</p>
+                                    <p>
+                                        Frais Livraison ({zoneSelectionnee?.name ?? "--"}) :{" "}
+                                        {(zoneSelectionnee?.prix ?? 0).toLocaleString()} XOF
+                                    </p>
+                                    <p className="mt-1 font-semibold">
+                                        Total : {totalCommande.toLocaleString()} XOF
+                                    </p>
+                                </div>
+                            </FormItem>
+                        ) : (<></>);
+                    }}
+                />
             </div>
         </Card>
     );

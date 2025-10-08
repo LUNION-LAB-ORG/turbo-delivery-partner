@@ -47,6 +47,8 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
                     prix: 0,
                     livraisonPaye: false,
                     zoneId: fraisLivraisons.length > 0 ? String(fraisLivraisons[0].id) : "",
+                    statut: 'EN_ATTENTE_RECUPERATION',       // statut par défaut
+                    tempsPreparation: 15,           // temps par défaut 15 min
                 },
             ],
         },
@@ -54,10 +56,12 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
 
     const { fields, append, remove } = useFieldArray({ control: form.control, name: 'commandes' });
 
-    /** --------------------- FORMULAIRE & MAP --------------------- */
     const handleAddressSelect = useCallback(
         (index: number, type: 'lieuRecuperation' | 'lieuLivraison') => {
-            const autocomplete = new google.maps.places.Autocomplete(document.getElementById(`${type}-${index}`) as HTMLInputElement, {});
+            const autocomplete = new google.maps.places.Autocomplete(
+                document.getElementById(`${type}-${index}`) as HTMLInputElement,
+                {}
+            );
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
                 if (place.geometry?.location) {
@@ -89,7 +93,17 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
     const handleSubmitForm = async (formData: FormValues) => {
         setIsSubmitting(true);
         try {
-            const result = await addCourseExterne(formData, restaurant.id);
+            // On transforme tempsPreparation en cookedAt côté front
+            const commandesAvecCookedAt = formData.commandes.map(cmd => {
+                let cookedAt: string | null = null;
+                if (cmd.statut === 'EN_PREPARATION' && cmd.tempsPreparation) {
+                    cookedAt = new Date(Date.now() + cmd.tempsPreparation * 60000).toISOString();
+                }
+                return { ...cmd, cookedAt };
+            });
+
+            const payload = { ...formData, commandes: commandesAvecCookedAt };
+            const result = await addCourseExterne(payload, restaurant.id);
             if (result.status === 'success') {
                 toast.success(result.message);
                 router.push('/delivery');
@@ -103,41 +117,54 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
         }
     };
 
-    /** --------------------- JSX --------------------- */
     return (
         <div className="w-full min-h-screen bg-background">
-            <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
+            <div className="container mx-auto px-2 sm:px-2 lg:px-2 xl:px-4 py-4 sm:py-4 lg:py-">
                 <div className="max-w-4xl mx-auto p-2 bg-white space-y-6">
-                    {/* Titre */}
                     <div className="space-y-2">
-                        <h1 className="text-2xl font-bold text-red-600">Nouvelle demande de coursier</h1>
-                        <div className="text-sm text-gray-600">Mes Courses / Nouvelle demande de coursier</div>
+                        <h1 className="text-2xl font-bold text-red-600">Demande de TURBOY</h1>
+                        <div className="text-sm text-gray-600">Mes Courses / Nouvelle Demande de TURBOY</div>
                     </div>
 
-                    {/* Formulaire */}
-                    <div className="bg-white p-6 rounded-lg shadow-sm">
+                    <div className="bg-white p-2 rounded-md shadow-sm">
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(handleSubmitForm)} className="space-y-6">
                                 {fields.map((field, index) => (
-                                    <CommandeFormSection key={field.id} index={index} form={form} remove={remove} handleAddressSelect={handleAddressSelect} restaurant={restaurant} fraisLivraisons={fraisLivraisons} />
+                                    <CommandeFormSection
+                                        key={field.id}
+                                        index={index}
+                                        form={form}
+                                        remove={remove}
+                                        handleAddressSelect={handleAddressSelect}
+                                        restaurant={restaurant}
+                                        fraisLivraisons={fraisLivraisons}
+                                    />
                                 ))}
 
-                                <Button type="button" onClick={() => append({
-                                    numero: '',
-                                    destinataire: { contact: '' },
-                                    lieuRecuperation: { address: restaurant.localisation ?? '', longitude: restaurant.longitude ?? 0, latitude: restaurant.latitude ?? 0 },
-                                    lieuLivraison: { address: '', longitude: 0, latitude: 0 },
-                                    modePaiement: 'ESPECE',
-                                    prix: 0,
-                                    livraisonPaye: false,
-                                    zoneId: fraisLivraisons.length > 0 ? String(fraisLivraisons[0].id) : "",
-                                })} className="w-full flex items-center justify-center gap-2 border border-gray-300 hover:bg-gray-50 transition-colors">
-                                    <PlusIcon className="h-4 w-4" /> Ajouter une commande
+                                <Button
+                                    type="button"
+                                    onClick={() => append({
+                                        numero: '',
+                                        destinataire: { contact: '' },
+                                        lieuRecuperation: { address: restaurant.localisation ?? '', longitude: restaurant.longitude ?? 0, latitude: restaurant.latitude ?? 0 },
+                                        lieuLivraison: { address: '', longitude: 0, latitude: 0 },
+                                        modePaiement: 'ESPECE',
+                                        prix: 0,
+                                        livraisonPaye: false,
+                                        zoneId: fraisLivraisons.length > 0 ? String(fraisLivraisons[0].id) : "",
+                                        statut: 'EN_ATTENTE_RECUPERATION',
+                                        tempsPreparation: 15, // valeur par défaut
+                                    })}
+                                    className="w-full flex items-center justify-center rounded-md gap-2 border border-gray-300 hover:bg-gray-50 transition-colors"
+                                >
+                                    <PlusIcon className="h-4 w-4" /> Nouvelle Commande dans la Course
                                 </Button>
 
-                                <MapComponent markers={markers} restaurant={restaurant} />
-
-                                <SubmitButton color="primary" className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition-colors" disabled={isSubmitting}>
+                                <SubmitButton
+                                    color="primary"
+                                    className="w-full bg-primary text-white py-2 rounded-md hover:bg-primary-dark transition-colors"
+                                    disabled={isSubmitting}
+                                >
                                     {isSubmitting ? 'Envoi en cours...' : isEditing ? 'Mettre à jour' : 'Créer'}
                                 </SubmitButton>
                             </form>

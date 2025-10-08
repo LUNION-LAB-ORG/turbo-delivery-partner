@@ -189,10 +189,10 @@ export default function Content({ restaurant, initialData }: Props) {
                                 size: 'h3',
                                 class: 'text-primary text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold'
                             })}>
-                                Mes Courses
+                                Demandes de coursier
                             </h1>
                             <p className="text-default-500 text-sm sm:text-base hidden sm:block">
-                                Gérez vos demandes de coursier
+                                Gestion des demandes de coursier
                             </p>
                         </div>
                         <Button
@@ -201,15 +201,15 @@ export default function Content({ restaurant, initialData }: Props) {
                             color="primary"
                             size="lg"
                             startContent={<IconPlus className="h-4 w-4 sm:h-5 sm:w-5" />}
-                            className="w-full sm:w-auto font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                            className="w-full sm:w-auto rounded-md font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                         >
-                            <span className="block sm:hidden">Nouvelle demande</span>
+                            <span className="block sm:hidden">Demande de coursier</span>
                             <span className="hidden sm:block">Demande de coursier</span>
                         </Button>
                     </div>
 
                     {/* Filtres */}
-                    <div className="bg-default-50 rounded-xl p-3 sm:p-4 lg:p-6 border border-default-200">
+                    <div className="bg-default-50 rounded-xl p-2 sm:p-4 border border-default-200">
                         <div className="space-y-3 sm:space-y-4">
                             <h3 className="text-base sm:text-lg font-semibold text-default-700">Filtrer les courses</h3>
 
@@ -263,7 +263,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                         color={statusFilter === category.id ? 'primary' : 'default'}
                                         onPress={() => handleFilter(category.id)}
                                         size="sm"
-                                        className="text-xs sm:text-sm font-medium w-full justify-center transition-all duration-200"
+                                        className="text-xs sm:text-sm rounded-md font-medium w-full justify-center transition-all duration-200"
                                     >
                                         {category.name}
                                     </Button>
@@ -271,7 +271,7 @@ export default function Content({ restaurant, initialData }: Props) {
                             </div>
 
                             {/* Bouton de réinitialisation et compteur de résultats */}
-                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 pt-2">
+                            <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4">
                                 <div className="text-sm text-default-500">
                                     {dataFilter.length} course{dataFilter.length !== 1 ? 's' : ''} trouvée{dataFilter.length !== 1 ? 's' : ''}
                                 </div>
@@ -317,7 +317,7 @@ export default function Content({ restaurant, initialData }: Props) {
                         <>
                             {/* Stats rapides - Nouveau (basé sur les données filtrées) */}
                             <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 sm:gap-4">
-                                <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+                                <Card className="bg-gradient-to-r rounded-md from-primary/10 to-primary/5 border-primary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-primary">{dataFilter.length}</p>
                                         <p className="text-xs sm:text-sm text-default-600">
@@ -326,7 +326,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </CardBody>
                                 </Card>
 
-                                <Card className="bg-gradient-to-r from-success/10 to-success/5 border-success/20">
+                                <Card className="bg-gradient-to-r rounded-md from-success/10 to-success/5 border-success/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-success">
                                             {dataFilter.filter(d => d.statut?.toUpperCase() === 'TERMINER').length}
@@ -335,7 +335,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </CardBody>
                                 </Card>
 
-                                <Card className="bg-gradient-to-r from-sky-500/10 to-sky-500/5 border-sky-500/20">
+                                <Card className="bg-gradient-to-r rounded-md from-sky-500/10 to-sky-500/5 border-sky-500/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-sky-500">
                                             {dataFilter.filter(d => d.statut?.toUpperCase() === 'VALIDER').length}
@@ -344,7 +344,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </CardBody>
                                 </Card>
 
-                                <Card className="bg-gradient-to-r from-warning/10 to-warning/5 border-warning/20">
+                                <Card className="bg-gradient-to-r rounded-md from-warning/10 to-warning/5 border-warning/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-warning">
                                             {dataFilter.filter(d => d.statut?.toUpperCase() === 'EN_COURS').length}
@@ -353,7 +353,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </CardBody>
                                 </Card>
 
-                                <Card className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-secondary/20">
+                                <Card className="bg-gradient-to-r rounded-md from-secondary/10 to-secondary/5 border-secondary/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-secondary">
                                             {dataFilter.filter(d => d.statut?.toUpperCase() === 'EN_ATTENTE').length}
@@ -362,7 +362,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     </CardBody>
                                 </Card>
 
-                                <Card className="bg-gradient-to-r from-danger/10 to-danger/5 border-danger/20">
+                                <Card className="bg-gradient-to-r rounded-md from-danger/10 to-danger/5 border-danger/20">
                                     <CardBody className="p-3 sm:p-4 text-center">
                                         <p className="text-lg sm:text-2xl font-bold text-danger">
                                             {dataFilter.filter(d => d.statut?.toUpperCase() === 'ANNULER').length}
