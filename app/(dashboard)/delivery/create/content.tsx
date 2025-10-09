@@ -8,7 +8,6 @@ import { Form } from '@/components/ui/form';
 import { Button } from '@heroui/react';
 import { AllCommandeSchema, FormValues } from '@/src/schemas/courses.schema';
 import { CommandeFormSection } from './components/CommandeFormSection';
-import { MapComponent } from '../component/MapComponent';
 import { Restaurant } from '@/types/models';
 import { addCourseExterne } from '@/src/actions/courses.actions';
 import { toast } from 'react-toastify';

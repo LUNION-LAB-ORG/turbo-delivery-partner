@@ -62,21 +62,20 @@ export async function addCourseExterne(formData: any, restaurantId: string): Pro
             data,
         };
     } catch (error: any) {
-        console.log(error)
         if (error?.response?.data && error.response?.data?.detail) {
             return {
                 status: 'error',
-                message: error?.response?.data?.detail ?? "Erreur lors de l'ajout de l'horaire",
+                message: error?.response?.data?.detail ?? "Erreur lors de l'ajout de la course!",
             };
         } else if (error?.response?.data?.message) {
             return {
                 status: 'error',
-                message: error?.response?.data?.detail ?? "Erreur lors de l'ajout de l'horaire !",
+                message: error?.response?.data?.detail ?? "Erreur lors de l'ajout de la course!",
             };
         } else {
             return {
                 status: 'error',
-                message: 'Erreur lors de l\'ajout de l\'horaire !',
+                message: "Erreur lors de l'ajout de la course!",
             };
         }
     }

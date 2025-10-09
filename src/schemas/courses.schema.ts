@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 // Schéma pour les coordonnées géographiques
 const localisationCourseExterneSchema = z.object({
+    address: z.string().optional(), // 👈 ajoute cette ligne
     longitude: z.number(),
     latitude: z.number(),
 });
@@ -26,6 +27,8 @@ const commandeCourseExterneSchema = z.object({
     modePaiement: modePaiementEnum,
     prix: z.number().min(0, 'Le prix doit être supérieur ou égal à 0'),
     livraisonPaye: z.boolean(),
+    statut: z.string().optional(),            // 👈 ajoute ça
+    tempsPreparation: z.number().optional(),
 });
 
 // Schéma principal pour la liste des commandes

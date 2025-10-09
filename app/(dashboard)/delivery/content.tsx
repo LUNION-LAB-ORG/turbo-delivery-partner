@@ -180,10 +180,10 @@ export default function Content({ restaurant, initialData }: Props) {
     return (
         <div className="w-full min-h-screen bg-background">
             <div className="container mx-auto px-3 sm:px-4 lg:px-6 xl:px-8 py-4 sm:py-6 lg:py-8">
-                <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6 lg:space-y-8">
+                <div className="max-w-7xl mx-auto space-y-2 sm:space-y-6 lg:space-y-4">
 
                     {/* Header */}
-                    <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:justify-between">
                         <div className="space-y-1">
                             <h1 className={title({
                                 size: 'h3',
@@ -209,8 +209,8 @@ export default function Content({ restaurant, initialData }: Props) {
                     </div>
 
                     {/* Filtres */}
-                    <div className="bg-default-50 rounded-xl p-2 sm:p-4 border border-default-200">
-                        <div className="space-y-3 sm:space-y-4">
+                    <div className="bg-default-50 rounded-md p-2 sm:p-4 border border-default-200">
+                        <div className="space-y-2 sm:space-y-4">
                             <h3 className="text-base sm:text-lg font-semibold text-default-700">Filtrer les courses</h3>
 
                             {/* AJOUT : Conteneur flex pour la recherche et le filtre par mois */}
@@ -226,7 +226,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                     className="w-full"
                                     classNames={{
                                         input: "text-sm",
-                                        inputWrapper: "bg-background border-default-300 data-[hover=true]:border-primary/50 group-data-[focus=true]:border-primary"
+                                        inputWrapper: "bg-background border-default-300 data-[hover=true]:border-primary/50 group-data-[focus=true]:border-primary rounded-md"
                                     }}
                                     isClearable
                                     onClear={() => setSearchTerm('')}
@@ -644,10 +644,12 @@ export default function Content({ restaurant, initialData }: Props) {
                                     as={Link}
                                     href="/delivery/create"
                                     color="primary"
-                                    variant="flat"
-                                    size="sm"
+                                    size="lg"
+                                    startContent={<IconPlus className="h-4 w-4 sm:h-5 sm:w-5" />}
+                                    className="w-full sm:w-auto rounded-md font-medium shadow-lg hover:shadow-xl transition-all duration-200"
                                 >
-                                    Créer une course
+                                    <span className="block sm:hidden">Demande de coursier</span>
+                                    <span className="hidden sm:block">Demande de coursier</span>
                                 </Button>
                             </div>
                         </div>
