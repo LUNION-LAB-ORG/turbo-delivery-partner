@@ -126,7 +126,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <html lang="en" className="light">
                 <head>
                     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
+                    <link rel="stylesheet" href="assets/css/leaflet.min.css" />
                     <link rel="manifest" href="/manifest.json" />
                     <meta name="theme-color" content="#317EFB" />
                     <link rel="apple-touch-icon" href="/icon-192x192.png" />

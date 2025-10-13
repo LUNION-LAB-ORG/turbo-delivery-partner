@@ -282,4 +282,31 @@ export interface LivreurRestau {
     telephone: string;
     type: string; // ex: "TURBO"
 }
+
+
+// GESTION DES TRAFICS LIVREURS
+export interface LivreurTrafic {
+    livreurId: string;
+    avatarUrl: string;
+    nomComplet: string;
+    telephone: string;
+    position: {
+        latitude: number;
+        longitude: number;
+    };
+    course?: boolean; // false si pas de course en cours
+}
+
+export interface LivreurCategorie {
+    total: number;
+    liste: LivreurTrafic[];
+}
+
+export interface TraficLivreursResponse {
+    disponibles: LivreurCategorie;
+    enActivite: LivreurCategorie;
+    indisponibles: LivreurCategorie;
+    totalLivreurs: number;
+}
+
   
