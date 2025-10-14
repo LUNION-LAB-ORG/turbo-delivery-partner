@@ -2,66 +2,88 @@
 
 import { useEffect, useRef } from 'react';
 import { LivreurTrafic } from '@/types/models';
+import createUrlFile from '@/utils/createUrlFile';
 
 export default function MapLeaflet({ positions }: { positions: LivreurTrafic[]; }) {
     const mapContainer = useRef<HTMLDivElement>(null);
     const mapInstance = useRef<any>(null); // pour stocker l'instance Leaflet
 
     useEffect(() => {
-        let map: any;
-        let markers: any[] = [];
+        let L: any;
+
         const initMap = async () => {
-            const L = await import('leaflet');
+            L = (await import('leaflet')).default;
             if (!mapContainer.current) return;
-    
-            map = L.map(mapContainer.current, {
-                center: [5.345317, -4.024429],
+
+            const map = L.map(mapContainer.current, {
+                center: [5.3984153, -3.9565058],
                 zoom: 13,
                 dragging: true,
                 scrollWheelZoom: true,
             });
-    
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
             }).addTo(map);
+
+            mapInstance.current = map;
+
+            addMarkers();
         };
-    
+
+        const addMarkers = () => {
+            if (!mapInstance.current || !positions || positions.length === 0) return;
+
+            const validPositions = positions.filter(
+                p => p.position.latitude !== 0 && p.position.longitude !== 0
+            );
+
+            validPositions.forEach(item => {
+                // Créer un icon personnalisé
+                const customIcon = L.divIcon({
+                    className: '', // vide pour ne pas appliquer les styles par défaut
+                    html: `
+                        <div style="
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            border: 3px solid red;
+                            overflow: hidden;
+                            box-shadow: 0 0 3px rgba(0,0,0,0.5);
+                        ">
+                            <img src="${item.avatarUrl ? createUrlFile(item.avatarUrl, 'backend') : '/assets/images/avatar.png'}"
+                                style="width: 100%; height: 100%; object-fit: cover;" />
+                        </div>
+                    `,
+                    iconSize: [40, 40],
+                    iconAnchor: [20, 40],
+                    popupAnchor: [0, -40],
+                });
+                  
+
+                L.marker([item.position.latitude, item.position.longitude], { icon: customIcon })
+                    .addTo(mapInstance.current)
+                    .bindPopup(
+                        `<b>${item.nomComplet}</b><br><b>Statut</b>: ${item.course ? 'En livraison' : 'Disponible'}<br><b>Téléphone</b>: ${item.telephone}`
+                    );
+            });
+
+            if (validPositions.length > 0) {
+                const bounds = L.latLngBounds(
+                    validPositions.map(item => [item.position.latitude, item.position.longitude])
+                );
+                mapInstance.current.fitBounds(bounds, { padding: [50, 50] });
+            }
+        };
+
         initMap();
-        mapInstance.current = map;
-    
+
         return () => {
             if (mapInstance.current) mapInstance.current.remove();
         };
-    }, []);
-    
-    useEffect(() => {
-        if (!mapInstance.current) return;
-        const L = require('leaflet');
-    
-        // Supprimer les anciens marqueurs
-        mapInstance.current.eachLayer((layer: any) => {
-            if (layer instanceof L.Marker) {
-                mapInstance.current.removeLayer(layer);
-            }
-        });
-    
-        // Ajouter les nouveaux
-        positions.forEach(item => {
-            L.marker([item.position.latitude, item.position.longitude])
-             .addTo(mapInstance.current)
-             .bindPopup(`<b>${item.nomComplet || 'Livreur'}</b><br>Statut: ${item.course || 'Disponible'}`);
-        });
-    
-        // Ajuster bounds
-        if (positions.length > 0) {
-            const bounds = L.latLngBounds(
-                positions.map(item => [item.position.latitude, item.position.longitude])
-            );
-            mapInstance.current.fitBounds(bounds, { padding: [50, 50] });
-        }
-    }, [positions]);    
+    }, [positions]);
 
-    return (        
+    return (
         <div ref={mapContainer} id="leaflet-map" className="w-full h-full" style={{ borderRadius: '5px' }} />
     );
 }

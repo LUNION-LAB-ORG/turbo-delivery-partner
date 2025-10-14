@@ -16,6 +16,7 @@ export default function Content({ data }: { data: TraficLivreursResponse }) {
     const [positions, setPositions] = useState<LivreurTrafic[]>([]);
     const [selectedLivreurId, setSelectedLivreurId] = useState<string | null>(null);
 
+    
     const toggleDashboard = useCallback(() => {
         setOpenDashboard(prev => !prev);
     }, []);
@@ -23,6 +24,16 @@ export default function Content({ data }: { data: TraficLivreursResponse }) {
     const handleLivreurSelect = useCallback((livreurId: string | null) => {
         setSelectedLivreurId(livreurId);
     }, []);
+
+    useEffect(() => {
+        const combinedPositions = [
+          ...data.disponibles.liste,
+          ...data.enActivite.liste,
+        ].filter(l => l.position.latitude !== 0 && l.position.longitude !== 0); // filtrer les positions nulles
+      
+        setPositions(combinedPositions);
+    }, [data]);
+    
 
     // Panel du dashboard avec stats communes
     const DashboardPanel = () => (
