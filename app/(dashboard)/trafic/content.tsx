@@ -5,37 +5,47 @@ import dynamic from 'next/dynamic';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCallback, useEffect, useState } from 'react';
 import { ChevronDown, LayoutDashboard } from 'lucide-react';
+import { getTraficDelivers } from '@/src/actions/trafic.actions';
 import { LivreurTrafic, TraficLivreursResponse } from '@/types/models';
 import { Card, CardHeader, CardBody, CardFooter, Button } from '@heroui/react';
 import { LivreurTimeline } from '@/components/dashboard/trafic/LivreurTimeline';
 
 const MapLeaflet = dynamic(() => import('@/components/dashboard/trafic/MapLeaflet'), { ssr: false });
 
-export default function Content({ data }: { data: TraficLivreursResponse }) {
-    const [openDashboard, setOpenDashboard] = useState<boolean>(false);
+export default function Content({ data: initialData, restaurantID }: { data: TraficLivreursResponse, restaurantID: string }) {
+    const [data, setData] = useState<TraficLivreursResponse>(initialData);
     const [positions, setPositions] = useState<LivreurTrafic[]>([]);
     const [selectedLivreurId, setSelectedLivreurId] = useState<string | null>(null);
+    const [openDashboard, setOpenDashboard] = useState<boolean>(false);
 
-    
-    const toggleDashboard = useCallback(() => {
-        setOpenDashboard(prev => !prev);
-    }, []);
+    const toggleDashboard = useCallback(() => setOpenDashboard(prev => !prev), []);
+    const handleLivreurSelect = useCallback((livreurId: string | null) => setSelectedLivreurId(livreurId), []);
 
-    const handleLivreurSelect = useCallback((livreurId: string | null) => {
-        setSelectedLivreurId(livreurId);
-    }, []);
-
+    // Mettre à jour les positions à chaque changement de data
     useEffect(() => {
         const combinedPositions = [
-          ...data.disponibles.liste,
-          ...data.enActivite.liste,
-        ].filter(l => l.position.latitude !== 0 && l.position.longitude !== 0); // filtrer les positions nulles
-      
+            ...data.disponibles.liste,
+            ...data.enActivite.liste,
+        ].filter(l => l.position.latitude !== 0 && l.position.longitude !== 0);
         setPositions(combinedPositions);
     }, [data]);
-    
 
-    // Panel du dashboard avec stats communes
+    // Rafraîchissement toutes les 15 secondes
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const updatedData = await getTraficDelivers(restaurantID);
+                setData(updatedData);
+            } catch (error) {
+                console.error('Erreur lors de la récupération des livreurs:', error);
+            }
+        };
+
+        const interval = setInterval(fetchData, 15000); // toutes les 15 secondes
+        return () => clearInterval(interval); // nettoyage
+    }, [restaurantID]);
+
+    // DashboardPanel et reste du composant restent inchangés
     const DashboardPanel = () => (
         <motion.div
             key="dashboard"
@@ -56,7 +66,7 @@ export default function Content({ data }: { data: TraficLivreursResponse }) {
                     />
                 </CardHeader>
                 <CardBody className="space-y-6 px-4 sm:px-6 pb-6">
-                    {/* Statistiques générales */}
+                    {/* Statistiques et timeline comme avant */}
                     <div className="grid grid-cols-3 gap-4 text-center text-sm">
                         <div>
                             <div className="font-semibold text-xl">{data.disponibles.total}</div>
@@ -71,40 +81,34 @@ export default function Content({ data }: { data: TraficLivreursResponse }) {
                             <div className="text-gray-500">Livreurs en activité de Livraison</div>
                         </div>
                     </div>
-                    
-                    {/* Détails du livreur sélectionné */}
+
                     {selectedLivreurId && (
                         <div className="border-t pt-4">
                             {(() => {
-                            // Chercher le livreur dans les trois catégories
-                            const livreur =
-                                data.enActivite.liste.find(l => l.livreurId === selectedLivreurId) ||
-                                data.disponibles.liste.find(l => l.livreurId === selectedLivreurId) ||
-                                data.indisponibles.liste.find(l => l.livreurId === selectedLivreurId);
+                                const livreur =
+                                    data.enActivite.liste.find(l => l.livreurId === selectedLivreurId) ||
+                                    data.disponibles.liste.find(l => l.livreurId === selectedLivreurId) ||
+                                    data.indisponibles.liste.find(l => l.livreurId === selectedLivreurId);
 
-                            if (!livreur)
-                                return <p className="text-gray-500">Livreur non trouvé</p>;
+                                if (!livreur) return <p className="text-gray-500">Livreur non trouvé</p>;
 
-                            const { latitude, longitude } = livreur.position;
+                                const { latitude, longitude } = livreur.position;
 
-                            return (
-                                <div className="text-sm space-y-1">
-                                    <h4 className="font-medium">{livreur.nomComplet}</h4>
-                                    <p className="text-gray-600">
-                                        📍 Latitude : {latitude.toFixed(6)}, Longitude : {longitude.toFixed(6)}
-                                    </p>
-                                    <p className="text-gray-500">📱 {livreur.telephone}</p>
-                                    {livreur.course && (
-                                        <p className="text-green-600">
-                                        🚚 En course : {livreur.course}
+                                return (
+                                    <div className="text-sm space-y-1">
+                                        <h4 className="font-medium">{livreur.nomComplet}</h4>
+                                        <p className="text-gray-600">
+                                            📍 Latitude : {latitude.toFixed(6)}, Longitude : {longitude.toFixed(6)}
                                         </p>
-                                    )}
-                                </div>
-                            );
+                                        <p className="text-gray-500">📱 {livreur.telephone}</p>
+                                        {livreur.course && (
+                                            <p className="text-green-600">🚚 En course : {livreur.course}</p>
+                                        )}
+                                    </div>
+                                );
                             })()}
                         </div>
                     )}
- 
 
                     <LivreurTimeline 
                         title={"Livreurs disponibles"} 
@@ -131,17 +135,11 @@ export default function Content({ data }: { data: TraficLivreursResponse }) {
             {/* Carte principale */}
             <Card className="w-full h-[85vh] shadow-md overflow-visible relative">
                 <CardHeader className="bg-primary text-white flex justify-between items-center px-4 py-3">
-                    {/* Titre à gauche */}
-                    <h3 className="text-lg font-semibold flex items-center gap-2">
-                        📍 Trafic des Livreurs en Temps Réel
-                    </h3>
-
-                    {/* Total des livreurs à droite */}
+                    <h3 className="text-lg font-semibold flex items-center gap-2">📍 Trafic des Livreurs en Temps Réel</h3>
                     <div className="text-sm font-medium bg-white text-primary px-3 py-1 rounded-md shadow">
                         Total Livreurs: {data.totalLivreurs}
                     </div>
                 </CardHeader>
-
                 <CardBody className="p-2 h-[80vh] relative">
                     <MapLeaflet positions={positions} />
                 </CardBody>

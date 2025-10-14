@@ -8,5 +8,5 @@ export default async function Page() {
     const restaurantID = session?.user?.restauranID;
     const data = await getTraficDelivers(restaurantID);
 
-    return <Content data={data} />;
+    return <Content data={data} restaurantID={restaurantID || ''} />;
 }
