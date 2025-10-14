@@ -926,17 +926,17 @@ export async function repositionnerLivreur(commande: RepositionnerCommande): Pro
         if (error?.response?.data && error.response?.data?.detail) {
             return {
                 status: 'error',
-                message: error?.response?.data?.detail ?? "Une erreur est survenue lors du repositionnement du livreur",
+                message: error?.response?.data?.detail ?? "Une erreur de repositionnement du livreur",
             };
         } else if (error?.response?.data?.message) {
             return {
                 status: 'error',
-                message: error?.response?.data?.detail ?? "Une erreur est survenue lors du repositionnement du livreur",
+                message: error?.response?.data?.detail ?? "Une erreur de repositionnement du livreur",
             };
         } else {
             return {
                 status: 'error',
-                message: "Une erreur est survenue lors du repositionnement du livreur",
+                message: "Une erreur de repositionnement du livreur",
             };
         }
     }

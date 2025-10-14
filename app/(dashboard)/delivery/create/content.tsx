@@ -1,21 +1,21 @@
 'use client';
 
-import React, { useState, useCallback, useEffect } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { PlusIcon } from 'lucide-react';
-import { Form } from '@/components/ui/form';
-import { Button } from '@heroui/react';
-import { AllCommandeSchema, FormValues } from '@/src/schemas/courses.schema';
-import { CommandeFormSection } from './components/CommandeFormSection';
-import { Restaurant } from '@/types/models';
-import { addCourseExterne } from '@/src/actions/courses.actions';
-import { toast } from 'react-toastify';
-import { useRouter } from 'next/navigation';
-import { SubmitButton } from '@/components/ui/form-ui/submit-button';
 import { MarkerData } from '@/types';
 import { ROUTE_COLORS } from '@/data';
+import { toast } from 'react-toastify';
+import { Button } from '@heroui/react';
+import { PlusIcon } from 'lucide-react';
+import { Form } from '@/components/ui/form';
+import { Restaurant } from '@/types/models';
+import { useRouter } from 'next/navigation';
 import { DeliveryFee } from '@/types/restaurant';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, useFieldArray } from 'react-hook-form';
+import React, { useState, useCallback, useEffect } from 'react';
+import { addCourseExterne } from '@/src/actions/courses.actions';
+import { SubmitButton } from '@/components/ui/form-ui/submit-button';
+import { CommandeFormSection } from './components/CommandeFormSection';
+import { AllCommandeSchema, FormValues } from '@/src/schemas/courses.schema';
 
 export interface CourseExterneFormProps {
     initialData?: FormValues;
@@ -57,19 +57,30 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
 
     const handleAddressSelect = useCallback(
         (index: number, type: 'lieuRecuperation' | 'lieuLivraison') => {
-            const autocomplete = new google.maps.places.Autocomplete(
-                document.getElementById(`${type}-${index}`) as HTMLInputElement,
-                {}
-            );
+            const input = document.getElementById(`${type}-${index}`) as HTMLInputElement | null;
+            if (!input) return;
+
+            // ⚠️ Éviter de recréer plusieurs instances Autocomplete sur le même input
+            if ((input as any)._autocompleteInstance) return;
+
+            const autocomplete = new google.maps.places.Autocomplete(input, {
+                fields: ['formatted_address', 'geometry'],
+                componentRestrictions: { country: 'ci' }, // 🇨🇮 restreint à la Côte d’Ivoire (optionnel)
+            });
+
+            // On stocke l’instance pour éviter les doublons
+            (input as any)._autocompleteInstance = autocomplete;
+
             autocomplete.addListener('place_changed', () => {
                 const place = autocomplete.getPlace();
-                if (place.geometry?.location) {
-                    const lat = place.geometry.location.lat();
-                    const lng = place.geometry.location.lng();
-                    form.setValue(`commandes.${index}.${type}.latitude`, lat);
-                    form.setValue(`commandes.${index}.${type}.longitude`, lng);
-                    form.setValue(`commandes.${index}.${type}.address`, place.formatted_address || '');
-                }
+                if (!place.geometry?.location) return;
+
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+
+                form.setValue(`commandes.${index}.${type}.latitude`, lat);
+                form.setValue(`commandes.${index}.${type}.longitude`, lng);
+                form.setValue(`commandes.${index}.${type}.address`, place.formatted_address || '');
             });
         },
         [form]

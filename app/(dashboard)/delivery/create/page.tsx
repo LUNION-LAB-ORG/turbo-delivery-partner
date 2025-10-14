@@ -9,8 +9,9 @@ export default async function Page() {
     const restaurant = data?.restaurant;
     const fraisLivraisons = await getAllFraisLivraison(restaurant?.id ?? '');    
     if (!restaurant) {
-        redirect('/auth/signout');
-    }
+        const baseUrl = process.env.NEXT_PUBLIC_API_HOST_URL || 'http://localhost:3000';
+        redirect(`${baseUrl}/api/auth/signout`);
+    }      
 
     return (
         <Suspense fallback={<Loading />}>

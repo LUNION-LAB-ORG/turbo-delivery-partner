@@ -1,7 +1,6 @@
 import Select from 'react-select';
 import Tesseract from 'tesseract.js';
 import { useWatch } from "react-hook-form";
-import { TrashIcon, Camera, FileText, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import 'react-phone-number-input/style.css';
 import { Restaurant } from '@/types/models';
@@ -11,6 +10,7 @@ import { AddressFields } from './AddressFields';
 import { DeliveryFee } from '@/types/restaurant';
 import { useState, useEffect, useRef } from "react";
 import { InputPhone } from '@/components/ui/form-ui/input-phone';
+import { TrashIcon, Camera, FileText, Loader2 } from 'lucide-react';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 // Options de mode de paiement
@@ -257,35 +257,35 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             render={({ field }) => {
                                 // Fonction pour formater le montant (espaces entre milliers)
                                 const formatMontant = (value: string | number) => {
-                                const num = parseFloat(String(value).replace(/\s/g, ''));
-                                if (isNaN(num)) return '';
-                                return num.toLocaleString('fr-FR');
+                                    const num = parseFloat(String(value).replace(/\s/g, ''));
+                                    if (isNaN(num)) return '';
+                                    return num.toLocaleString('fr-FR');
                                 };
 
                                 // Fonction appelée à chaque saisie
                                 const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                const inputValue = e.target.value.replace(/\s/g, ''); // Supprime les espaces
-                                if (!/^\d*$/.test(inputValue)) return; // Bloque tout sauf chiffres
-                                field.onChange(inputValue ? parseFloat(inputValue) : 0); // Stocke nombre brut dans le form
-                                e.target.value = formatMontant(inputValue); // Réécrit la valeur affichée formatée
-                                };
+                                    const inputValue = e.target.value.replace(/\s/g, ''); // Supprime les espaces
+                                    if (!/^\d*$/.test(inputValue)) return; // Bloque tout sauf chiffres
+                                        field.onChange(inputValue ? parseFloat(inputValue) : 0); // Stocke nombre brut dans le form
+                                        e.target.value = formatMontant(inputValue); // Réécrit la valeur affichée formatée
+                                    };
 
                                 return (
-                                <FormItem className="space-y-1">
-                                    <FormLabel>Montant Commande</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="text"
-                                            inputMode="numeric"
-                                            defaultValue={formatMontant(field.value ?? '')}
-                                            placeholder="Ex: 2 000"
-                                            className="w-full h-10"
-                                            onChange={handleChange}
-                                            onBlur={(e) => e.target.value = formatMontant(field.value ?? '')}
-                                        />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
+                                    <FormItem className="space-y-1">
+                                        <FormLabel>Montant Commande</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                type="text"
+                                                inputMode="numeric"
+                                                defaultValue={formatMontant(field.value ?? '')}
+                                                placeholder="Ex: 2 000"
+                                                className="w-full h-10"
+                                                onChange={handleChange}
+                                                onBlur={(e) => e.target.value = formatMontant(field.value ?? '')}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
                                 );
                             }}
                         />
@@ -343,7 +343,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                         </div>
 
                         <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
-                            <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} handleAddressSelect={handleAddressSelect} />
+                            <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} />
                         </div>
 
                         {form.watch(`commandes.${index}.statut`) === "EN_PREPARATION" && (
@@ -411,7 +411,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                         )} />
 
                         <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
-                            <AddressFields index={index} type="lieuLivraison" label="Adresse de Livraison" form={form} handleAddressSelect={handleAddressSelect} />
+                            <AddressFields index={index} type="lieuLivraison" label="Adresse de Livraison" form={form} />
                         </div>
 
                         <FormField control={form.control} name={`commandes.${index}.livraisonPaye`} render={({ field }) => (

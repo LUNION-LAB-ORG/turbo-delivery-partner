@@ -65,7 +65,7 @@ export function useFileAttenteController(
                 toast.success(data.message);
                 resetTimer();
             } else {
-                toast.error("Erreur lors de la réposition du livreur");
+                toast.error("Erreurde répositionnement du livreur");
                 setHasErreur(true);
                 resetTimer();
             }
@@ -137,7 +137,7 @@ export function useFileAttenteController(
                     setFileAttentes(updatedData);
                 }
             } catch (error) {
-                console.error("Erreur lors du rafraîchissement de la file d'attente:", error);
+                console.error("Erreur de rafraîchissement de la file d'attente:", error);
             }
         }, 15 * 1000); // 15 minutes en millisecondes
     
