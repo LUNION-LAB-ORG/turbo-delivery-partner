@@ -144,7 +144,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             const imageUrl = URL.createObjectURL(imageBlob);
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
-            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne en json: ${extractedTextResult}`;
+            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne le numero_commande, le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix), frais_livraison et le total_commande = total_commande - frais_livraison, si les frais_livraison sont detectés avant le total commande, sinon total_commande = total_commande + frais_livraison en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }
@@ -237,7 +237,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                         </div>
                                     ) : (
                                         extractedText && (
-                                            <pre className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-800">
+                                            <pre className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-800 break-words overflow-x-auto">
                                                 {extractedText}
                                             </pre>
                                         )
