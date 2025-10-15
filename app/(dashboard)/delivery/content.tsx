@@ -463,7 +463,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                 </div>
 
                                                 {/* Horaires - Design compact */}
-                                                <div className="grid grid-cols-4 gap-3 sm:gap-4">
+                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
                                                     {/* Début */}
                                                     <div className="flex items-center gap-2">
                                                         <Clock className="text-success h-4 w-4 flex-shrink-0" />

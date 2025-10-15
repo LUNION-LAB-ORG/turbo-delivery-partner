@@ -7,7 +7,7 @@ import { apiClientHttp } from '@/lib/api-client-http';
 
 // Configuration
 const BASE_URL = '/api/restaurant/course-externe';
-const BASE_URL_COMMANDE = '/api/restaurant/commandes';
+const BASE_URL_COMMANDE = '/api/restaurant/commandes-externe';
 
 const commandeEndpoints = {
     terminerCommandeExterne: { endpoint: `${BASE_URL_COMMANDE}/terminer`, method: 'PUT' },
@@ -200,7 +200,7 @@ export async function terminerCommandeExterne(commandeId: string): Promise<Actio
         const data = await apiClientHttp.request<CommandeCourseExterne>({
             endpoint: commandeEndpoints.terminerCommandeExterne.endpoint,
             method: commandeEndpoints.terminerCommandeExterne.method,
-            data: { commandeId, },
+            data: { 'commandeId':commandeId },
         });
 
         return {
@@ -233,7 +233,7 @@ export async function cancelCommandeExterne(commandeId: string): Promise<ActionR
         const data = await apiClientHttp.request<CommandeCourseExterne>({
             endpoint: commandeEndpoints.annulerCommandeExterne.endpoint,
             method: commandeEndpoints.annulerCommandeExterne.method,
-            data: { commandeId },
+            data: { 'commandeId':commandeId },
         });
 
         return {

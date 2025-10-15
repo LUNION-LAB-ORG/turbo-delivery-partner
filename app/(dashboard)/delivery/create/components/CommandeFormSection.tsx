@@ -11,6 +11,7 @@ import { DeliveryFee } from '@/types/restaurant';
 import { useState, useEffect, useRef } from "react";
 import { InputPhone } from '@/components/ui/form-ui/input-phone';
 import { TrashIcon, Camera, FileText, Loader2 } from 'lucide-react';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from "@heroui/react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 
 // Options de mode de paiement
@@ -38,6 +39,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     const videoRef = useRef<HTMLVideoElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     /** Initialisation des valeurs par défaut */
     useEffect(() => {
@@ -150,328 +152,372 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     };
 
     return (
-        <Card className="p-4 space-y-4 rounded-xl bg-background border-l-4 border-l-primary shadow-md">
-            {/* Header avec scanner à droite */}
-            <div className="flex justify-between items-center bg-muted/30 dark:bg-muted p-3 rounded-md">
-                <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold text-primary">Commande {index + 1}</h3>
-                </div>
+        <>
+            <Card className="p-4 space-y-4 rounded-xl bg-background border-l-4 border-l-primary shadow-md">
+                {/* Header avec scanner à droite */}
+                <div className="flex justify-between items-center bg-muted/30 dark:bg-muted p-3 rounded-md">
+                    <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-primary">Commande {index + 1}</h3>
+                    </div>
 
-                <div className="flex items-center gap-2">
-                    {/* Bouton scanner compact */}
-                    <Button
-                        type="button"
-                        variant="flat"
-                        color="primary"
-                        size="sm"
-                        onPress={() => fileInputRef.current?.click()}
-                        className="flex items-center gap-1 h-7 min-h-0"
-                    >
-                        <Camera className="h-4 w-4" />
-                        <span>Scanner</span>
-                    </Button>
-
-                    {/* Supprimer commande */}
-                    {index > 0 && (
+                    <div className="flex items-center gap-2">
+                        {/* Bouton scanner compact */}
                         <Button
                             type="button"
-                            variant="bordered"
-                            color="danger"
+                            variant="ghost"
+                            color="primary"
                             size="sm"
-                            onPress={() => remove(index)}
-                            className="h-7 min-h-0"
+                            onPress={() => setIsModalOpen(true)}
+                            className="flex items-center gap-1 h-7 min-h-0"
                         >
-                            <TrashIcon className="h-3 w-3" />
+                            <Camera className="h-4 w-4" />
+                            <span>Scanner</span>
                         </Button>
-                    )}
+
+
+                        {/* Supprimer commande */}
+                        {index > 0 && (
+                            <Button
+                                type="button"
+                                variant="bordered"
+                                color="danger"
+                                size="sm"
+                                onPress={() => remove(index)}
+                                className="h-7 min-h-0"
+                            >
+                                <TrashIcon className="h-3 w-3" />
+                            </Button>
+                        )}
+                    </div>
+
+                    {/* Input invisible pour uploader l’image */}
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        capture="environment"
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                    />
                 </div>
 
-                {/* Input invisible pour uploader l’image */}
-                <input
-                    ref={fileInputRef}
-                    type="file"
-                    capture="environment"
-                    accept="image/*"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                />
-            </div>
-
-            {/* Scanner */}
-            {(isScanning || scannedImage || error) && (
-                <div className="mt-2 space-y-2">
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md">
-                            {error}
-                        </div>
-                    )}
-
-                    {scannedImage && (
-                        <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                                <img
-                                    src={scannedImage}
-                                    alt="Document scanné"
-                                    className="w-full rounded-lg border shadow-sm"
-                                />
-                                <Button
-                                    variant="bordered"
-                                    className="mt-2 w-full"
-                                    onPress={resetScanner}
-                                >
-                                    Scanner un autre ticket
-                                </Button>
+                {/* Scanner */}
+                {(isScanning || scannedImage || error) && (
+                    <div className="mt-2 space-y-2">
+                        {error && (
+                            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-2 rounded-md">
+                                {error}
                             </div>
-                            <div>
-                                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                    <FileText className="h-5 w-5" /> Données extraites
-                                </h4>
-                                {isProcessing ? (
-                                    <div className="bg-gray-50 p-4 rounded-lg text-center">
-                                        <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-                                        <p className="mt-2 text-gray-500">Extraction en cours...</p>
-                                    </div>
-                                ) : (
-                                    extractedText && (
-                                        <pre className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-800">
-                                            {extractedText}
-                                        </pre>
-                                    )
-                                )}
+                        )}
+
+                        {scannedImage && (
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <img
+                                        src={scannedImage}
+                                        alt="Document scanné"
+                                        className="w-full rounded-lg border shadow-sm"
+                                    />
+                                    <Button
+                                        variant="bordered"
+                                        className="mt-2 w-full"
+                                        onPress={resetScanner}
+                                    >
+                                        Scanner un autre ticket
+                                    </Button>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                                        <FileText className="h-5 w-5" /> Données extraites
+                                    </h4>
+                                    {isProcessing ? (
+                                        <div className="bg-gray-50 p-4 rounded-lg text-center">
+                                            <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+                                            <p className="mt-2 text-gray-500">Extraction en cours...</p>
+                                        </div>
+                                    ) : (
+                                        extractedText && (
+                                            <pre className="bg-gray-50 p-4 rounded-lg text-sm font-mono text-gray-800">
+                                                {extractedText}
+                                            </pre>
+                                        )
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
-            )}
+                        )}
+                    </div>
+                )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {/* Infos Commande */}
-                <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm">
-                    <Card className="p-4 space-y-4 rounded-md bg-card border border-border shadow-sm">
-                        <h3 className="text-lg font-semibold text-primary mb-3">Infos Commande</h3>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Infos Commande */}
+                    <div className="grid grid-cols-1 gap-2 rounded-md shadow-sm">
+                        <Card className="p-4 space-y-4 rounded-md bg-card border border-border shadow-sm">
+                            <h3 className="text-lg font-semibold text-primary mb-3">Infos Commande</h3>
 
-                        {/* Montant Commande */}
-                        <FormField
-                            control={form.control}
-                            name={`commandes.${index}.prix`}
-                            render={({ field }) => {
-                                // Fonction pour formater le montant (espaces entre milliers)
-                                const formatMontant = (value: string | number) => {
-                                    const num = parseFloat(String(value).replace(/\s/g, ''));
-                                    if (isNaN(num)) return '';
-                                    return num.toLocaleString('fr-FR');
-                                };
+                            {/* Montant Commande */}
+                            <FormField
+                                control={form.control}
+                                name={`commandes.${index}.prix`}
+                                render={({ field }) => {
+                                    // Fonction pour formater le montant (espaces entre milliers)
+                                    const formatMontant = (value: string | number) => {
+                                        const num = parseFloat(String(value).replace(/\s/g, ''));
+                                        if (isNaN(num)) return '';
+                                        return num.toLocaleString('fr-FR');
+                                    };
 
-                                // Fonction appelée à chaque saisie
-                                const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                    const inputValue = e.target.value.replace(/\s/g, ''); // Supprime les espaces
-                                    if (!/^\d*$/.test(inputValue)) return; // Bloque tout sauf chiffres
+                                    // Fonction appelée à chaque saisie
+                                    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                                        const inputValue = e.target.value.replace(/\s/g, ''); // Supprime les espaces
+                                        if (!/^\d*$/.test(inputValue)) return; // Bloque tout sauf chiffres
                                         field.onChange(inputValue ? parseFloat(inputValue) : 0); // Stocke nombre brut dans le form
                                         e.target.value = formatMontant(inputValue); // Réécrit la valeur affichée formatée
                                     };
 
-                                return (
-                                    <FormItem className="space-y-1">
-                                        <FormLabel>Montant Commande</FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="text"
-                                                inputMode="numeric"
-                                                defaultValue={formatMontant(field.value ?? '')}
-                                                placeholder="Ex: 2 000"
-                                                className="w-full h-10"
-                                                onChange={handleChange}
-                                                onBlur={(e) => e.target.value = formatMontant(field.value ?? '')}
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                );
-                            }}
-                        />
+                                    return (
+                                        <FormItem className="space-y-1">
+                                            <FormLabel>Montant Commande</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    defaultValue={formatMontant(field.value ?? '')}
+                                                    placeholder="Ex: 2 000"
+                                                    className="w-full h-10"
+                                                    onChange={handleChange}
+                                                    onBlur={(e) => e.target.value = formatMontant(field.value ?? '')}
+                                                />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    );
+                                }}
+                            />
 
-                        {/* N° Commande */}
-                        <FormField control={form.control} name={`commandes.${index}.numero`} render={({ field }) => (
-                            <FormItem className="space-y-1">
-                                <FormLabel>N° Commande</FormLabel>
-                                <FormControl>
-                                    <Input {...field} className="w-full h-10" placeholder="Ex: 12345" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
+                            {/* N° Commande */}
+                            <FormField control={form.control} name={`commandes.${index}.numero`} render={({ field }) => (
+                                <FormItem className="space-y-1">
+                                    <FormLabel>N° Commande</FormLabel>
+                                    <FormControl>
+                                        <Input {...field} className="w-full h-10" placeholder="Ex: 12345" />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
 
-                        {/* Statut Commande */}
-                        <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
-                            <FormField
-                                control={form.control}
-                                name={`commandes.${index}.statut`}
-                                render={({ field }) => (
-                                    <FormItem className="space-y-1">
-                                        <FormLabel>Statut Commande</FormLabel>
-                                        <FormControl>
-                                            <div
-                                                className="flex items-center gap-2 cursor-pointer select-none"
-                                                onClick={() =>
-                                                    field.onChange(
-                                                        field.value === "EN_PREPARATION"
-                                                            ? "EN_ATTENTE_RECUPERATION"
-                                                            : "EN_PREPARATION"
-                                                    )
-                                                }
-                                            >
-                                                <Switch
-                                                    isSelected={field.value === "EN_ATTENTE_RECUPERATION"}
-                                                    onChange={() =>
+                            {/* Statut Commande */}
+                            <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
+                                <FormField
+                                    control={form.control}
+                                    name={`commandes.${index}.statut`}
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-1">
+                                            <FormLabel>Statut Commande</FormLabel>
+                                            <FormControl>
+                                                <div
+                                                    className="flex items-center gap-2 cursor-pointer select-none"
+                                                    onClick={() =>
                                                         field.onChange(
                                                             field.value === "EN_PREPARATION"
                                                                 ? "EN_ATTENTE_RECUPERATION"
                                                                 : "EN_PREPARATION"
                                                         )
                                                     }
-                                                    className="scale-90"
+                                                >
+                                                    <Switch
+                                                        isSelected={field.value === "EN_ATTENTE_RECUPERATION"}
+                                                        onChange={() =>
+                                                            field.onChange(
+                                                                field.value === "EN_PREPARATION"
+                                                                    ? "EN_ATTENTE_RECUPERATION"
+                                                                    : "EN_PREPARATION"
+                                                            )
+                                                        }
+                                                        className="scale-90"
+                                                    />
+                                                    <span className="font-medium">
+                                                        {field.value === "EN_PREPARATION" ? "En Préparation" : "Déjà Prête"}
+                                                    </span>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
+                                <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} />
+                            </div>
+
+                            {form.watch(`commandes.${index}.statut`) === "EN_PREPARATION" && (
+                                <FormField
+                                    control={form.control}
+                                    name={`commandes.${index}.tempsPreparation`}
+                                    render={({ field }) => (
+                                        <FormItem className="space-y-1">
+                                            <FormLabel>Temps de préparation (minutes)</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    type="number"
+                                                    min={0}
+                                                    {...field}
+                                                    value={field.value ?? 0}
+                                                    onChange={(e) => field.onChange(Number(e.target.value))} // ⚡ convertit en number
                                                 />
-                                                <span className="font-medium">
-                                                    {field.value === "EN_PREPARATION" ? "En Préparation" : "Déjà Prête"}
-                                                </span>
-                                            </div>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
 
-                        <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
-                            <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} />
-                        </div>
+                            )}
+                        </Card>
+                    </div>
 
-                        {form.watch(`commandes.${index}.statut`) === "EN_PREPARATION" && (
-                            <FormField
-                                control={form.control}
-                                name={`commandes.${index}.tempsPreparation`}
-                                render={({ field }) => (
+                    {/* Destinataire */}
+                    <div className="rounded-md shadow-sm space-y-4">
+                        <Card className="p-4 space-y-5 rounded-md bg-card border border-border shadow-sm">
+                            <h3 className="text-lg font-semibold text-green-600 mb-3">Destinataire / Client</h3>
+                            <FormField control={form.control} name={`commandes.${index}.destinataire.contact`} render={({ field }) => (
                                 <FormItem className="space-y-1">
-                                    <FormLabel>Temps de préparation (minutes)</FormLabel>
+                                    <FormLabel>N° Téléphone</FormLabel>
                                     <FormControl>
-                                    <Input
-                                        type="number"
-                                        min={0}
-                                        {...field}
-                                        value={field.value ?? 0}
-                                        onChange={(e) => field.onChange(Number(e.target.value))} // ⚡ convertit en number
-                                    />
+                                        <InputPhone value={field.value ?? ''} setValue={field.onChange} className="h-10" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
-                            )}
-                          />
-                          
-                        )}
-                    </Card>
+                            )} />
+
+                            <FormField control={form.control} name={`commandes.${index}.zoneId`} render={({ field }) => (
+                                <FormItem className="space-y-1">
+                                    <FormLabel>Zone de livraison</FormLabel>
+                                    <Select
+                                        value={fraisLivraisons.map(z => ({ value: z.id, label: z.name })).find(z => z.value === field.value) || null}
+                                        onChange={(option: any) => field.onChange(option?.value ?? "")}
+                                        options={fraisLivraisons.map(z => ({ value: z.id, label: z.name }))}
+                                        placeholder="-- Sélectionnez une zone --"
+                                        isClearable
+                                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            {/* Mode de Paiement */}
+                            <FormField control={form.control} name={`commandes.${index}.modePaiement`} render={({ field }) => (
+                                <FormItem className="space-y-1">
+                                    <FormLabel>Mode de Paiement</FormLabel>
+                                    <select {...field} className="w-full h-10 border rounded px-2">
+                                        {modePaiementOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                                    </select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+
+                            <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
+                                <AddressFields index={index} type="lieuLivraison" label="Adresse de Livraison" form={form} />
+                            </div>
+
+                            <FormField control={form.control} name={`commandes.${index}.livraisonPaye`} render={({ field }) => (
+                                <FormItem className="flex justify-between items-center p-2 border rounded-lg bg-muted/50">
+                                    <FormLabel>Ce client a déjà reglé sa facture (Commande & Livraison)</FormLabel>
+                                    <FormControl>
+                                        <Switch isSelected={field.value} onChange={field.onChange} className="scale-75" />
+                                    </FormControl>
+                                </FormItem>
+                            )} />
+                        </Card>
+                    </div>
                 </div>
+                <div className="grid grid-cols-1 space-y-2">
+                    <FormField
+                        control={form.control}
+                        name={`commandes.${index}.zoneId`}
+                        render={({ field }) => {
+                            // ✅ On observe en direct les valeurs nécessaires
+                            const montantCommande = useWatch({
+                                control: form.control,
+                                name: `commandes.${index}.prix`,
+                            });
 
-                {/* Destinataire */}
-                <div className="rounded-md shadow-sm space-y-4">
-                    <Card className="p-4 space-y-5 rounded-md bg-card border border-border shadow-sm">
-                        <h3 className="text-lg font-semibold text-green-600 mb-3">Destinataire / Client</h3>
-                        <FormField control={form.control} name={`commandes.${index}.destinataire.contact`} render={({ field }) => (
-                            <FormItem className="space-y-1">
-                                <FormLabel>N° Téléphone</FormLabel>
-                                <FormControl>
-                                    <InputPhone value={field.value ?? ''} setValue={field.onChange} className="h-10" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
+                            const zoneId = useWatch({
+                                control: form.control,
+                                name: `commandes.${index}.zoneId`,
+                            });
 
-                        <FormField control={form.control} name={`commandes.${index}.zoneId`} render={({ field }) => (
-                            <FormItem className="space-y-1">
-                                <FormLabel>Zone de livraison</FormLabel>
-                                <Select
-                                    value={fraisLivraisons.map(z => ({ value: z.id, label: z.name })).find(z => z.value === field.value) || null}
-                                    onChange={(option: any) => field.onChange(option?.value ?? "")}
-                                    options={fraisLivraisons.map(z => ({ value: z.id, label: z.name }))}
-                                    placeholder="-- Sélectionnez une zone --"
-                                    isClearable
-                                />
-                                <FormMessage />
-                            </FormItem>
-                        )} />
+                            // ✅ Zone sélectionnée et calculs
+                            const zoneSelectionnee = fraisLivraisons.find(z => z.id === zoneId);
+                            const montant = parseFloat(montantCommande || 0) || 0;
+                            const fraisLivraison =
+                                typeof zoneSelectionnee?.prix === "number"
+                                    ? zoneSelectionnee.prix
+                                    : parseFloat(zoneSelectionnee?.prix ?? "0");
 
-                        {/* Mode de Paiement */}
-                        <FormField control={form.control} name={`commandes.${index}.modePaiement`} render={({ field }) => (
-                            <FormItem className="space-y-1">
-                                <FormLabel>Mode de Paiement</FormLabel>
-                                <select {...field} className="w-full h-10 border rounded px-2">
-                                    {modePaiementOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                                </select>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
+                            const totalCommande = montant + fraisLivraison;
 
-                        <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
-                            <AddressFields index={index} type="lieuLivraison" label="Adresse de Livraison" form={form} />
+                            return montant > 0 ? (
+                                <FormItem className="space-y-2">
+                                    <div className="bg-green-50/50 p-2 rounded-md border border-green-200 font-medium text-gray-800">
+                                        <p>Montant Commande : {montant.toLocaleString()} XOF</p>
+                                        <p>
+                                            Frais Livraison ({zoneSelectionnee?.name ?? "--"}) :{" "}
+                                            {(zoneSelectionnee?.prix ?? 0).toLocaleString()} XOF
+                                        </p>
+                                        <p className="mt-1 font-semibold">
+                                            Total : {totalCommande.toLocaleString()} XOF
+                                        </p>
+                                    </div>
+                                </FormItem>
+                            ) : (<></>);
+                        }}
+                    />
+                </div>
+            </Card>
+
+            <Modal isOpen={isModalOpen} onOpenChange={setIsModalOpen}>
+                <ModalContent>
+                    <ModalHeader className="flex flex-col gap-1">
+                        Choisir une méthode de scan
+                    </ModalHeader>
+                    <ModalBody>
+                        <p className="text-sm text-gray-600 mb-3">
+                            Vous pouvez soit prendre une photo avec la caméra, soit uploader un ticket existant.
+                        </p>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Button
+                                color="primary"
+                                className="flex-1"
+                                onPress={async () => {
+                                    setIsModalOpen(false);
+                                    await startCamera();
+                                }}
+                            >
+                                <Camera className="w-4 h-4 mr-2" />
+                                Scanner via Caméra
+                            </Button>
+
+                            <Button
+                                variant="bordered"
+                                className="flex-1"
+                                onPress={() => {
+                                    setIsModalOpen(false);
+                                    fileInputRef.current?.click();
+                                }}
+                            >
+                                <FileText className="w-4 h-4 mr-2" />
+                                Uploader une image
+                            </Button>
                         </div>
-
-                        <FormField control={form.control} name={`commandes.${index}.livraisonPaye`} render={({ field }) => (
-                            <FormItem className="flex justify-between items-center p-2 border rounded-lg bg-muted/50">
-                                <FormLabel>Ce client a déjà reglé sa facture (Commande & Livraison)</FormLabel>
-                                <FormControl>
-                                    <Switch isSelected={field.value} onChange={field.onChange} className="scale-75" />
-                                </FormControl>
-                            </FormItem>
-                        )} />
-                    </Card>
-                </div>
-            </div>
-            <div className="grid grid-cols-1 space-y-2">
-                
-
-
-                <FormField
-                    control={form.control}
-                    name={`commandes.${index}.zoneId`}
-                    render={({ field }) => {
-                        // ✅ On observe en direct les valeurs nécessaires
-                        const montantCommande = useWatch({
-                            control: form.control,
-                            name: `commandes.${index}.prix`,
-                        });
-
-                        const zoneId = useWatch({
-                            control: form.control,
-                            name: `commandes.${index}.zoneId`,
-                        });
-
-                        // ✅ Zone sélectionnée et calculs
-                        const zoneSelectionnee = fraisLivraisons.find(z => z.id === zoneId);
-                        const montant = parseFloat(montantCommande || 0) || 0;
-                        const fraisLivraison =
-                            typeof zoneSelectionnee?.prix === "number"
-                                ? zoneSelectionnee.prix
-                                : parseFloat(zoneSelectionnee?.prix ?? "0");
-
-                        const totalCommande = montant + fraisLivraison;
-
-                        return montant > 0 ? (
-                            <FormItem className="space-y-2">
-                                <div className="bg-green-50/50 p-2 rounded-md border border-green-200 font-medium text-gray-800">
-                                    <p>Montant Commande : {montant.toLocaleString()} XOF</p>
-                                    <p>
-                                        Frais Livraison ({zoneSelectionnee?.name ?? "--"}) :{" "}
-                                        {(zoneSelectionnee?.prix ?? 0).toLocaleString()} XOF
-                                    </p>
-                                    <p className="mt-1 font-semibold">
-                                        Total : {totalCommande.toLocaleString()} XOF
-                                    </p>
-                                </div>
-                            </FormItem>
-                        ) : (<></>);
-                    }}
-                />
-            </div>
-        </Card>
+                    </ModalBody>
+                    <ModalFooter>
+                        <Button variant="light" onPress={() => setIsModalOpen(false)}>
+                            Annuler
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </>
     );
 };
 

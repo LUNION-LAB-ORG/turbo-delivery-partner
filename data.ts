@@ -327,6 +327,7 @@ export const courses_statuses_filters = [
 ];
 
 export const COURSES_STATUSES = {
+    EN_PREPARATION: 'EN_PREPARATION',
     EN_ATTENTE: 'EN_ATTENTE',
     EN_COURS: 'EN_COURS',
     TERMINE: 'TERMINER',

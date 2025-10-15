@@ -25,16 +25,20 @@ const DeliveryTools = ({ restaurant, delivery }: { restaurant: Restaurant; deliv
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
                     <DropdownSection showDivider title="Actions">
-                        {delivery.statut === COURSES_STATUSES.EN_ATTENTE ? (
+                        {delivery.statut === COURSES_STATUSES.EN_ATTENTE || delivery.statut === COURSES_STATUSES.EN_PREPARATION ? (
                             <DropdownItem startContent={<X />} color="danger" key="edit" onClick={() => setOpenCancel(true)}>
                                 Annuler
                             </DropdownItem>
                         ) : (
                             <></>
                         )}
-                        <DropdownItem startContent={<QrCode />} color="default" key="code" onClick={() => setOpenQrCode(true)}>
-                            Code de la course
-                        </DropdownItem>
+                        { delivery.statut !== COURSES_STATUSES.EN_PREPARATION ? (
+                            <DropdownItem startContent={<QrCode />} color="default" key="code" onClick={() => setOpenQrCode(true)}>
+                                Code de la course
+                            </DropdownItem>
+                        ) : (
+                            <></>
+                        )}
                         {delivery.statut === COURSES_STATUSES.EN_COURS ? (
                             <DropdownItem startContent={<Check />} color="success" key="edit" onClick={() => setOpenValider(true)}>
                                 Terminer
