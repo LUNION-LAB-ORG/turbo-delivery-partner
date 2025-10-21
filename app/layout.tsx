@@ -7,11 +7,11 @@ import NextAuthSessionProvider from '@/providers/next-auth-session.provider';
 
 export const metadata: Metadata = {
     title: {
-        template: '%s | Turbo Delivery Restaurant - Restaurant management platform',
-        default: 'Turbo Delivery Restaurant - Restaurant management platform',
-        absolute: 'Turbo Delivery Restaurant - Restaurant management platform',
+        template: '%s | TURBO DELIVERY MANAGEMENT - Restaurant management platform',
+        default: 'TURBO DELIVERY MANAGEMENT - Restaurant management platform',
+        absolute: 'TURBO DELIVERY MANAGEMENT - Restaurant management platform',
     },
-    description: "Turbo Delivery Restaurant, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
+    description: "TURBO DELIVERY MANAGEMENT, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
     icons: {
         icon: '/favicon.ico',
         apple: '/apple-icon.png',
@@ -44,24 +44,24 @@ export const metadata: Metadata = {
         type: 'website',
         locale: 'fr_CI',
         url: 'https://www.turbo-delivery-restaurant.com',
-        siteName: 'Turbo Delivery Restaurant',
-        title: 'Turbo Delivery Restaurant - Restaurant management platform',
-        description: "Turbo Delivery Restaurant, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
+        siteName: 'TURBO DELIVERY MANAGEMENT',
+        title: 'TURBO DELIVERY MANAGEMENT - Restaurant management platform',
+        description: "TURBO DELIVERY MANAGEMENT, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
         images: [
             {
                 url: 'https://www.turbo-delivery-restaurant.com/og-image.png',
                 width: 630,
                 height: 630,
-                alt: 'Turbo Delivery Restaurant - Restaurant management platform',
+                alt: 'TURBO DELIVERY MANAGEMENT - Restaurant management platform',
             },
         ],
     },
     twitter: {
         card: 'summary_large_image',
-        site: '@Turbo Delivery Restaurant',
-        creator: '@Turbo Delivery Restaurant',
-        title: 'Turbo Delivery Restaurant - Restaurant management platform',
-        description: "Turbo Delivery Restaurant, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
+        site: '@TURBO DELIVERY MANAGEMENT',
+        creator: '@TURBO DELIVERY MANAGEMENT',
+        title: 'TURBO DELIVERY MANAGEMENT - Restaurant management platform',
+        description: "TURBO DELIVERY MANAGEMENT, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
         images: ['https://www.turbo-delivery-restaurant.com/twitter-image.png'],
     },
     viewport: {

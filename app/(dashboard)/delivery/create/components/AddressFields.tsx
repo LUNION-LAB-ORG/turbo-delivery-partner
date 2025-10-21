@@ -8,29 +8,46 @@ interface AddressFieldsProps {
     type: 'lieuRecuperation' | 'lieuLivraison';
     label: string;
     form: any;
+    defaultAddress?: {
+        address?: string | null;
+        latitude?: number | null;
+        longitude?: number | null;
+        readOnly?: boolean;
+    };
 }
 
-export const AddressFields = ({ index, type, label, form }: AddressFieldsProps) => {
+export const AddressFields = ({ index, type, label, form, defaultAddress }: AddressFieldsProps) => {
     const [suggestions, setSuggestions] = useState<any[]>([]);
-    const [query, setQuery] = useState('');
+    const [query, setQuery] = useState(defaultAddress?.address ?? '');
 
-    // Requête vers Nominatim (gratuite)
+    // Si une adresse par défaut est fournie, la pousser dans le form
     useEffect(() => {
-        if (query.length < 3) return; // éviter les requêtes inutiles
+        if (defaultAddress) {
+            form.setValue(`commandes.${index}.${type}.address`, defaultAddress.address ?? '');
+            form.setValue(`commandes.${index}.${type}.latitude`, defaultAddress.latitude ?? null);
+            form.setValue(`commandes.${index}.${type}.longitude`, defaultAddress.longitude ?? null);
+        }
+    }, [defaultAddress, form, index, type]);
+
+    // Suggestion Nominatim
+    useEffect(() => {
+        if (defaultAddress?.readOnly) return; // on ne fait pas de requête si le champ est verrouillé
+        if (query.length < 3) return;
         const controller = new AbortController();
 
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ci&addressdetails=1&limit=5`, {
-            signal: controller.signal,
-            headers: {
-                'Accept-Language': 'fr', // résultats en français
-            },
-        })
+        fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=ci&addressdetails=1&limit=5`,
+            {
+                signal: controller.signal,
+                headers: { 'Accept-Language': 'fr' },
+            }
+        )
             .then((res) => res.json())
             .then((data) => setSuggestions(data))
             .catch(() => { });
 
         return () => controller.abort();
-    }, [query]);
+    }, [query, defaultAddress]);
 
     const handleSelect = (place: any) => {
         form.setValue(`commandes.${index}.${type}.address`, place.display_name);
@@ -45,27 +62,38 @@ export const AddressFields = ({ index, type, label, form }: AddressFieldsProps) 
             <FormField
                 control={form.control}
                 name={`commandes.${index}.${type}.address`}
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel className="flex items-center gap-2">
-                            <MapPinIcon className="h-5 w-5 text-primary" />
-                            <span>{label}</span>
-                        </FormLabel>
-                        <FormControl>
-                            <Input
-                                {...field}
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                placeholder={label}
-                                autoComplete="off"
-                            />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                )}
+                render={({ field }) => {
+                    // 🩵 Synchroniser avec react-hook-form (clé du problème)
+                    useEffect(() => {
+                        if (field.value && field.value !== query) {
+                            setQuery(field.value);
+                        }
+                    }, [field.value]);
+
+                    return (
+                        <FormItem>
+                            <FormLabel className="flex items-center gap-2">
+                                <MapPinIcon className="h-5 w-5 text-primary" />
+                                <span>{label}</span>
+                            </FormLabel>
+                            <FormControl>
+                                <Input
+                                    {...field}
+                                    value={query}
+                                    onChange={(e) => setQuery(e.target.value)}
+                                    placeholder={label}
+                                    autoComplete="off"
+                                    readOnly={defaultAddress?.readOnly ?? false}
+                                    className={defaultAddress?.readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    );
+                }}
             />
 
-            {suggestions.length > 0 && (
+            {!defaultAddress?.readOnly && suggestions.length > 0 && (
                 <ul className="absolute bg-white border border-gray-200 mt-1 rounded-md shadow-md max-h-48 overflow-y-auto z-50 w-full">
                     {suggestions.map((place, i) => (
                         <li

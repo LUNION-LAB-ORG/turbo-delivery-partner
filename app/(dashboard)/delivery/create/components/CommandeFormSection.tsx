@@ -122,21 +122,40 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
         if (!match) return null;
         try { return JSON.parse(match[1]); } catch { return null; }
     };
+
     const fillFormFromText = (jsonString: string) => {
         try {
             const data = extractJsonFromString(JSON.parse(jsonString));
+
             const numeroCommande = data.numero_commande || '';
             const contact = data.numero_telephone || '';
             const fraisLivraison = parseInt(data.frais_livraison || '0', 10);
-            const zoneSelectionnee = fraisLivraisons.find(z => z.prix == fraisLivraison);
             const total = parseInt(data.total_commande || '0', 10);
-            setExtractedText(`N° Commande: ${numeroCommande} | N° Tel: ${contact} | Frais Livraison: ${fraisLivraison} | Total: ${total}`);
+
+            // 🔍 Trouve la zone correspondante
+            const zoneSelectionnee = fraisLivraisons.find(z => z.prix == fraisLivraison);
+
+            // ✅ Affiche un résumé visuel
+            setExtractedText(
+                `N° Commande: ${numeroCommande} | N° Tel: ${contact} | Frais Livraison: ${fraisLivraison} | Total: ${total}`
+            );
+
+            // ✅ Remplit les champs du formulaire
             form.setValue(`commandes.${index}.prix`, total);
             form.setValue(`commandes.${index}.numero`, numeroCommande);
-            form.setValue(`commandes.${index}.zoneId`, String(zoneSelectionnee?.id ?? ""));
             form.setValue(`commandes.${index}.destinataire.contact`, contact);
-        } catch (err) { setError("Impossible d'interpréter la réponse OpenAI"); }
+
+            // ✅ Renseigne automatiquement l’adresse de livraison
+            if (zoneSelectionnee) {
+                form.setValue(`commandes.${index}.lieuLivraison.address`, zoneSelectionnee.zone ?? "");
+                form.setValue(`commandes.${index}.zoneId`, String(zoneSelectionnee?.id ?? ""));
+            }
+
+        } catch (err) {
+            setError("Impossible d'interpréter la réponse OpenAI");
+        }
     };
+
     const processImage = async (imageBlob: File | Blob) => {
         setIsProcessing(true);
         setError('');
@@ -268,10 +287,11 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
 
                                     // Fonction appelée à chaque saisie
                                     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                                        const inputValue = e.target.value.replace(/\s/g, ''); // Supprime les espaces
-                                        if (!/^\d*$/.test(inputValue)) return; // Bloque tout sauf chiffres
-                                        field.onChange(inputValue ? parseFloat(inputValue) : 0); // Stocke nombre brut dans le form
-                                        e.target.value = formatMontant(inputValue); // Réécrit la valeur affichée formatée
+                                        const inputValue = e.target.value.replace(/\s/g, '');
+                                        if (!/^\d*$/.test(inputValue)) return;
+
+                                        const numericValue = inputValue ? parseFloat(inputValue) : 0;
+                                        field.onChange(numericValue);
                                     };
 
                                     return (
@@ -281,7 +301,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                                 <Input
                                                     type="text"
                                                     inputMode="numeric"
-                                                    defaultValue={formatMontant(field.value ?? '')}
+                                                    value={formatMontant(field.value ?? '')}
                                                     placeholder="Ex: 2 000"
                                                     className="w-full h-10"
                                                     onChange={handleChange}
@@ -347,7 +367,18 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             </div>
 
                             <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
-                                <AddressFields index={index} type="lieuRecuperation" label="Lieu de récupération" form={form} />
+                                <AddressFields
+                                    index={0}
+                                    type="lieuRecuperation"
+                                    label="Lieu de récupération"
+                                    form={form}
+                                    defaultAddress={{
+                                        address: restaurant?.idLocation,
+                                        latitude: restaurant?.latitude,
+                                        longitude: restaurant?.longitude,
+                                        readOnly: true, // 🔒 empêche modification
+                                    }}
+                                />
                             </div>
 
                             {form.watch(`commandes.${index}.statut`) === "EN_PREPARATION" && (
@@ -417,19 +448,10 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             <div className="bg-green-50/50 p-2 rounded-md border border-green-200">
                                 <AddressFields index={index} type="lieuLivraison" label="Adresse de Livraison" form={form} />
                             </div>
-
-                            <FormField control={form.control} name={`commandes.${index}.livraisonPaye`} render={({ field }) => (
-                                <FormItem className="flex justify-between items-center p-2 border rounded-lg bg-muted/50">
-                                    <FormLabel>Ce client a déjà reglé sa facture (Commande & Livraison)</FormLabel>
-                                    <FormControl>
-                                        <Switch isSelected={field.value} onChange={field.onChange} className="scale-75" />
-                                    </FormControl>
-                                </FormItem>
-                            )} />
                         </Card>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 space-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <FormField
                         control={form.control}
                         name={`commandes.${index}.zoneId`}
@@ -471,6 +493,15 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             ) : (<></>);
                         }}
                     />
+
+                    <FormField control={form.control} name={`commandes.${index}.livraisonPaye`} render={({ field }) => (
+                        <FormItem className="flex justify-between items-center p-2 border rounded-lg bg-muted/50">
+                            <FormLabel>Ce client a déjà reglé sa facture (Commande & Livraison)</FormLabel>
+                            <FormControl>
+                                <Switch isSelected={field.value} onChange={field.onChange} className="scale-75" />
+                            </FormControl>
+                        </FormItem>
+                    )} />
                 </div>
             </Card>
 
