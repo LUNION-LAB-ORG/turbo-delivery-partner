@@ -309,6 +309,10 @@ export const courses_statuses_filters = [
         name: 'En attente',
     },
     {
+        id: 'EN_PREPARATION',
+        name: 'En Préparation',
+    },
+    {
         id: 'VALIDER',
         name: 'Validées',
     },

@@ -1,19 +1,23 @@
 'use client';
 
+import { useState } from 'react';
+import { COURSES_STATUSES } from '@/data';
+import { AiOutlineEye } from 'react-icons/ai';
+import DeliveryCancel from './delivery-cancel';
+import { Check, QrCode, X } from 'lucide-react';
+import DeliveryQRCode from './delivery-qr-code';
+import DeliveryDetails from './delivery-details';
+import DeliveryValidate from './delivery-validate';
+import { IconDotsVertical } from '@tabler/icons-react';
 import { CourseExterne, Restaurant } from '@/types/models';
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownSection, DropdownItem, Button } from "@heroui/react";
-import { useState } from 'react';
-import { IconDotsVertical } from '@tabler/icons-react';
-import { COURSES_STATUSES } from '@/data';
-import { Check, QrCode, X } from 'lucide-react';
-import DeliveryValidate from './delivery-validate';
-import DeliveryCancel from './delivery-cancel';
-import DeliveryQRCode from './delivery-qr-code';
+
 
 const DeliveryTools = ({ restaurant, delivery }: { restaurant: Restaurant; delivery: CourseExterne }) => {
     const [openValider, setOpenValider] = useState<boolean>(false);
     const [openCancel, setOpenCancel] = useState<boolean>(false);
     const [openQrCode, setOpenQrCode] = useState<boolean>(false);
+    const [openDetail, setOpenDetail] = useState<boolean>(false);
 
     return (
         <>
@@ -25,6 +29,12 @@ const DeliveryTools = ({ restaurant, delivery }: { restaurant: Restaurant; deliv
                 </DropdownTrigger>
                 <DropdownMenu aria-label="Static Actions">
                     <DropdownSection showDivider title="Actions">
+                        <DropdownItem
+                            key="details"
+                            startContent={<AiOutlineEye className="text-primary text-lg" />}
+                            onClick={() => setOpenDetail(true)} >
+                            Voir les détails
+                        </DropdownItem>
                         {delivery.statut === COURSES_STATUSES.EN_ATTENTE || delivery.statut === COURSES_STATUSES.EN_PREPARATION ? (
                             <DropdownItem startContent={<X />} color="danger" key="edit" onClick={() => setOpenCancel(true)}>
                                 Annuler
@@ -53,6 +63,7 @@ const DeliveryTools = ({ restaurant, delivery }: { restaurant: Restaurant; deliv
             <DeliveryValidate restaurant={restaurant} delivery={delivery} open={openValider} setOpen={setOpenValider} />
             <DeliveryCancel restaurant={restaurant} delivery={delivery} open={openCancel} setOpen={setOpenCancel} />
             <DeliveryQRCode restaurant={restaurant} delivery={delivery} open={openQrCode} setOpen={setOpenQrCode} />
+            <DeliveryDetails delivery={delivery} open={openDetail} setOpen={setOpenDetail} />
         </>
     );
 };

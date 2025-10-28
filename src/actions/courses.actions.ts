@@ -143,12 +143,12 @@ export async function terminerCourseExterne(courseId: string): Promise<ActionRes
         if (error?.response?.data && error.response?.data?.detail) {
             return {
                 status: 'error',
-                message: error?.response?.data?.detail ?? "Erreur lors du traitement",
+                message: error?.response?.data?.detail ?? "Erreur lors du traitement Course Terminée",
             };
         } else if (error?.response?.data?.message) {
             return {
                 status: 'error',
-                message: error?.response?.data?.detail ?? "Erreur lors du traitement",
+                message: error?.response?.data?.detail ?? "Erreur lors du traitement Course Terminée",
             };
         } else {
             return {

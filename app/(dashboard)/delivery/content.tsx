@@ -1,23 +1,24 @@
 'use client';
 
+import dayjs from 'dayjs';
+import 'dayjs/locale/fr'
+
 import Link from 'next/link';
-import { QrCode, XCircle, CheckCircle } from 'lucide-react';
 import { SORT_OPTIONS } from '@/data';
 import { IconPlus } from '@tabler/icons-react';
 import { title } from '@/components/primitives';
 import { courses_statuses_filters } from '@/data';
+import createUrlFile from '@/utils/createUrlFile';
 import DeliveryTools from './component/deliveryTools';
+import { Clock, Package, Store, Search } from 'lucide-react';
 import EmptyDataTable from '@/components/commons/EmptyDataTable';
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { getPaginationCourseExterne, terminerCommandeExterne, cancelCommandeExterne } from '@/src/actions/courses.actions';
-import DeliveryQRCodeCommande from './component/delivery-qr-code-commande';
+import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
-import { Clock, MapPin, User, Package, CreditCard, Store, ChevronDown, ChevronUp, Search } from 'lucide-react';
-import { Button, Card, CardBody, CardHeader, Input, Chip, Divider, Pagination, Skeleton, Select, SelectItem } from "@heroui/react";
-import { formatDate } from '@/utils/date-formate';
-import dayjs from 'dayjs';
+import { Button, Card, CardBody, CardHeader, Input, Chip, Pagination, Skeleton, Select, SelectItem, CardFooter, Avatar } from "@heroui/react";
 
 type SortOption = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
+dayjs.locale('fr')
 
 // AJOUT : Définition des mois pour le filtre
 const MONTHS_FILTERS = [
@@ -48,6 +49,17 @@ const getStatusColor = (statut: string) => {
             return 'secondary';
         default:
             return 'default';
+    }
+};
+
+const getStatusTextColor = (statut: string) => {
+    switch (statut?.toUpperCase()) {
+        case 'VALIDER': return 'text-yellow-700';
+        case 'TERMINER': return 'text-green-700';
+        case 'ANNULER': return 'text-red-700';
+        case 'EN_ATTENTE': return 'text-gray-500';
+        case 'PREPARATION': return 'text-orange-600';
+        default: return 'text-gray-600';
     }
 };
 
@@ -95,11 +107,10 @@ export default function Content({ restaurant, initialData }: Props) {
     const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.DATE_DESC);
     const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize] = useState(5);
+    const [pageSize] = useState(6);
     const [data, setData] = useState<PaginatedResponse<CourseExterne> | null>(initialData);
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
-    const [openQrCodeId, setOpenQrCodeId] = useState<string | null>(null);
 
     // === NOUVEAU ===
     // Fonction fetchData optimisée, mémorisée avec useCallback
@@ -255,7 +266,7 @@ export default function Content({ restaurant, initialData }: Props) {
                             </div>
 
                             {/* Filtres par statut */}
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-3">
                                 {courses_statuses_filters.map((category) => (
                                     <Button
                                         key={category.id}
@@ -373,250 +384,48 @@ export default function Content({ restaurant, initialData }: Props) {
                             </div>
 
                             {/* Liste des courses - Design amélioré */}
-                            <div className="space-y-4 sm:space-y-6">
-                                {filteredData.map((delivery) => (
-                                    <Card key={delivery.id} className={`w-full transition-all duration-300 hover:shadow-lg ${getStatusBorderClass(delivery.statut)}`}>
-
-                                        {/* Header de la carte - Mobile optimized */}
-                                        <CardHeader className="p-4 sm:p-6">
-                                            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 w-full">
-
-                                                {/* Info principale */}
-                                                <div className="flex flex-col space-y-2 flex-1 min-w-0">
-                                                    <div className="flex flex-col xs:flex-row xs:items-center gap-2 xs:gap-3">
-                                                        <Chip
-                                                            color={getStatusColor(delivery.statut)}
-                                                            variant="flat"
-                                                            size="sm"
-                                                            className="w-fit font-medium"
-                                                        >
-                                                            {delivery.statut}
-                                                        </Chip>
-                                                        <span className="text-default-500 font-bold text-sm sm:text-base">
-                                                            Code: {delivery.code}
-                                                        </span>
-                                                    </div>
-
-                                                    {/* Info restaurant mobile */}
-                                                    <div className="flex items-center gap-2 sm:hidden">
-                                                        <Store className="text-default-400 h-4 w-4 flex-shrink-0" />
-                                                        <span className="text-sm text-default-600 truncate">
-                                                            {delivery.restaurant.nomEtablissement}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Actions */}
-                                                <div className="flex items-center gap-2 sm:gap-3 self-end xs:self-auto">
-                                                    <DeliveryTools restaurant={restaurant} delivery={delivery} />
-                                                    <Button
-                                                        isIconOnly
-                                                        color="primary"
-                                                        variant="light"
-                                                        onClick={() => toggleExpand(delivery.id)}
-                                                        size="sm"
-                                                        className="hover:bg-primary/10 transition-colors"
-                                                    >
-                                                        {expandedDelivery === delivery.id ?
-                                                            <ChevronUp className="h-4 w-4" /> :
-                                                            <ChevronDown className="h-4 w-4" />
-                                                        }
-                                                    </Button>
-                                                </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {dataFilter.map((delivery) => (
+                                    <Card key={delivery.id} className={`w-full bg-white ${getStatusBorderClass(delivery.statut)} shadow-md rounded-md`}>
+                                        <CardHeader className="flex justify-between items-center py-3 border-b">
+                                            <div className="flex items-center gap-5">
+                                                <span className={`font-bold text-base ${getStatusTextColor(delivery.statut)}`}>Code: {delivery.code}</span>
+                                                <span className="bg-gray-900 text-white font-semibold rounded px-2 ml-2 py-1">
+                                                    {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(
+                                                        (delivery.commandes?.reduce((sum, cmd) => sum + (cmd.prix ?? 0), 0) || 0) +
+                                                        (delivery.commandes?.reduce((sum, cmd) => sum + (cmd.fraisLivraison ?? 0), 0) || 0)
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <div className="flex gap-2 items-center">
+                                                <DeliveryTools delivery={delivery} restaurant={restaurant} />
                                             </div>
                                         </CardHeader>
+                                        <CardBody className="py-3">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Package className="text-gray-400" />
+                                                <span className="font-medium">
+                                                    {delivery.nombreCommande} commande{delivery.nombreCommande > 1 ? 's' : ''}
+                                                </span>
+                                            </div>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Clock className="text-gray-400" />
+                                                <span>Créé le {delivery.createdAt ? dayjs(delivery.createdAt).locale('fr').format('D MMMM YYYY [à] HH:mm') : '-'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <Clock className="text-gray-400" />                                        
 
-                                        <CardBody className="p-4 sm:p-6 pt-0">
-                                            <div className="space-y-4 sm:space-y-5">
+                                                {/* Statut */}
+                                                <Chip
+                                                    color={getStatusColor(delivery.statut)}
+                                                    variant="flat" className="text-sm font-medium px-2 py-0.5 rounded-md">
+                                                    {delivery.statut}
+                                                </Chip>
 
-                                                {/* Info restaurant desktop */}
-                                                <div className="hidden sm:flex items-start gap-3">
-                                                    <Store className="text-default-500 mt-1 h-5 w-5 flex-shrink-0" />
-                                                    <div className="min-w-0 flex-1">
-                                                        <p className="text-default-700 font-medium text-base">
-                                                            {delivery.restaurant.nomEtablissement}
-                                                        </p>
-                                                        <p className="text-default-500 text-sm">
-                                                            {delivery.restaurant.commune}
-                                                        </p>
-                                                    </div>
-                                                </div>
-
-                                                <Divider className="hidden sm:block" />
-
-                                                {/* Résumé commande - Layout amélioré */}
-                                                <div className="bg-default-50 rounded-lg p-3 sm:p-4">
-                                                    <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-3 xs:gap-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <Package className="text-primary h-4 w-4 sm:h-5 sm:w-5" />
-                                                            <span className="text-sm sm:text-base font-medium">
-                                                                {delivery.nombreCommande} commande{delivery.nombreCommande > 1 ? 's' : ''}
-                                                            </span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xl sm:text-2xl font-bold text-primary">
-                                                                {delivery.total.toFixed(2)}
-                                                            </span>
-                                                            <span className="text-sm text-default-500">XOF</span>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Horaires - Design compact */}
-                                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                                                    {/* Début */}
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="text-success h-4 w-4 flex-shrink-0" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-xs text-default-500">Début</p>
-                                                            <p className="text-sm font-medium text-default-700 truncate">
-                                                                {formatDate(delivery.createdAt, 'DD/MM/YYYY HH:mm:ss')}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Pickup */}
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="text-blue-500 h-4 w-4 flex-shrink-0" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-xs text-default-500">Prise en charge</p>
-                                                            <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.pickupAt ? formatDate(delivery.pickupAt, 'DD/MM/YYYY HH:mm:ss') : 'En attente...'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Delivered */}
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="text-indigo-500 h-4 w-4 flex-shrink-0" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-xs text-default-500">Livraison</p>
-                                                            <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.deliveredAt ? formatDate(delivery.deliveredAt, 'DD/MM/YYYY HH:mm:ss') : 'Non livré'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Payout */}
-                                                    <div className="flex items-center gap-2">
-                                                        <Clock className="text-purple-500 h-4 w-4 flex-shrink-0" />
-                                                        <div className="min-w-0 flex-1">
-                                                            <p className="text-xs text-default-500">Reversement</p>
-                                                            <p className="text-sm font-medium text-default-700 truncate">
-                                                                {delivery.payoutAt ? formatDate(delivery.payoutAt, 'DD/MM/YYYY HH:mm:ss') : 'En attente...'}
-                                                            </p>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                {/* Section détails expandable - Améliorée */}
-                                                {expandedDelivery === delivery.id && (
-                                                    <div className="mt-4 sm:mt-6 space-y-3 sm:space-y-4 border-t pt-4 sm:pt-6">
-                                                        <h4 className="text-base sm:text-lg font-semibold text-default-700 mb-3 sm:mb-4">
-                                                            Détails des commandes ({delivery.commandes.length})
-                                                        </h4>
-
-                                                        <div className="space-y-3 sm:space-y-4 max-h-96 overflow-y-auto">
-                                                            {delivery.commandes.map((commande, index) => (
-                                                                <Card key={commande.id} className="bg-default-25 border border-default-200">
-                                                                    <CardHeader className="p-3 sm:p-4 pb-2">
-                                                                        <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-2 xs:gap-4 w-full">
-                                                                            {/* Partie gauche : statut + numéro */}
-                                                                            <div className="flex flex-col xs:flex-row xs:items-center gap-2">
-                                                                                <Chip
-                                                                                    size="sm"
-                                                                                    variant="flat"
-                                                                                    color={getCommandeStatusColor(commande.statut)}
-                                                                                    className="w-fit"
-                                                                                >
-                                                                                    {commande.statut ?? 'EN_ATTENTE'}
-                                                                                </Chip>
-                                                                                <span className="text-default-600 font-medium text-sm">
-                                                                                    Commande #{commande.numero}
-                                                                                </span>
-                                                                            </div>
-
-                                                                            {/* Partie droite : numéro + bouton QR */}
-                                                                            <div className="flex items-center gap-2">
-                                                                                <Chip size="sm" variant="solid" color="primary">{index + 1}</Chip>
-
-                                                                                {/* Bouton QR Code */}
-                                                                                <button onClick={() => setOpenQrCodeId(commande.id)} className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-default-100 transition">
-                                                                                    <QrCode className="w-4 h-4 text-default-600" /> QR Code
-                                                                                </button>
-
-                                                                                {/* Bouton Annuler */}
-                                                                                <button
-                                                                                    onClick={() => cancelCommandeExterne(commande.id)}
-                                                                                    className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-red-100 transition"
-                                                                                >
-                                                                                    <XCircle className="w-4 h-4 text-red-600" /> {/* Icône à la place de l’emoji */}
-                                                                                    Annuler
-                                                                                </button>
-
-                                                                                {/* Bouton Terminer */}
-                                                                                {commande.statut === 'EN_ATTENTE_VERSEMENT' && (
-                                                                                    <button
-                                                                                        onClick={() => terminerCommandeExterne(commande.id)}
-                                                                                        className="flex items-center gap-1 px-3 py-1 rounded-lg border text-sm font-medium text-default-700 hover:bg-green-100 transition"
-                                                                                    >
-                                                                                        <CheckCircle className="w-4 h-4 text-green-600" /> {/* Icône pour terminer */}
-                                                                                        Terminer
-                                                                                    </button>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                    </CardHeader>
-
-                                                                    <CardBody className="p-3 sm:p-4 pt-0">
-                                                                        <div className="space-y-3">
-
-                                                                            {/* Destinataire */}
-                                                                            <div className="flex items-start gap-2">
-                                                                                <User className="text-default-500 mt-0.5 h-4 w-4 flex-shrink-0" />
-                                                                                <div className="min-w-0 flex-1">
-                                                                                    <p className="text-default-500 text-xs break-all">
-                                                                                        {commande.destinataire.contact}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            {/* Lieu de livraison */}
-                                                                            <div className="flex items-start gap-2">
-                                                                                <MapPin className="text-default-500 mt-0.5 h-4 w-4 flex-shrink-0" />
-                                                                                <div className="min-w-0 flex-1">
-                                                                                    <p className="text-xs text-default-500">Coordonnées</p>
-                                                                                    <p className="text-default-600 text-xs font-mono break-all">
-                                                                                        {`${commande.lieuLivraison.latitude}, ${commande.lieuLivraison.longitude}`}
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <Divider />
-
-                                                                            {/* Prix et paiement */}
-                                                                            <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2 xs:gap-4">
-                                                                                <div className="flex items-center gap-2">
-                                                                                    <CreditCard className="text-default-500 h-4 w-4" />
-                                                                                    <span className="text-default-600 text-sm">
-                                                                                        {commande.modePaiement}
-                                                                                    </span>
-                                                                                </div>
-                                                                                <div className="flex items-center gap-1">
-                                                                                    <span className="font-bold text-primary text-base">
-                                                                                        {commande.prix.toFixed(2)}
-                                                                                    </span>
-                                                                                    <span className="text-xs text-default-500">XOF</span>
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    </CardBody>
-                                                                    <DeliveryQRCodeCommande restaurant={restaurant} delivery={delivery} commande={commande} open={openQrCodeId === commande.id} setOpen={() => setOpenQrCodeId(null)} />
-                                                                </Card>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                )}
+                                                {/* Date de prise en charge */}
+                                                <span className="text-sm text-gray-700">
+                                                    Prise en charge : {delivery.pickupAt ? dayjs(delivery.pickupAt).format('DD/MM/YYYY HH:mm:ss') : '—'}
+                                                </span>
                                             </div>
                                         </CardBody>
                                     </Card>

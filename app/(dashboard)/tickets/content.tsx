@@ -1,11 +1,11 @@
 'use client';
 
-import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Pagination, RangeValue, CalendarDate, DateRangePicker } from '@heroui/react';
-import { title } from '@/components/primitives';
-import useContentCtx from './useContentCtx';
-import { Calendar, Cherry, CircleFadingPlus, Home, SquareMenu, ToggleRight, User } from 'lucide-react';
-import { PaginatedResponse } from '@/types/models';
 import { BonLivraisonVM } from '@/types';
+import useContentCtx from './useContentCtx';
+import { title } from '@/components/primitives';
+import { PaginatedResponse } from '@/types/models';
+import { Calendar, Cherry, CircleFadingPlus, Home, SquareMenu, ToggleRight, User } from 'lucide-react';
+import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Pagination, RangeValue, CalendarDate, DateRangePicker, CardBody, Card } from '@heroui/react';
 
 interface ContentProps {
     initialData: PaginatedResponse<BonLivraisonVM> | null;
@@ -17,11 +17,21 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
 
     return (
         <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4">
-            <span>Rechercher par période</span>
-            <DateRangePicker className="max-w-xs relative" onChange={(value) => handleDateChange(value as RangeValue<CalendarDate>)} />
             <div className="flex items-center justify-between">
-                <h1 className={title({ size: 'h3', class: 'text-primary' })}>Gestions des tickets</h1>
+                <h3 className={title({ size: 'h3', class: 'text-primary' })}>Mes Tickets</h3>
             </div>
+            <Card>
+                <CardBody className="flex items-center justify-between">
+                    {/* Gauche */}
+                    <div className="text-gray-700 font-medium">Rechercher par période</div>
+
+                    {/* Droite */}
+                    <DateRangePicker
+                        className="max-w-xs"
+                        onChange={(value) => handleDateChange(value as RangeValue<CalendarDate>)}
+                    />
+                </CardBody>
+            </Card>
             <Table aria-label="Example table with custom cells rounded-md">
                 <TableHeader columns={columns}>
                     {(column) => (
@@ -53,9 +63,13 @@ export default function Content({ initialData, restaurantId }: ContentProps) {
                     {(item) => <TableRow key={item.commandeId}>{(columnKey) => <TableCell>{renderCell(item, columnKey) as React.ReactNode}</TableCell>}</TableRow>}
                 </TableBody>
             </Table>
-            <div className="flex h-fit z-10 justify-center mt-8 fixed bottom-4">
-                <div className="bg-gray-200 absolute inset-0 w-full h-full blur-sm opacity-50"></div>
-                <Pagination total={data?.totalPages ?? 1} page={currentPage} onChange={handlePageChange} showControls color="primary" variant="bordered" isDisabled={isLoading} />
+            <div className="flex justify-center pt-4 sm:pt-6">
+                <Pagination
+                    total={data?.totalPages ?? 1}
+                    page={currentPage}
+                    onChange={handlePageChange}
+                    color="primary"
+                />
             </div>
         </div>
     );

@@ -1,19 +1,35 @@
 'use client';
 
-import { getAllBonLivraisons } from '@/src/actions/tickets.actions';
+import dayjs from 'dayjs';
+import { toast } from 'react-toastify';
 import { BonLivraisonVM } from '@/types';
 import { PaginatedResponse } from '@/types/models';
-import { CalendarDate, RangeValue, Switch } from '@heroui/react';
 import { Key, useCallback, useEffect, useState } from 'react';
-import { toast } from 'react-toastify';
+import { CalendarDate, Chip, RangeValue } from '@heroui/react';
+import { getAllBonLivraisons } from '@/src/actions/tickets.actions';
+
+const getStatusColor = (statut: string) => {
+    switch (statut?.toUpperCase()) {
+        case 'VALIDER':
+            return 'warning';
+        case 'TERMINER':
+            return 'success';
+        case 'ANNULER':
+            return 'danger';
+        case 'EN_ATTENTE':
+            return 'secondary';
+        default:
+            return 'default';
+    }
+};
 
 export const columns = [
-    { name: 'Référence', uid: 'reference' },
-    { name: 'Date et Heure', uid: 'date' },
-    { name: 'Livreur', uid: 'livreur' },
-    { name: 'Coût livraison', uid: 'coutLivraison' },
-    { name: 'Coût commande', uid: 'coutCommande' },
-    { name: 'Terminé', uid: 'statut' },
+    { name: 'CODE', uid: 'reference' },
+    { name: 'LIVREUR', uid: 'livreur' },
+    { name: 'COMMANDE TOTALE', uid: 'coutCommande' },
+    { name: 'COÛT DE LIVRAISON', uid: 'coutLivraison' },
+    { name: 'DATE ET HEURE', uid: 'date' },
+    { name: 'STATUT DE LA COMMANDE', uid: 'statut' },
 ];
 
 interface Props {
@@ -67,11 +83,43 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
             case 'livreur':
                 return <p>{cellValue?.toString() ?? '-'}</p>;
             case 'coutLivraison':
-                return <p>{String(cellValue) + ' FCFA'}</p>;
+                return (
+                    <p>
+                        {new Intl.NumberFormat('fr-FR', {
+                            style: 'currency',
+                            currency: 'XOF',
+                        }).format(Number(cellValue) || 0)}
+                    </p>
+                );
             case 'coutCommande':
-                return <p>{String(cellValue) + ' FCFA'}</p>;
+                return (
+                    <p>
+                        {new Intl.NumberFormat('fr-FR', {
+                            style: 'currency',
+                            currency: 'XOF',
+                        }).format(Number(cellValue) || 0)}
+                    </p>
+                );
             case 'statut':
-                return cellValue == 'TERMINER' ? <Switch size="sm" color="primary" readOnly isSelected /> : <Switch size="sm" isSelected={false} readOnly />;
+                return (
+                    <Chip
+                        color={getStatusColor(String(cellValue ?? ''))}
+                        variant="flat" className="text-sm font-medium px-2 py-0.5 rounded-md">
+                        {String(cellValue ?? '')}
+                    </Chip>
+                );
+            case 'date':
+                return (
+                    <p>
+                        {dayjs(
+                            (
+                                typeof cellValue === 'object' && cellValue !== null && 'hour' in cellValue
+                                    ? `1970-01-01T${String(cellValue.hour).padStart(2, '0')}:${String(cellValue.minute).padStart(2, '0')}:${String(cellValue.second ?? 0).padStart(2, '0')}`
+                                    : cellValue
+                            ) as string | number | Date | undefined // ✅ typage explicite accepté par dayjs
+                        ).format('DD/MM/YYYY')}
+                    </p>
+                );
             default:
                 return cellValue;
         }
