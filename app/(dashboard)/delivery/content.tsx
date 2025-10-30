@@ -8,14 +8,13 @@ import { SORT_OPTIONS } from '@/data';
 import { IconPlus } from '@tabler/icons-react';
 import { title } from '@/components/primitives';
 import { courses_statuses_filters } from '@/data';
-import createUrlFile from '@/utils/createUrlFile';
 import DeliveryTools from './component/deliveryTools';
 import { Clock, Package, Store, Search } from 'lucide-react';
 import EmptyDataTable from '@/components/commons/EmptyDataTable';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
 import { CourseExterne, PaginatedResponse, Restaurant } from '@/types/models';
-import { Button, Card, CardBody, CardHeader, Input, Chip, Pagination, Skeleton, Select, SelectItem, CardFooter, Avatar } from "@heroui/react";
+import { Button, Card, CardBody, CardHeader, Input, Chip, Pagination, Skeleton, Select, SelectItem, } from "@heroui/react";
 
 type SortOption = (typeof SORT_OPTIONS)[keyof typeof SORT_OPTIONS];
 dayjs.locale('fr')
@@ -63,23 +62,6 @@ const getStatusTextColor = (statut: string) => {
     }
 };
 
-const getCommandeStatusColor = (statut: string) => {
-    switch (statut?.toUpperCase()) {
-        case 'EN_ATTENTE_VERSEMENT':
-            return 'warning';
-        case 'TERMINER':
-            return 'success';
-        case 'ANNULER':
-            return 'danger';
-        case 'RECUPERER':
-            return 'secondary';
-        case 'EN_COURS_LIVRAISON':
-            return 'secondary';
-        default:
-            return 'default';
-    }
-};
-
 const getStatusBorderClass = (statut: string) => {
     switch (statut.toUpperCase()) {
         case 'VALIDER':
@@ -101,18 +83,16 @@ interface Props {
 }
 
 export default function Content({ restaurant, initialData }: Props) {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('all');
-    const [monthFilter, setMonthFilter] = useState('all'); // AJOUT : État pour le filtre par mois
-    const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.DATE_DESC);
-    const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(6);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [monthFilter, setMonthFilter] = useState('all'); 
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [sortBy, setSortBy] = useState<SortOption>(SORT_OPTIONS.DATE_DESC);
     const [data, setData] = useState<PaginatedResponse<CourseExterne> | null>(initialData);
     const [dataFilter, setDataFilter] = useState<CourseExterne[]>(data?.content ?? []);
     const [isLoading, setIsLoading] = useState(!initialData);
 
-    // === NOUVEAU ===
     // Fonction fetchData optimisée, mémorisée avec useCallback
     const fetchData = useCallback(async (page: number = currentPage) => {
         try {
@@ -120,13 +100,12 @@ export default function Content({ restaurant, initialData }: Props) {
             setData(newData);
         } catch (error) {
             console.error('Error fetching data:', error);
-        } 
+        }
     }, [restaurant.id, currentPage, pageSize]);
 
     // === Polling automatique toutes les 15s ===
     useEffect(() => {
-        const intervalId = setInterval(() => fetchData(currentPage), 15000); // 15000ms = 15s
-
+        const intervalId = setInterval(() => fetchData(currentPage), 15000);
         return () => clearInterval(intervalId);
     }, [fetchData, currentPage]);
 
@@ -177,16 +156,15 @@ export default function Content({ restaurant, initialData }: Props) {
         setMonthFilter('all');
     }, [setSearchTerm, setSortBy, setCurrentPage, setStatusFilter, setMonthFilter]);
 
-    const handleSearchChange = (value: string) => setSearchTerm(value);
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+    }
 
     const handleMonthChange = (keys: any) => {
         // HeroUI Select renvoie un Set, nous prenons le premier élément ou 'all' par défaut
         const selectedKey = Array.from(keys)[0] as string;
-        console.log(selectedKey);
         setMonthFilter(selectedKey || 'all');
     };
-
-    const toggleExpand = (deliveryId: string) => setExpandedDelivery(expandedDelivery === deliveryId ? null : deliveryId);
 
     return (
         <div className="w-full min-h-screen bg-background">
@@ -413,7 +391,7 @@ export default function Content({ restaurant, initialData }: Props) {
                                                 <span>Créé le {delivery.createdAt ? dayjs(delivery.createdAt).locale('fr').format('D MMMM YYYY [à] HH:mm') : '-'}</span>
                                             </div>
                                             <div className="flex items-center gap-2 mb-2">
-                                                <Clock className="text-gray-400" />                                        
+                                                <Clock className="text-gray-400" />
 
                                                 {/* Statut */}
                                                 <Chip

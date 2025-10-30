@@ -1,9 +1,9 @@
-import React, { Suspense } from 'react';
 import Content from './content';
-import Loading from '@/components/layouts/loading';
-import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
-import { findOneRestaurant } from '@/src/actions/restaurant.actions';
+import React, { Suspense } from 'react';
 import { redirect } from 'next/navigation';
+import Loading from '@/components/layouts/loading';
+import { findOneRestaurant } from '@/src/actions/restaurant.actions';
+import { getPaginationCourseExterne } from '@/src/actions/courses.actions';
 
 export default async function DeliveryPage() {
     const data = await findOneRestaurant();

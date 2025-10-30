@@ -12,7 +12,9 @@ import { Transition, Dialog, TransitionChild, DialogPanel } from '@headlessui/re
 import { cancelCommandeExterne } from '@/src/actions/courses.actions';
 
 const getStatusBgColor = (statut: string = ''): string => {
-    switch (statut.toUpperCase()) {
+    const normalized = statut ? statut.toUpperCase() : "INCONNU";
+
+    switch (normalized) {
         case 'VALIDER':
             return 'bg-green-600 text-white';
         case 'TERMINER':

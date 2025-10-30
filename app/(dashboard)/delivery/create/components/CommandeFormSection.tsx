@@ -163,7 +163,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             const imageUrl = URL.createObjectURL(imageBlob);
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
-            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne le numero_commande, le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix), frais_livraison et le total_commande = total_commande - frais_livraison, si les frais_livraison sont detectés avant le total commande, sinon total_commande = total_commande + frais_livraison en json: ${extractedTextResult}`;
+            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne [le numero_commande(Si CHECK existe, prend sa valeur sinon prend la valeur de ORDER), le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix), frais_livraison et le total_commande = total_commande - frais_livraison, si frais_livraison est mentionné avant total commande. Si frais_livraison est mentionné après total_commande alors total_commande = total_commande + frais_livraison] en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }
@@ -519,11 +519,14 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             <Button
                                 color="primary"
                                 className="flex-1"
-                                onPress={async () => {
+                                onPress={() => {
                                     setIsModalOpen(false);
-                                    await startCamera();
+                                    if (fileInputRef.current) {
+                                    fileInputRef.current.setAttribute('capture', 'environment');
+                                    fileInputRef.current.click();
+                                    }
                                 }}
-                            >
+                                >
                                 <Camera className="w-4 h-4 mr-2" />
                                 Scanner via Caméra
                             </Button>
@@ -533,9 +536,12 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 className="flex-1"
                                 onPress={() => {
                                     setIsModalOpen(false);
-                                    fileInputRef.current?.click();
+                                    if (fileInputRef.current) {
+                                        fileInputRef.current.removeAttribute('capture'); // ✅ supprime le mode caméra
+                                        fileInputRef.current.click();
+                                    }
                                 }}
-                            >
+                                >
                                 <FileText className="w-4 h-4 mr-2" />
                                 Uploader une image
                             </Button>

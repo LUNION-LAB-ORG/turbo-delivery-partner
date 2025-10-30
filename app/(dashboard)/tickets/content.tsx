@@ -10,7 +10,7 @@ import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Pagina
 interface ContentProps {
     initialData: PaginatedResponse<BonLivraisonVM> | null;
     restaurantId?: string;
-}
+}  
 
 export default function Content({ initialData, restaurantId }: ContentProps) {
     const { columns, renderCell, data, handlePageChange, currentPage, isLoading, handleDateChange } = useContentCtx({ initialData, restaurantId });
