@@ -163,7 +163,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             const imageUrl = URL.createObjectURL(imageBlob);
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
-            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne [le numero_commande(Si CHECK existe, prend sa valeur sinon prend la valeur de ORDER), le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix), frais_livraison et le total_commande = total_commande - frais_livraison, si frais_livraison est mentionné avant total commande. Si frais_livraison est mentionné après total_commande alors total_commande = total_commande + frais_livraison] en json: ${extractedTextResult}`;
+            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne [le numero_commande(Si CHECK existe, prend sa valeur sinon prend la valeur de ORDER), le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix), frais_livraison et le total_commande(total_commande = total_commande + frais_livraison, si frais_livraison est mentionné après total_commande. total_commande = total_commande - frais_livraison, si frais_livraison est mentionné avant total_commande)] en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }
