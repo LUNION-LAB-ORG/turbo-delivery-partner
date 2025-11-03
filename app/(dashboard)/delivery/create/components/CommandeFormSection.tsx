@@ -126,18 +126,34 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     const fillFormFromText = (jsonString: string) => {
         try {
             const data = extractJsonFromString(JSON.parse(jsonString));
-
+            console.log(data)
             const numeroCommande = data.numero_commande || '';
             const contact = data.numero_telephone || '';
-            const fraisLivraison = parseInt(data.frais_livraison || '0', 10);
+            const zoneLivraison = data.zone_livraison?.trim().toLowerCase() || '';
+            let fraisLivraison = parseInt(data.frais_livraison || '0', 10);
             const total = parseInt(data.total_commande || '0', 10);
 
+            // 🔍 Découpe la zone en plusieurs mots clés (ex: "Cocody Angré" → ["cocody", "angré"])
+            const motsZone = zoneLivraison.split(/\s+/).filter(Boolean);
+
             // 🔍 Trouve la zone correspondante
-            const zoneSelectionnee = fraisLivraisons.find(z => z.prix == fraisLivraison);
+            const zoneSelectionnee = fraisLivraisons.find(z => {
+                const prixMatch = Number(z.prix) === fraisLivraison;
+
+                const name = z.name?.toLowerCase() || '';
+
+                // Vérifie si AU MOINS UN mot correspond dans le nom de la zone
+                const nameMatch = motsZone.some((mot: string) => name.includes(mot));
+                if (!prixMatch && nameMatch) {
+                    fraisLivraison = Number(z.prix);
+                }
+
+                return prixMatch || nameMatch;
+            });
 
             // ✅ Affiche un résumé visuel
             setExtractedText(
-                `N° Commande: ${numeroCommande} | N° Tel: ${contact} | Frais Livraison: ${fraisLivraison} | Total: ${total}`
+                `N° Commande: ${numeroCommande} | N° Tel: ${contact} | Frais Livraison: ${fraisLivraison} | Zone de Livraison: ${zoneLivraison} | Total: ${total}`
             );
 
             // ✅ Remplit les champs du formulaire
@@ -163,7 +179,11 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             const imageUrl = URL.createObjectURL(imageBlob);
             let extractedTextResult = await extractText(imageUrl);
             URL.revokeObjectURL(imageUrl);
-            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne [le numero_commande(Si CHECK existe, prend sa valeur sinon prend la valeur de ORDER), le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix), frais_livraison et le total_commande(total_commande = total_commande + frais_livraison, si frais_livraison est mentionné après total_commande. total_commande = total_commande - frais_livraison, si frais_livraison est mentionné avant total_commande)] en json: ${extractedTextResult}`;
+            extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne [
+                le numero_commande(Si CHECK ou FACTURE ou Ticket ou "Num de fact" existe, prend sa valeur sinon prend la valeur de ORDER. Ou bien prend la valeur après la ligne "Servi par"), 
+                le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix, Si Customer Phone existe, prend sa valeur), 
+                frais_livraison, zone_livraison(Si Debonairs Pizza est dans le texte, la zone de livraison est dans le cadrant client, sur la deuxième ligne. Sinon Si Customer Address existe prend sa valeur) 
+                et le total_commande(si Montant TTC existe, prend sa valeur(Tu ne prendras que la valeur numériquement convertible), si frais_livraison est mentionné avant le total, soustrait frais_livraison du total)] en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }
@@ -172,7 +192,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
 
     return (
         <>
-            <Card className="p-4 space-y-4 rounded-xl bg-background border-l-4 border-l-primary shadow-md">
+            <Card className="p-4 space-y-4 rounded-xl bg-background border-l-4 border-l-primary shadow-md w-full max-w-[1200px] mx-auto">
                 {/* Header avec scanner à droite */}
                 <div className="flex justify-between items-center bg-muted/30 dark:bg-muted p-3 rounded-md">
                     <div className="flex items-center gap-2">
@@ -187,7 +207,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             color="primary"
                             size="sm"
                             onPress={() => setIsModalOpen(true)}
-                            className="flex items-center gap-1 h-7 min-h-0"
+                            className="flex items-center gap-1 h-7 min-h-0 sm:w-auto"
                         >
                             <Camera className="h-4 w-4" />
                             <span>Scanner</span>
@@ -202,7 +222,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 color="danger"
                                 size="sm"
                                 onPress={() => remove(index)}
-                                className="h-7 min-h-0"
+                                className="h-7 min-h-0 sm:w-auto"
                             >
                                 <TrashIcon className="h-3 w-3" />
                             </Button>
@@ -230,16 +250,16 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                         )}
 
                         {scannedImage && (
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <img
                                         src={scannedImage}
                                         alt="Document scanné"
-                                        className="w-full rounded-lg border shadow-sm"
+                                        className="w-full max-h-[300px] object-contain rounded-lg border shadow-sm"
                                     />
                                     <Button
                                         variant="bordered"
-                                        className="mt-2 w-full"
+                                        className="mt-2 w-full sm:w-auto"
                                         onPress={resetScanner}
                                     >
                                         Scanner un autre ticket
@@ -303,7 +323,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                                     inputMode="numeric"
                                                     value={formatMontant(field.value ?? '')}
                                                     placeholder="Ex: 2 000"
-                                                    className="w-full h-10"
+                                                    className="w-full min-w-0 h-10"
                                                     onChange={handleChange}
                                                     onBlur={(e) => e.target.value = formatMontant(field.value ?? '')}
                                                 />
@@ -319,7 +339,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 <FormItem className="space-y-1">
                                     <FormLabel>N° Commande</FormLabel>
                                     <FormControl>
-                                        <Input {...field} className="w-full h-10" placeholder="Ex: 12345" />
+                                        <Input {...field} className="w-full min-w-0 h-10" placeholder="Ex: 12345" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -391,6 +411,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                             <FormControl>
                                                 <Input
                                                     type="number"
+                                                    className='w-full min-w-0'
                                                     min={0}
                                                     {...field}
                                                     value={field.value ?? 0}
@@ -401,7 +422,6 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                         </FormItem>
                                     )}
                                 />
-
                             )}
                         </Card>
                     </div>
@@ -414,7 +434,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 <FormItem className="space-y-1">
                                     <FormLabel>N° Téléphone</FormLabel>
                                     <FormControl>
-                                        <InputPhone value={field.value ?? ''} setValue={field.onChange} className="h-10" />
+                                        <InputPhone value={field.value ?? ''} setValue={field.onChange} className="w-full min-w-0 h-10" />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -515,10 +535,10 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                             Vous pouvez soit prendre une photo avec la caméra, soit uploader un ticket existant.
                         </p>
 
-                        <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="flex flex-col sm:flex-row gap-3 w-full">
                             <Button
                                 color="primary"
-                                className="flex-1"
+                                className="flex-1 sm:w-auto"
                                 onPress={() => {
                                     setIsModalOpen(false);
                                     if (fileInputRef.current) {
@@ -533,7 +553,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
 
                             <Button
                                 variant="bordered"
-                                className="flex-1"
+                                className="flex-1 sm:w-auto"
                                 onPress={() => {
                                     setIsModalOpen(false);
                                     if (fileInputRef.current) {
