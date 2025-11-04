@@ -183,7 +183,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                 le numero_commande(Si CHECK ou FACTURE ou Ticket ou "Num de fact" existe, prend sa valeur sinon prend la valeur de ORDER. Ou bien prend la valeur après la ligne "Servi par"), 
                 le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix, Si Customer Phone existe, prend sa valeur), 
                 frais_livraison, zone_livraison(Si Debonairs Pizza est dans le texte, la zone de livraison est dans le cadrant client, sur la deuxième ligne. Sinon Si Customer Address existe prend sa valeur) 
-                et le total_commande(si Montant TTC existe, prend sa valeur(Tu ne prendras que la valeur numériquement convertible), si frais_livraison est detecté avant le total, soustrait frais_livraison du total. si frais_livraison est detecté après le total ne fait pas de soustraction du total)] en json: ${extractedTextResult}`;
+                et le total_commande(si Montant TTC existe, prend sa valeur(Tu ne prendras que la valeur numériquement convertible), si frais_livraison est mentionné avant le total, soustrait frais_livraison du total)] en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }

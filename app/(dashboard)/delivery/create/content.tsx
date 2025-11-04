@@ -116,7 +116,9 @@ const CourseExterneForm = ({ initialData, isEditing = false, restaurant, fraisLi
             const result = await addCourseExterne(payload, restaurant.id);
             if (result.status === 'success') {
                 toast.success(result.message);
-                router.push('/delivery');
+                setTimeout(() => {
+                    window.location.href = '/delivery';
+                }, 500);
             } else {
                 toast.error(result.message);
             }
