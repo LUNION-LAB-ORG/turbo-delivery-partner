@@ -7,6 +7,7 @@ import { Restaurant } from '@/types/models';
 import { Input } from '@/components/ui/input';
 import { Button, Switch } from '@heroui/react';
 import { AddressFields } from './AddressFields';
+// import { createWorker, PSM } from 'tesseract.js';
 import { DeliveryFee } from '@/types/restaurant';
 import { useState, useEffect, useRef } from "react";
 import { InputPhone } from '@/components/ui/form-ui/input-phone';
@@ -97,10 +98,50 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     };
 
     /** --------------------- OCR & OpenAI --------------------- */
-    const extractText = async (imageUrl: string): Promise<string> => {
-        const { data } = await Tesseract.recognize(imageUrl, 'fra', { logger: () => null });
-        return data.text;
-    };
+    // const extractText = async (imageUrl: string): Promise<string> => {
+    //     // Crée le worker et attend qu'il soit prêt
+    //     const worker = await createWorker();
+
+    //     // // Définir les paramètres OCR
+    //     await worker.setParameters({
+    //         tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789.,€CFA',
+    //         tessedit_pageseg_mode: PSM.SINGLE_BLOCK, // équivalent psm:6
+    //     });
+
+    //     // // Reconnaissance OCR
+    //     const { data } = await worker.recognize(imageUrl);
+
+    //     // // Libération du worker
+    //     await worker.terminate();
+
+    //     return data.text;
+    // };
+
+    const extractTextFromImage = async (file: File | Blob) => {
+        const image = new Image();
+        image.src = URL.createObjectURL(file);
+        await new Promise((resolve) => (image.onload = resolve));
+
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d')!;
+        canvas.width = image.width;
+        canvas.height = image.height;
+        ctx.drawImage(image, 0, 0);
+
+        // ⚙️ Traitement basique : passage en niveaux de gris
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+            data[i] = data[i + 1] = data[i + 2] = avg;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
+        const base64 = canvas.toDataURL('image/png');
+        const { data: ocrData } = await Tesseract.recognize(base64, 'fra');
+        return ocrData.text;
+    }
+
     const analyzeWithOpenAI = async (prompt: string): Promise<string> => {
         setIsProcessing(true);
         try {
@@ -126,7 +167,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
     const fillFormFromText = (jsonString: string) => {
         try {
             const data = extractJsonFromString(JSON.parse(jsonString));
-            console.log(data)
+            
             const numeroCommande = data.numero_commande || '';
             const contact = data.numero_telephone || '';
             const zoneLivraison = data.zone_livraison?.trim().toLowerCase() || '';
@@ -139,15 +180,16 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
             // 🔍 Trouve la zone correspondante
             const zoneSelectionnee = fraisLivraisons.find(z => {
                 const prixMatch = Number(z.prix) === fraisLivraison;
-
                 const name = z.name?.toLowerCase() || '';
-
-                // Vérifie si AU MOINS UN mot correspond dans le nom de la zone
+            
+                // Vérifie si au moins un mot correspond dans le nom de la zone
                 const nameMatch = motsZone.some((mot: string) => name.includes(mot));
-                if (!prixMatch && nameMatch) {
+            
+                // ✅ Ne modifie fraisLivraison que si prixMatch est faux ET que fraisLivraison est null/undefined
+                if (!prixMatch && nameMatch && (fraisLivraison == null)) {
                     fraisLivraison = Number(z.prix);
                 }
-
+            
                 return prixMatch || nameMatch;
             });
 
@@ -177,18 +219,89 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
         setError('');
         try {
             const imageUrl = URL.createObjectURL(imageBlob);
-            let extractedTextResult = await extractText(imageUrl);
+            let extractedTextResult = await extractTextFromImage(imageBlob);
+
             URL.revokeObjectURL(imageUrl);
             extractedTextResult = `Prompt: Extrait à partir de ce texte et retourne [
                 le numero_commande(Si CHECK ou FACTURE ou Ticket ou "Num de fact" existe, prend sa valeur sinon prend la valeur de ORDER. Ou bien prend la valeur après la ligne "Servi par"), 
                 le numero_telephone(prefixe tjrs par +225 s'il n'y a pas de prefix, Si Customer Phone existe, prend sa valeur), 
-                frais_livraison, zone_livraison(Si Debonairs Pizza est dans le texte, la zone de livraison est dans le cadrant client, sur la deuxième ligne. Sinon Si Customer Address existe prend sa valeur) 
-                et le total_commande(si Montant TTC existe, prend sa valeur(Tu ne prendras que la valeur numériquement convertible), si frais_livraison est mentionné avant le total, soustrait frais_livraison du total)] en json: ${extractedTextResult}`;
+                frais_livraison(Frais de livraison ou Delivery ou Livraison), zone_livraison(Si Debonairs Pizza est dans le texte, la zone de livraison se trouve sur la 2ème ligne la ligne client. Sinon Si Customer Address existe prend sa valeur) 
+                et le total_commande(Montant TTC ou TOTAL ou TOTAL FACTURE ou TOTAL Tendered(Tu ne prendras que la valeur numériquement convertible, s'il contient la virgule, prend cela comme la valeur décimale))] en json: ${extractedTextResult}`;
             const resultJson = await analyzeWithOpenAI(extractedTextResult);
             fillFormFromText(resultJson);
         } catch (err: any) { setError(err.message || 'Erreur lors du traitement de l\'image'); }
         finally { setIsProcessing(false); }
     };
+
+    // const processImage = async (imageBlob: File | Blob) => {
+    //     setIsProcessing(true);
+    //     setError('');
+
+    //     try {
+    //         // Convertir l'image en Base64
+    //         const base64Data = await new Promise<string>((resolve, reject) => {
+    //             const reader = new FileReader();
+    //             reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
+    //             reader.onerror = reject;
+    //             reader.readAsDataURL(imageBlob);
+    //         });
+
+    //         const prompt = `
+    //         Extrait à partir de cette image et retourne UNIQUEMENT un objet JSON valide :
+    //         [
+    //           numero_commande (Si "CHECK", "FACTURE", "Ticket" ou "Num de fact" existe, prends sa valeur sinon celle après "Servi par"),
+    //           numero_telephone (préfixe toujours par +225 s'il n'y en a pas, si "Customer Phone" existe prends sa valeur, et s'il y a deux numéros, prends le deuxième),
+    //           frais_livraison,
+    //           zone_livraison (si "Debonairs Pizza" est présent, prends la zone du cadrant client ligne 2 ; sinon, si "Customer Address" existe, prends cette valeur),
+    //           total_commande (si "Montant TTC" existe, prends sa valeur numérique ; si "frais_livraison" est avant, soustrais-le du total)
+    //         ]
+    //         Réponds UNIQUEMENT avec le JSON brut, sans explication, sans texte avant ni après.
+    //       `;
+
+    //         const response = await fetch('https://api.mistral.ai/v1/chat/completions', {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Authorization': `Bearer ${process.env.NEXT_PUBLIC_MISTRAL_API_KEY}`,
+    //                 'Content-Type': 'application/json',
+    //             },
+    //             body: JSON.stringify({
+    //                 model: 'mistral-large-latest',
+    //                 messages: [
+    //                     {
+    //                         role: 'user',
+    //                         content: `${prompt}\n\nVoici l'image encodée en base64 :\n\n${base64Data}`,
+    //                     },
+    //                 ],
+    //             }),
+    //         });
+
+    //         if (!response.ok) {
+    //             const errorText = await response.text();
+    //             throw new Error(`Erreur API Mistral (${response.status}): ${errorText}`);
+    //         }
+
+    //         const data = await response.json();
+    //         let resultText = data?.choices?.[0]?.message?.content ?? '';
+    //         console.log('Réponse Mistral brute :', resultText);
+
+    //         // 🔍 Extraction du bloc JSON avec RegExp
+    //         const jsonMatch = resultText.match(/```json\s*([\s\S]*?)```/i) || resultText.match(/({[\s\S]*})/);
+    //         if (!jsonMatch) throw new Error("Aucun JSON valide trouvé dans la réponse");
+
+    //         const cleanJson = jsonMatch[1].trim();
+    //         console.log('JSON extrait :', cleanJson);
+
+    //         // ✅ Parsing du JSON propre
+    //         const resultJson = JSON.parse(cleanJson);
+    //         fillFormFromText(resultJson);
+
+    //     } catch (err: any) {
+    //         console.error('Erreur OCR Mistral:', err);
+    //         setError(err.message || 'Erreur lors du traitement de l\'image');
+    //     } finally {
+    //         setIsProcessing(false);
+    //     }
+    // };
 
     return (
         <>
@@ -542,11 +655,11 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                 onPress={() => {
                                     setIsModalOpen(false);
                                     if (fileInputRef.current) {
-                                    fileInputRef.current.setAttribute('capture', 'environment');
-                                    fileInputRef.current.click();
+                                        fileInputRef.current.setAttribute('capture', 'environment');
+                                        fileInputRef.current.click();
                                     }
                                 }}
-                                >
+                            >
                                 <Camera className="w-4 h-4 mr-2" />
                                 Scanner via Caméra
                             </Button>
@@ -561,7 +674,7 @@ export const CommandeFormSection = ({ index, form, remove, handleAddressSelect, 
                                         fileInputRef.current.click();
                                     }
                                 }}
-                                >
+                            >
                                 <FileText className="w-4 h-4 mr-2" />
                                 Uploader une image
                             </Button>

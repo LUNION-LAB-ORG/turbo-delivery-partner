@@ -24,13 +24,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
     const [sheetOpen, setSheetOpen] = useState(false);
     const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');
 
-    const turboNav = [
-        { href: '/delivery', icon: <TicketCheck className="h-5 w-5" />, label: 'Demande de TURBOY' },
-        { href: '/tickets', icon: <Hammer className="h-5 w-5" />, label: 'Mes Tickets' },
-        { href: '/file-attente', icon: <TbTruckDelivery className="h-5 w-5" />, label: 'Ma file d\'attente' },
-        { href: '/notification', icon: <Bell className="h-5 w-5" />, label: 'Notification' },
-        { href: '/analytics', icon: <Gauge className="h-5 w-5" />, label: 'Dashboard' },
-    ];
+    
 
     const ordersNav = [
         { href: '/mes-commandes', icon: <ShoppingBag className="h-5 w-5" />, label: 'Mes Commandes' },
@@ -46,6 +40,14 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
         { href: '/analytics', icon: <Gauge className="h-5 w-5" />, label: 'Dashboard' },
     ];
 
+    const turboNav = [
+        { href: '/delivery', icon: <TicketCheck className="h-5 w-5" />, label: 'Demande de TURBOY' },
+        { href: '/tickets', icon: <Hammer className="h-5 w-5" />, label: 'Mes Tickets' },
+        { href: '/file-attente', icon: <TbTruckDelivery className="h-5 w-5" />, label: 'Ma file d\'attente' },
+        { href: '/notification', icon: <Bell className="h-5 w-5" />, label: 'Notification' },
+        { href: '/analytics', icon: <Gauge className="h-5 w-5" />, label: 'Dashboard' },
+    ];
+    
     const navItems = activeSection === 'turbo' ? turboNav : ordersNav;
 
     // 🔹 Synchroniser activeSection avec le chemin actuel au chargement / changement de route

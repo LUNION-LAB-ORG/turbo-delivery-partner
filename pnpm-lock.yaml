@@ -308,6 +308,9 @@ importers:
       recharts:
         specifier: ^2.15.4
         version: 2.15.4(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      scribe.js-ocr:
+        specifier: ^0.9.0
+        version: 0.9.0(encoding@0.1.13)
       sharp:
         specifier: ^0.33.5
         version: 0.33.5
@@ -3173,6 +3176,12 @@ packages:
   '@rushstack/eslint-patch@1.13.0':
     resolution: {integrity: sha512-2ih5qGw5SZJ+2fLZxP6Lr6Na2NTIgPRL/7Kmyuw0uIyBQnuhQ8fi8fzUTd38eIQmqp+GYLC00cI6WgtqHxBwmw==}
 
+  '@scribe.js/tesseract.js-core@6.0.3':
+    resolution: {integrity: sha512-q2bXN0yQCEs5IA9138vF+xGSfNhOaMVdPKkuZNSiz3A+SfuRZuAU3iKzIXJMdSJnWvHSBOUPLDdqguClCNX9Qw==}
+
+  '@scribe.js/tesseract.js@6.0.3':
+    resolution: {integrity: sha512-9OxwpIvWklq6026xP8YLeMktylfh7QpNRpXto1OXHItHdTZb38bQ2BSH4kqhd4LorDB8qSbnp2myJ9Jxwq7ZVA==}
+
   '@smastrom/react-rating@1.5.0':
     resolution: {integrity: sha512-7vg3NRgO0tpvEunq8BEWA8qckNSd7x3dVGqaNEfLs3Ow4ibU2EEXJtnd7Yl44xOujWIzXM5Bk2VZm2DVm065Qw==}
     peerDependencies:
@@ -3608,6 +3617,9 @@ packages:
   '@webassemblyjs/wast-printer@1.14.1':
     resolution: {integrity: sha512-kPSSXE6De1XOR820C90RIo2ogvZG+c3KiHzqUoO/F34Y2shGzesfqv7o57xrxovZJH/MetF5UjroJ/R/3isoiw==}
 
+  '@webgpu/types@0.1.21':
+    resolution: {integrity: sha512-pUrWq3V5PiSGFLeLxoGqReTZmiiXwY3jRkIG5sLLKjyqNxrwm/04b4nw7LSmGWJcKk59XOM/YRTUwOzo4MMlow==}
+
   '@x1mrdonut1x/nouislider-react@3.4.3':
     resolution: {integrity: sha512-rv826yTgAlK28qpPTHk/2WG/oSdd2liFvS+Mp4NJfgTZnuTSI0/8GqP5l7z15hDLpMnMJuwIsh+YutyWTtpo3Q==}
     peerDependencies:
@@ -3915,6 +3927,9 @@ packages:
   caniuse-lite@1.0.30001750:
     resolution: {integrity: sha512-cuom0g5sdX6rw00qOoLNSFCJ9/mYIsuSOA+yzpDw8eopiFqcVwQvZHqov0vmEighRxX++cfC0Vg1G+1Iy/mSpQ==}
 
+  canvaskit-wasm@0.39.1:
+    resolution: {integrity: sha512-Gy3lCmhUdKq+8bvDrs9t8+qf7RvcjuQn+we7vTVVyqgOVO1UVfHpsnBxkTZw+R4ApEJ3D5fKySl9TU11hmjl/A==}
+
   cardinal@0.4.4:
     resolution: {integrity: sha512-3MxV0o9wOpQcobrcSrRpaSxlYkohCcZu0ytOjJUww/Yo/223q4Ecloo7odT+M0SI5kPgb1JhvSaF4EEuVXOLAQ==}
     hasBin: true
@@ -4007,6 +4022,10 @@ packages:
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
+
+  commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
 
   commander@2.20.3:
     resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
@@ -6405,6 +6424,10 @@ packages:
   schema-utils@4.3.3:
     resolution: {integrity: sha512-eflK8wEtyOE6+hsaRVPxvUKYCpRgzLqDTb8krvAsRIwOGlHoSgYLgBXoubGgLd2fT41/OUYdb48v4k4WWHQurA==}
     engines: {node: '>= 10.13.0'}
+
+  scribe.js-ocr@0.9.0:
+    resolution: {integrity: sha512-d6B85AqgC/ks97QmueMONqt2eCsX2V0LOKttaP+R9ACsCWntOJP5Z2nZRb4nZvI7fb4THFISqgLFaAUQ0nAXXw==}
+    hasBin: true
 
   scriptjs@2.5.9:
     resolution: {integrity: sha512-qGVDoreyYiP1pkQnbnFAUIS5AjenNwwQBdl7zeos9etl+hYKWahjRTfzAZZYBv5xNHx7vNKCmaLDQZ6Fr2AEXg==}
@@ -11147,6 +11170,22 @@ snapshots:
 
   '@rushstack/eslint-patch@1.13.0': {}
 
+  '@scribe.js/tesseract.js-core@6.0.3': {}
+
+  '@scribe.js/tesseract.js@6.0.3(encoding@0.1.13)':
+    dependencies:
+      '@scribe.js/tesseract.js-core': 6.0.3
+      bmp-js: 0.1.0
+      idb-keyval: 6.2.2
+      is-url: 1.2.4
+      node-fetch: 2.7.0(encoding@0.1.13)
+      opencollective-postinstall: 2.0.3
+      regenerator-runtime: 0.13.11
+      wasm-feature-detect: 1.8.0
+      zlibjs: 0.3.1
+    transitivePeerDependencies:
+      - encoding
+
   '@smastrom/react-rating@1.5.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       react: 18.3.1
@@ -11609,6 +11648,8 @@ snapshots:
       '@webassemblyjs/ast': 1.14.1
       '@xtuc/long': 4.2.2
 
+  '@webgpu/types@0.1.21': {}
+
   '@x1mrdonut1x/nouislider-react@3.4.3(nouislider@15.8.1)(react@18.3.1)':
     dependencies:
       nouislider: 15.8.1
@@ -11947,6 +11988,10 @@ snapshots:
 
   caniuse-lite@1.0.30001750: {}
 
+  canvaskit-wasm@0.39.1:
+    dependencies:
+      '@webgpu/types': 0.1.21
+
   cardinal@0.4.4:
     dependencies:
       ansicolors: 0.2.1
@@ -12043,6 +12088,8 @@ snapshots:
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
+
+  commander@11.1.0: {}
 
   commander@2.20.3: {}
 
@@ -14522,6 +14569,14 @@ snapshots:
       ajv: 8.17.1
       ajv-formats: 2.1.1(ajv@8.17.1)
       ajv-keywords: 5.1.0(ajv@8.17.1)
+
+  scribe.js-ocr@0.9.0(encoding@0.1.13):
+    dependencies:
+      '@scribe.js/tesseract.js': 6.0.3(encoding@0.1.13)
+      canvaskit-wasm: 0.39.1
+      commander: 11.1.0
+    transitivePeerDependencies:
+      - encoding
 
   scriptjs@2.5.9: {}
 
