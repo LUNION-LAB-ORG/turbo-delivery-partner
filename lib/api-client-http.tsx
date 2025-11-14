@@ -108,7 +108,6 @@ class ApiClientHttp {
         try {
             const queryString = new URLSearchParams(params).toString();
             const url = `${endpoint.trim()}${queryString ? `?${queryString}` : ''}`;
-
             switch (method.trim().toLowerCase()) {
                 case 'post':
                     return (await this.axiosInstance.post(url, data, config)).data;

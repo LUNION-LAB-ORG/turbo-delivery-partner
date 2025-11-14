@@ -1,228 +1,368 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { PageResponse, CommandeExterne, rechercherCommandesExterne } from "@/src/actions/commandes.actions";
-import { ShoppingCart, Search, Calendar, CreditCard, MapPin, Truck, Tag, MoreVertical } from "lucide-react";
-import { Button, Card, CardBody, CardFooter, CardHeader, Input } from "@heroui/react";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import EmptyDataTable from "@/components/commons/EmptyDataTable";
+import { accepterCommande } from "@/src/actions/commandes.actions";
+import { Order } from "@/types/models";
+import { CheckIcon, EyeIcon } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
 
-type OrdersProps = {
-    commandesInitiales: PageResponse<CommandeExterne> | null;
-    session: any;
+export type PageResponse<T> = {
+    content: T[];
+    number: number;
+    size: number;
+    totalElements: number;
+    totalPages: number;
+    first?: boolean;
+    last?: boolean;
+    pageable?: any;
+    numberOfElements?: number;
+    sort?: any;
 };
 
-export default function Orders({ commandesInitiales, session }: OrdersProps) {
-    const [commandes, setCommandes] = useState<PageResponse<CommandeExterne> | null>(commandesInitiales);
-    const [filtered, setFiltered] = useState<CommandeExterne[]>(commandesInitiales?.content ?? []);
-    const [selectedCategory, setSelectedCategory] = useState("TOUTES");
-    const [currentPage, setCurrentPage] = useState(0);
+type OrdersProps = {
+    commandesInitiales: PageResponse<Order> | null;
+    session?: any;
+    onFetchPage?: (page: number) => Promise<PageResponse<Order> | null>;
+};
 
-    const [dateDebut, setDateDebut] = useState("");
-    const [dateFin, setDateFin] = useState("");
+export default function OrdersPage({ commandesInitiales, session, onFetchPage }: OrdersProps) {
+    const [commandes, setCommandes] = useState<PageResponse<Order> | null>(commandesInitiales);
+    const [selectedCategory, setSelectedCategory] = useState<string>("TOUTES");
+    const [currentPage, setCurrentPage] = useState<number>(commandesInitiales?.number ?? 0);
 
-    const formatDateForApi = (dateStr: string, endOfDay = false) => {
-        if (!dateStr) return undefined;
-        const date = new Date(dateStr);
-        if (endOfDay) date.setHours(23, 59, 59, 999);
-        else date.setHours(0, 0, 0, 0);
-        return date.toISOString();
+    const [detailOrder, setDetailOrder] = useState<Order | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [loadingPage, setLoadingPage] = useState(false);
+
+    const categoryMap: Record<string, string[]> = {
+        TOUTES: [], // vide = toutes les commandes
+        PENDING: ["PENDING"],
+        COMPLETED: ["COMPLETED"],
+        CANCELLED: ["CANCELLED"],
     };
 
     useEffect(() => {
-        if (commandes) {
-            const result = commandes.content.filter((cmd) =>
-                selectedCategory === "TOUTES" ? true : cmd.statut === selectedCategory
-            );
-            setFiltered(result);
-        }
-    }, [selectedCategory, commandes]);
+        setCommandes(commandesInitiales);
+        setCurrentPage(commandesInitiales?.number ?? 0);
+    }, [commandesInitiales]);
 
-    const rechercher = async () => {
-        const payload: any = {
-            restaurantId: session?.user?.restauranID,
-            page: 0,
-            size: 10,
-        };
-        if (dateDebut) payload.start = formatDateForApi(dateDebut);
-        if (dateFin) payload.end = formatDateForApi(dateFin, true);
+    const filtered = useMemo(() => {
+        if (!commandes) return [];
+        if (selectedCategory === "TOUTES") return commandes.content;
+        const allowedStates = categoryMap[selectedCategory]?.map(s => s.toUpperCase()) ?? [];
+        return commandes.content.filter(cmd => allowedStates.includes((cmd.orderState ?? "").toUpperCase()));
+    }, [commandes, selectedCategory]);
 
-        const response = await rechercherCommandesExterne(payload);
-        if (response) {
-            setCommandes(response);
-            const content = response.content.filter(cmd =>
-                selectedCategory === "TOUTES" ? true : cmd.statut === selectedCategory
-            );
-            setFiltered(content);
-            setCurrentPage(0);
+    const statusColor = (status: string) => {
+        switch (status) {
+            case "PENDING":
+                return "bg-yellow-50 text-yellow-800 border-yellow-400";
+            case "COMPLETED":
+                return "bg-green-50 text-green-800 border-green-400";
+            case "CANCELLED":
+                return "bg-red-50 text-red-800 border-red-400";
+            default:
+                return "bg-gray-50 text-gray-800 border-gray-300";
         }
+    };
+
+    const currency = (value?: number) => (value == null ? "0" : new Intl.NumberFormat("fr-FR").format(value));
+
+    const openDetail = (order: Order) => {
+        setDetailOrder(order);
+        setShowModal(true);
+    };
+
+    const closeDetail = () => {
+        setShowModal(false);
+        setDetailOrder(null);
     };
 
     const handlePagination = async (page: number) => {
-        setCurrentPage(page);
-
-        const payload: any = {
-            restaurantId: session?.user?.restauranID,
-            page: page,
-            size: 10,
-        };
-        if (dateDebut) payload.start = formatDateForApi(dateDebut);
-        if (dateFin) payload.end = formatDateForApi(dateFin, true);
-
-        const response = await rechercherCommandesExterne(payload);
-        if (response) {
-            setCommandes(response);
-            const content = response.content.filter(cmd =>
-                selectedCategory === "TOUTES" ? true : cmd.statut === selectedCategory
-            );
-            setFiltered(content);
+        if (page < 0) return;
+        if (onFetchPage) {
+            setLoadingPage(true);
+            try {
+                const res = await onFetchPage(page);
+                if (res) {
+                    setCommandes(res);
+                    setCurrentPage(res.number);
+                }
+            } finally {
+                setLoadingPage(false);
+            }
+        } else {
+            setCurrentPage(page);
         }
     };
 
-    function statusColor(status: string) {
-        switch (status) {
-            case "EN_ATTENTE_RECUPERATION": return "border-yellow-500 bg-yellow-50 text-yellow-700";
-            case "EN_COURS_LIVRAISON": return "border-blue-500 bg-blue-50 text-blue-700";
-            case "PRÊT": return "border-green-500 bg-green-50 text-green-700";
-            case "ANNULER": return "border-red-500 bg-red-50 text-red-700";
-            case "TERMINER": return "border-gray-500 bg-gray-50 text-gray-700";
-            default: return "border-gray-300 bg-white text-gray-700";
-        }
-    }
-
-    function ActionMenu() {
-        const [open, setOpen] = useState(false);
-        return (
-            <div className="relative ml-2">
-                <button onClick={() => setOpen(!open)} className="p-1 rounded border border-gray-300 hover:bg-gray-100">
-                    <MoreVertical className="w-4 h-4 text-gray-600" />
-                </button>
-            </div>
-        );
-    }
-
-    if (!commandes || !commandes.content.length) {
-        return (
-            <div className="w-full h-full p-2 space-y-2 rounded-md">
-                {/* Statistiques */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                    {[
-                        { label: "TOUTES", value: commandes?.content.length },
-                        { label: "EN_ATTENTE_RECUPERATION", value: commandes?.content.filter(c => c.statut === "EN_ATTENTE_RECUPERATION").length },
-                        { label: "EN_COURS_LIVRAISON", value: commandes?.content.filter(c => c.statut === "EN_COURS_LIVRAISON").length },
-                        { label: "EN_ATTENTE_VERSEMENT", value: commandes?.content.filter(c => c.statut === "EN_ATTENTE_VERSEMENT").length },
-                        { label: "TERMINER", value: commandes?.content.filter(c => c.statut === "TERMINER").length },
-                        { label: "ANNULER", value: commandes?.content.filter(c => c.statut === "ANNULER").length },
-                    ].map(stat => (
-                        <Card key={stat.label} className={`col-span-1 text-center rounded-md py-2 border-l-4 ${statusColor(stat.label)}`}>
-                            <span className="text-lg font-bold">{stat.value}</span>
-                            <div className="text-xs text-gray-600 truncate">{stat.label.replace("_", " ")}</div>
-                        </Card>
-                    ))}
-                </div>
-
-                {/* Empty */}
-                <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-6">
-                    <EmptyDataTable
-                        title="Aucune commande trouvée"
-                        message="Aucune commande correspondant à vos critères de recherche ou de filtre."
-                    />
-                </div>
-            </div>
-        );
-    }
+    const statusBuckets = useMemo(() => {
+        const content = commandes?.content ?? [];
+        const counts: Record<string, number> = {};
+        counts["TOUTES"] = content.length;
+        content.forEach((c) => {
+            const s = c.orderState ?? "UNKNOWN";
+            counts[s] = (counts[s] ?? 0) + 1;
+        });
+        return counts;
+    }, [commandes]);
 
     return (
-        <>
-            {/* Statistiques */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-6 gap-2">
-                {[
-                    { label: "TOUTES", value: commandes?.content.length },
-                    { label: "EN_ATTENTE_RECUPERATION", value: commandes?.content.filter(c => c.statut === "EN_ATTENTE_RECUPERATION").length },
-                    { label: "EN_COURS_LIVRAISON", value: commandes?.content.filter(c => c.statut === "EN_COURS_LIVRAISON").length },
-                    { label: "EN_ATTENTE_VERSEMENT", value: commandes?.content.filter(c => c.statut === "EN_ATTENTE_VERSEMENT").length },
-                    { label: "TERMINER", value: commandes?.content.filter(c => c.statut === "TERMINER").length },
-                    { label: "ANNULER", value: commandes?.content.filter(c => c.statut === "ANNULER").length },
-                ].map(stat => (
-                    <Card key={stat.label} className={`col-span-1 text-center rounded-md py-2 border-l-4 ${statusColor(stat.label)}`}>
-                        <span className="text-lg font-bold">{stat.value}</span>
-                        <div className="text-xs text-gray-600 truncate">{stat.label.replace("_", " ")}</div>
-                    </Card>
+        <div className="p-2 w-full max-w-7xl mx-auto">
+            {/* STATISTICS */}
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                {["TOUTES", "PENDING", "COMPLETED", "CANCELLED"].map((label) => (
+                    <div
+                        key={label}
+                        className={`p-3 rounded-lg border-l-4 shadow-sm flex flex-col items-center justify-center ${statusColor(label)}`}
+                    >
+                        <div className="text-2xl font-bold">{statusBuckets[label] ?? 0}</div>
+                        <div className="text-xs text-gray-700 mt-1 truncate">{label.replaceAll("_", " ")}</div>
+                    </div>
                 ))}
             </div>
 
-            {/* Liste commandes */}
-            <Card className="w-full rounded-md" shadow="sm">
-                <CardHeader>
-                    <div className="w-full h-full p-4 space-y-4">
-                        <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
-                            <Input type="date" value={dateDebut} onChange={e => setDateDebut(e.target.value)} size="sm" label="Date début" className="flex-1 w-full"/>
-                            <Input type="date" value={dateFin} onChange={e => setDateFin(e.target.value)} size="sm" label="Date fin" className="flex-1 w-full"/>
-                            <Button onPress={rechercher} size="sm" className="bg-primary text-white font-bold rounded-md h-[45px] flex-1 w-full sm:w-auto" startContent={<Search className="w-4 h-4 mr-2"/>}>Rechercher</Button>
-                        </div>
-
-                        <ScrollArea className="w-full whitespace-nowrap pb-2">
-                            {["TOUTES","EN_ATTENTE_RECUPERATION","EN_COURS_LIVRAISON","EN_ATTENTE_VERSEMENT","TERMINER","ANNULER"].map(category => (
-                                <Button key={category} className="flex-shrink-0 mx-2 rounded-md" variant={selectedCategory === category ? "solid" : "ghost"} color={selectedCategory === category ? "primary" : "default"} onPress={() => setSelectedCategory(category)} size="sm">
-                                    {category.toUpperCase()}
-                                </Button>
-                            ))}
-                            <ScrollBar orientation="horizontal" className="h-0"/>
-                        </ScrollArea>
-                    </div>
-                </CardHeader>
-
-                <CardBody>
-                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-2">
-                        {filtered.map(cmd => (
-                            <Card key={cmd.id} className={`w-full rounded-md border-l-4 ${statusColor(cmd.statut)}`}>
-                                <CardBody className="p-4 flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
-                                    <div className="flex-1">
-                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-3 mb-2">
-                                            <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
-                                                <ShoppingCart className="w-4 h-4 text-gray-500"/>
-                                                <h3 className="font-semibold text-sm">#{cmd.numero}</h3>
-                                                <button className="flex items-center gap-1 px-3 py-1 rounded-md text-xs bg-black text-white font-semibold border border-gray-300">
-                                                    {cmd.prix.toLocaleString()} Fcfa
-                                                </button>
-                                            </div>
-
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <Truck className="w-4 h-4 text-gray-600"/>
-                                                <span className="font-semibold">{cmd.fraisLivraison.toLocaleString()} Fcfa</span>
-                                                <ActionMenu/>
-                                            </div>
-                                        </div>
-
-                                        <div className="flex flex-col sm:flex-row justify-between gap-2 text-xs text-gray-500">
-                                            <div className="flex items-center gap-2">
-                                                <MapPin className="w-3 h-3 text-gray-400"/>
-                                                <span>{cmd.zone}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                <CreditCard className="w-3 h-3 text-gray-400"/>
-                                                <span>{cmd.modePaiement}</span>
-                                            </div>
-                                            <button className={`flex items-center gap-1 px-3 py-1 rounded-md ${statusColor(cmd.statut)} font-semibold`}>
-                                                <Tag className="w-3 h-3 text-gray-400"/>
-                                                <span>{cmd.statut}</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </CardBody>
-                            </Card>
+            {/* LIST */}
+            <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                    <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                        {["TOUTES", "PENDING", "COMPLETED", "CANCELLED"].map((cat) => (
+                            <button
+                                key={cat}
+                                className={`flex-shrink-0 whitespace-nowrap px-2 sm:px-3 py-1 rounded-md border text-xs sm:text-sm ${selectedCategory === cat ? "bg-primary-600 text-white" : "bg-white text-gray-700"}`}
+                                onClick={() => setSelectedCategory(cat)}
+                            >
+                                {cat.replaceAll("_", " ")}
+                            </button>
                         ))}
                     </div>
-                </CardBody>
 
-                <CardFooter>
-                    <div className="w-full p-4 bg-gray flex flex-col sm:flex-row justify-center items-center gap-2 sm:gap-4">
-                        <Button disabled={currentPage <= 0} onPress={() => handlePagination(currentPage - 1)} size="sm" className="bg-primary rounded-md text-white w-full sm:w-auto">Précédent</Button>
-                        <span className="text-sm">Page {commandes.number + 1} / {commandes.totalPages}</span>
-                        <Button disabled={commandes.last} onPress={() => handlePagination(currentPage + 1)} size="sm" className="bg-primary rounded-md text-white w-full sm:w-auto">Suivant</Button>
+                    <div className="text-sm text-gray-600 mt-2 sm:mt-0">
+                        Page {(commandes?.number ?? 0) + 1} / {commandes?.totalPages ?? 1}
                     </div>
-                </CardFooter>
-            </Card>
-        </>
+                </div>
+
+                <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+                    {filtered.map((cmd) => (
+                        <article key={cmd.id} className={`bg-white rounded-lg shadow-sm border-l-4 ${statusColor(cmd.orderState)} overflow-hidden w-full`}>
+                            <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 flex-wrap">
+                                <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center text-sm font-semibold text-gray-700">
+                                            {cmd.id.slice(0, 4).toUpperCase()}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="font-semibold text-sm truncate">Commande #{cmd.numero}</div>
+                                            <div className="text-xs text-gray-500 truncate">{new Date(cmd.dateCreation ?? "").toLocaleString()}</div>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-3 flex flex-col sm:flex-row sm:items-center sm:gap-6 gap-2 text-xs text-gray-600 flex-wrap">
+                                        <div className="flex items-center gap-2 truncate">
+                                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                                                <path d="M12 2C8 2 4 5 4 9c0 6 8 13 8 13s8-7 8-13c0-4-4-7-8-7z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                                            </svg>
+                                            <span className="truncate">{cmd.adresseM?.libelle ?? "Adresse inconnue"}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 truncate">
+                                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 12h18" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                                                <path d="M6 6h.01M6 18h.01M12 6h.01M12 18h.01M18 6h.01M18 18h.01" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                                            </svg>
+                                            <span className="truncate">{cmd.paymentMethod ?? "—"}</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 truncate">
+                                            <svg className="w-4 h-4 text-gray-400 flex-shrink-0" viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 3h18v18H3z" stroke="currentColor" strokeWidth="1.2" />
+                                            </svg>
+                                            <span className="truncate">{currency(cmd.totalAmount)} Fcfa</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                    {/* Bouton Détails */}
+                                    <button
+                                        onClick={() => openDetail(cmd)}
+                                        className="p-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition"
+                                        title="Détails"
+                                    >
+                                        <EyeIcon className="w-5 h-5" />
+                                    </button>
+
+                                    {/* Bouton Accepter si pending */}
+                                    {cmd.orderState === "PENDING" && (
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    const updated = await accepterCommande(cmd.id);
+                                                    if (updated) {
+                                                        setCommandes((prev) => {
+                                                            if (!prev) return prev;
+                                                            const newContent = prev.content.map((c) => (c.id === updated.id ? updated : c));
+                                                            return { ...prev, content: newContent };
+                                                        });
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Erreur lors de l'acceptation :", err);
+                                                }
+                                            }}
+                                            className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
+                                            title="Accepter"
+                                        >
+                                            <CheckIcon className="w-5 h-5" />
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="border-t px-4 py-3 bg-gray-50">
+                                <div className="flex items-center justify-between text-xs text-gray-600 flex-wrap">
+                                    <div>{cmd.orderItemM?.length ?? 0} article(s)</div>
+                                    <div>Frais: {currency(cmd.deliveryFee)} Fcfa</div>
+                                </div>
+                            </div>
+                        </article>
+                    ))}
+                </div>
+
+                {/* Pagination */}
+                <div className="flex items-center justify-center gap-3 mt-4 flex-wrap">
+                    <button
+                        onClick={() => handlePagination((commandes?.number ?? 0) - 1)}
+                        disabled={(commandes?.first ?? false) || loadingPage}
+                        className="px-3 py-2 rounded border bg-white disabled:opacity-50"
+                    >
+                        Précédent
+                    </button>
+                    <div className="text-sm text-gray-700">
+                        Page {(commandes?.number ?? 0) + 1} / {commandes?.totalPages ?? 1}
+                    </div>
+                    <button
+                        onClick={() => handlePagination((commandes?.number ?? 0) + 1)}
+                        disabled={(commandes?.last ?? false) || loadingPage}
+                        className="px-3 py-2 rounded border bg-white disabled:opacity-50"
+                    >
+                        Suivant
+                    </button>
+                </div>
+            </div>
+
+            {/* DETAILS MODAL */}
+            {showModal && detailOrder && (
+                <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-2 sm:p-4">
+                    <div className="absolute inset-0 bg-black/40" onClick={closeDetail} />
+                    <div className="relative w-full max-w-full sm:max-w-3xl max-h-[90vh] overflow-auto bg-white rounded-lg shadow-lg">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-b gap-2 sm:gap-0">
+                            <div>
+                                <div className="font-semibold">Détails commande #{detailOrder.id.slice(0, 8)}</div>
+                                <div className="text-xs text-gray-500">{new Date(detailOrder.dateCreation ?? "").toLocaleString()}</div>
+                            </div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <div className={`px-2 py-1 rounded text-xs font-medium border ${statusColor(detailOrder.orderState)}`}>
+                                    {detailOrder.orderState}
+                                </div>
+                                {detailOrder.orderState === "PENDING" && (
+                                    <button
+                                        onClick={async () => {
+                                            if (!detailOrder) return;
+                                            try {
+                                                const updated = await accepterCommande(detailOrder.id);
+                                                if (updated) {
+                                                    setCommandes((prev) => {
+                                                        if (!prev) return prev;
+                                                        const newContent = prev.content.map((c) => (c.id === updated.id ? updated : c));
+                                                        return { ...prev, content: newContent };
+                                                    });
+                                                    setDetailOrder(updated);
+                                                }
+                                            } catch (err) {
+                                                console.error("Erreur lors de l'acceptation :", err);
+                                            }
+                                        }}
+                                        className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-semibold rounded-md bg-green-600 text-white hover:bg-green-700 transition"
+                                    >
+                                        Accepter
+                                    </button>
+                                )}
+                                <button onClick={closeDetail} className="px-2 sm:px-3 py-1 text-xs sm:text-sm text-gray-600 rounded-md border">
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Left: items */}
+                            <div>
+                                <h4 className="font-semibold mb-2">Produits</h4>
+                                <div className="space-y-3 max-h-[420px] overflow-auto pr-2">
+                                    {detailOrder.orderItemM?.map((it) => (
+                                        <div key={it.id} className="flex items-start gap-3 p-3 rounded border flex-wrap">
+                                            <div className="w-16 h-16 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-600">
+                                                Img
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center justify-between gap-2 flex-wrap">
+                                                    <div className="font-medium text-sm truncate">{`Produit ${it.platId.slice(0, 6)}`}</div>
+                                                    <div className="text-sm font-semibold">{currency(it.price)} Fcfa</div>
+                                                </div>
+                                                <div className="text-xs text-gray-500 mt-1 truncate">
+                                                    Qté: {it.quantity} {it.optionValues?.length ? ` • Options: ${it.optionValues.join(", ")}` : ""}
+                                                </div>
+                                                {it.accompIds?.length ? (
+                                                    <div className="text-xs text-gray-500 mt-1 truncate">Accompagnements: {it.accompIds.join(", ")}</div>
+                                                ) : null}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="mt-4 p-3 border rounded bg-gray-50">
+                                    <div className="flex justify-between text-sm">
+                                        <span>Sous-total</span>
+                                        <span>{currency(detailOrder.totalAmount - (detailOrder.deliveryFee ?? 0) - (detailOrder.serviceFee ?? 0))} Fcfa</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm mt-1">
+                                        <span>Frais livraison</span>
+                                        <span>{currency(detailOrder.deliveryFee)} Fcfa</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm mt-1">
+                                        <span>Frais service</span>
+                                        <span>{currency(detailOrder.serviceFee)} Fcfa</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm font-semibold mt-2">
+                                        <span>Total</span>
+                                        <span>{currency(detailOrder.totalAmount)} Fcfa</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Right: adresse + client */}
+                            <div>
+                                <h4 className="font-semibold mb-2">Livraison & client</h4>
+                                <div className="mb-3 p-3 rounded border bg-white">
+                                    <div className="text-sm font-medium truncate">{detailOrder.recipientName ?? detailOrder.userM?.nom}</div>
+                                    <div className="text-xs text-gray-500 truncate">{detailOrder.recipientPhone ?? detailOrder.userM?.telephone}</div>
+                                    <div className="text-xs text-gray-600 mt-2 truncate">{detailOrder.adresseM?.libelle ?? "Adresse non fournie"}</div>
+                                    {(detailOrder.adresseM?.etage || detailOrder.adresseM?.numeroPorte) && (
+                                        <div className="text-xs text-gray-500 mt-1 truncate">
+                                            {detailOrder.adresseM?.batName ? `${detailOrder.adresseM.batName} • ` : ""}
+                                            {detailOrder.adresseM?.etage ? `Etage ${detailOrder.adresseM.etage} • ` : ""}
+                                            {detailOrder.adresseM?.numeroPorte ? `Porte ${detailOrder.adresseM.numeroPorte}` : ""}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="mt-3 text-xs text-gray-600">
+                                    <div>Mode paiement: <strong>{detailOrder.paymentMethod ?? "—"}</strong></div>
+                                    <div className="mt-1">Commande créée: {new Date(detailOrder.dateCreation ?? "").toLocaleString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

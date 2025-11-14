@@ -1,6 +1,7 @@
 'use server';
 
 import { apiClientHttp } from '@/lib/api-client-http';
+import { Order } from '@/types/models';
 
 const BASE_URL = '/api/restaurant';
 
@@ -20,6 +21,25 @@ const commandesExterneEndpoints = {
             if (params?.restaurantId) query.append('restaurantId', params.restaurantId);
             if (params?.start) query.append('start', params.start);
             if (params?.end) query.append('end', params.end);
+            if (params?.page !== undefined) query.append('page', params.page.toString());
+            if (params?.size !== undefined) query.append('size', params.size.toString());
+
+            // 👉 si aucun paramètre, on renvoie juste l'url de base
+            return query.toString() ? `${url}?${query.toString()}` : url;
+        },
+        method: 'GET',
+    },
+
+    orders: {
+        endpoint: (params?: {
+            restaurantId?: string;
+            page?: number;
+            size?: number;
+        }) => {
+            let url = `${BASE_URL}/commandes-externe/rechercher-commandes`;
+            const query = new URLSearchParams();
+
+            if (params?.restaurantId) query.append('restaurantId', params.restaurantId);
             if (params?.page !== undefined) query.append('page', params.page.toString());
             if (params?.size !== undefined) query.append('size', params.size.toString());
 
@@ -116,3 +136,34 @@ export async function rechercherCommandesExterne(params?: {
         return null;
     }
 }
+
+
+export async function getOrdersByRestaurantId(restaurantId: string): Promise<PageResponse<Order> | null> {
+    try {
+        const data = await apiClientHttp.request<PageResponse<Order>>({
+            endpoint: `/api/V1/turbo/customer/commande/byRestaurant/${restaurantId}`,
+            method: 'GET',
+            service: 'client',
+        });
+
+        return data;
+    } catch (error) {
+        return null;
+    }
+}
+
+export async function accepterCommande(orderId: string): Promise<Order | null> {
+    try {
+        const data = await apiClientHttp.request<Order>({
+            endpoint: `/api/V1/turbo/customer/commande/accepter/${orderId}`,
+            method: "PUT",
+            service: "client",
+        });
+
+        return data;
+    } catch (error) {
+        console.error("Erreur lors de l'acceptation de la commande :", error);
+        return null;
+    }
+}
+

@@ -309,4 +309,77 @@ export interface TraficLivreursResponse {
     totalLivreurs: number;
 }
 
+export interface Customer {
+    id: string;
+    status: number;
+    deleted: boolean;
+    dateCreation: string;
+    dateEdition: string;
+    nom: string;
+    prenoms: string;
+    avatarUrl: string | null;
+    telephone: string;
+    email: string;
+    birthDay: string;
+    gender: string;
+}
+
+export interface OrderItem {
+    id: string;
+    status: number;
+    deleted: boolean;
+    dateCreation: string;
+    dateEdition: string;
+    price: number;
+    quantity: number;
+    platId: string;
+    optionId: string | null;
+    optionValues: string[];
+    accompIds: string[];
+    drinkIds: string[];
+}
+
+export interface Adresse {
+    id: string;
+    status: number;
+    deleted: boolean;
+    dateCreation: string;
+    dateEdition: string;
+    libelle: string;
+    etage: string;
+    numeroPorte: string;
+    infoSupl: string;
+    batName: string;
+    userM: Customer;
+}
+
+export interface Order {
+    id: string;
+    status: number;
+    numero: string;
+    deleted: boolean;
+    dateCreation: string;
+    dateEdition: string;
+
+    totalAmount: number;
+    orderState: string;
+
+    userM: Customer;
+
+    orderItemM: OrderItem[];
+
+    adresseM: Adresse;
+
+    recipientName: string;
+    recipientPhone: string;
+
+    paymentMethod: string;
+
+    deliveryFee: number;
+    serviceFee: number;
+
+    restaurantId: string | null;
+}
+
+
   
