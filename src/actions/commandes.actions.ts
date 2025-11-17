@@ -162,7 +162,6 @@ export async function accepterCommande(orderId: string): Promise<Order | null> {
             data: { 'orderId': orderId }
         });
 
-        toast.success("Commande Validée avec succès, une demande coursier a été crée en conséquence");
         return data;
     } catch (error) {
         console.error("Erreur lors de l'acceptation de la commande :", error);
@@ -178,7 +177,6 @@ export async function annulerCommande(orderId: string): Promise<Order | null> {
             service: "client",
             data: { 'orderId': orderId }
         });
-        toast.error("Commande Annulée avec succès");
         return data;
     } catch (error) {
         console.error("Erreur lors de l'annulation de la commande :", error);

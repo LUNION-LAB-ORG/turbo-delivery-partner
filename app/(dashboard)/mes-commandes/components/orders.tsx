@@ -3,7 +3,9 @@
 import { accepterCommande, annulerCommande } from "@/src/actions/commandes.actions";
 import { Order } from "@/types/models";
 import { CheckIcon, EyeIcon, XCircle  } from "lucide-react";
+import { useRouter } from "next/navigation";
 import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "react-toastify";
 
 export type PageResponse<T> = {
     content: T[];
@@ -32,6 +34,8 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
     const [detailOrder, setDetailOrder] = useState<Order | null>(null);
     const [showModal, setShowModal] = useState(false);
     const [loadingPage, setLoadingPage] = useState(false);
+
+    const router = useRouter();
 
     const categoryMap: Record<string, string[]> = {
         TOUTES: [], // vide = toutes les commandes
@@ -105,6 +109,26 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
         });
         return counts;
     }, [commandes]);
+
+    async function handleAccepter(orderId: string) {
+        const result = await accepterCommande(orderId);
+        if (result) {
+            toast.success("Commande Validée avec succès, une demande coursier a été crée en conséquence");
+            setTimeout(() => router.refresh(), 1000);
+        } else {
+            toast.error("Erreur lors de la validation de la commande");
+        }
+    }
+
+    async function handleAnnuler(orderId: string) {
+        const result = await annulerCommande(orderId);
+        if (result) {
+            toast.success("Commande Annulée avec succès, aucune demande coursier n'a été crée en conséquence");
+            setTimeout(() => router.refresh(), 1000);
+        } else {
+            toast.error("Erreur lors de l'annulation de la commande");
+        }
+    }
 
     return (
         <div className="p-2 w-full max-w-7xl mx-auto">
@@ -194,25 +218,9 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
                                     {/* Bouton Accepter si pending */}
                                     {cmd.orderState === "PENDING" && (
                                         <button
-                                            onClick={async () => {
-                                                try {
-                                                    const updated = await accepterCommande(cmd.id);
-                                                    if (updated) {
-                                                        setCommandes((prev) => {
-                                                            if (!prev) return prev;
-                                                            const newContent = prev.content.map((c) =>
-                                                                c.id === updated.id ? updated : c
-                                                            );
-                                                            return { ...prev, content: newContent };
-                                                        });
-                                                    }
-                                                } catch (err) {
-                                                    console.error("Erreur lors de l'acceptation :", err);
-                                                }
-                                            }}
+                                            onClick={async () => handleAccepter(cmd.id)}
                                             className="p-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
-                                            title="Accepter"
-                                        >
+                                            title="Accepter">
                                             <CheckIcon className="w-5 h-5" />
                                         </button>
                                     )}
@@ -220,25 +228,9 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
                                     {/* Bouton Annuler si pending */}
                                     {cmd.orderState === "PENDING" && (
                                         <button
-                                            onClick={async () => {
-                                                try {
-                                                    const updated = await annulerCommande(cmd.id); // ta fonction API d'annulation
-                                                    if (updated) {
-                                                        setCommandes((prev) => {
-                                                            if (!prev) return prev;
-                                                            const newContent = prev.content.map((c) =>
-                                                                c.id === updated.id ? updated : c
-                                                            );
-                                                            return { ...prev, content: newContent };
-                                                        });
-                                                    }
-                                                } catch (err) {
-                                                    console.error("Erreur lors de l'annulation :", err);
-                                                }
-                                            }}
+                                            onClick={async () => annulerCommande(cmd.id)}
                                             className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
-                                            title="Annuler"
-                                        >
+                                            title="Annuler">
                                             <XCircle className="w-5 h-5" />
                                         </button>
                                     )}
@@ -260,8 +252,7 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
                     <button
                         onClick={() => handlePagination((commandes?.number ?? 0) - 1)}
                         disabled={(commandes?.first ?? false) || loadingPage}
-                        className="px-3 py-2 rounded border bg-white disabled:opacity-50"
-                    >
+                        className="px-3 py-2 rounded border bg-white disabled:opacity-50">
                         Précédent
                     </button>
                     <div className="text-sm text-gray-700">
@@ -270,8 +261,7 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
                     <button
                         onClick={() => handlePagination((commandes?.number ?? 0) + 1)}
                         disabled={(commandes?.last ?? false) || loadingPage}
-                        className="px-3 py-2 rounded border bg-white disabled:opacity-50"
-                    >
+                        className="px-3 py-2 rounded border bg-white disabled:opacity-50">
                         Suivant
                     </button>
                 </div>
