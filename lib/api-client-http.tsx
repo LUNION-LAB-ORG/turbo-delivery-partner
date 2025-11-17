@@ -29,7 +29,6 @@ class ApiClientHttp {
 
         // Interceptor pour ajouter les en-têtes
         this.axiosInstance.interceptors.request.use(async (config) => {
-            // console.log(config)
             return config;
             // const headers = await this.setHeaders();
             // config.headers = headers;
@@ -90,7 +89,7 @@ class ApiClientHttp {
                     erp: process.env.NEXT_PUBLIC_API_ERP_URL,
                     restaurant: process.env.NEXT_PUBLIC_API_RESTO_URL,
                     livreur: process.env.NEXT_PUBLIC_API_DELIVERY_URL,
-                    client: process.env.NEXT_PUBLIC_API_CLIENT_URL,
+                    client: process.env.NEXT_PUBLIC_API_CLIENT_URL,   
                     backend: process.env.NEXT_PUBLIC_API_BACKEND_URL,  
                 }[service] || '';
 
@@ -108,6 +107,7 @@ class ApiClientHttp {
         try {
             const queryString = new URLSearchParams(params).toString();
             const url = `${endpoint.trim()}${queryString ? `?${queryString}` : ''}`;
+
             switch (method.trim().toLowerCase()) {
                 case 'post':
                     return (await this.axiosInstance.post(url, data, config)).data;

@@ -2,6 +2,7 @@
 
 import { apiClientHttp } from '@/lib/api-client-http';
 import { Order } from '@/types/models';
+import { toast } from 'react-toastify';
 
 const BASE_URL = '/api/restaurant';
 
@@ -155,14 +156,32 @@ export async function getOrdersByRestaurantId(restaurantId: string): Promise<Pag
 export async function accepterCommande(orderId: string): Promise<Order | null> {
     try {
         const data = await apiClientHttp.request<Order>({
-            endpoint: `/api/V1/turbo/customer/commande/accepter/${orderId}`,
+            endpoint: `/api/V1/turbo/customer/commande/accepter`,
             method: "PUT",
             service: "client",
+            data: { 'orderId': orderId }
         });
 
+        toast.success("Commande Validée avec succès, une demande coursier a été crée en conséquence");
         return data;
     } catch (error) {
         console.error("Erreur lors de l'acceptation de la commande :", error);
+        return null;
+    }
+}
+
+export async function annulerCommande(orderId: string): Promise<Order | null> {
+    try {
+        const data = await apiClientHttp.request<Order>({
+            endpoint: `/api/V1/turbo/customer/commande/annuler`,
+            method: "PUT",
+            service: "client",
+            data: { 'orderId': orderId }
+        });
+        toast.error("Commande Annulée avec succès");
+        return data;
+    } catch (error) {
+        console.error("Erreur lors de l'annulation de la commande :", error);
         return null;
     }
 }

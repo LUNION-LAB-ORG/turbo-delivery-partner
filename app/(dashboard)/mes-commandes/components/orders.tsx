@@ -1,8 +1,8 @@
 "use client";
 
-import { accepterCommande } from "@/src/actions/commandes.actions";
+import { accepterCommande, annulerCommande } from "@/src/actions/commandes.actions";
 import { Order } from "@/types/models";
-import { CheckIcon, EyeIcon } from "lucide-react";
+import { CheckIcon, EyeIcon, XCircle  } from "lucide-react";
 import React, { useEffect, useMemo, useState } from "react";
 
 export type PageResponse<T> = {
@@ -200,7 +200,9 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
                                                     if (updated) {
                                                         setCommandes((prev) => {
                                                             if (!prev) return prev;
-                                                            const newContent = prev.content.map((c) => (c.id === updated.id ? updated : c));
+                                                            const newContent = prev.content.map((c) =>
+                                                                c.id === updated.id ? updated : c
+                                                            );
                                                             return { ...prev, content: newContent };
                                                         });
                                                     }
@@ -212,6 +214,32 @@ export default function OrdersPage({ commandesInitiales, session, onFetchPage }:
                                             title="Accepter"
                                         >
                                             <CheckIcon className="w-5 h-5" />
+                                        </button>
+                                    )}
+
+                                    {/* Bouton Annuler si pending */}
+                                    {cmd.orderState === "PENDING" && (
+                                        <button
+                                            onClick={async () => {
+                                                try {
+                                                    const updated = await annulerCommande(cmd.id); // ta fonction API d'annulation
+                                                    if (updated) {
+                                                        setCommandes((prev) => {
+                                                            if (!prev) return prev;
+                                                            const newContent = prev.content.map((c) =>
+                                                                c.id === updated.id ? updated : c
+                                                            );
+                                                            return { ...prev, content: newContent };
+                                                        });
+                                                    }
+                                                } catch (err) {
+                                                    console.error("Erreur lors de l'annulation :", err);
+                                                }
+                                            }}
+                                            className="p-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
+                                            title="Annuler"
+                                        >
+                                            <XCircle className="w-5 h-5" />
                                         </button>
                                     )}
                                 </div>
