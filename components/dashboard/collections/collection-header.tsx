@@ -4,7 +4,7 @@ import { IconPlus } from '@tabler/icons-react';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
-export function CollectionHeader({ collectionModel, totalPlat }: CollectionWithDishes) {
+export function CollectionHeader({ collectionModel, totalPlat, plats }: CollectionWithDishes) {
     return (
         <div className="mb-8">
             <div className="flex items-center justify-between">

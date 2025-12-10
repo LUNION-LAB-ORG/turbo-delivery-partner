@@ -35,7 +35,7 @@ export default function CreateDishPage({ collections }: { collections: Collectio
 
                 if (result.status === 'success') {
                     toast.success(result.message);
-                    router.push(`/collections/dish/${result.data?.id}`);
+                    router.push(`/plats/dish/${result.data?.id}`);
                 } else {
                     toast.error(result.message);
                 }

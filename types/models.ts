@@ -196,9 +196,24 @@ export interface Dish {
     collection: Collection;
 }
 
+export interface Plat {
+    id: string;
+    status: number;
+    deleted: boolean;
+    dateCreation: string;
+    dateEdition: string;
+    libelle: string;
+    description: string;
+    disponible: boolean;
+    cookTime: string;
+    price: number;
+    imageUrl: string;
+}
+
 export interface CollectionWithDishes {
     collectionModel: Collection;
     totalPlat: number;
+    plats: Plat[];
 }
 
 export interface DishComplet {

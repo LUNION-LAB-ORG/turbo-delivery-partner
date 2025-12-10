@@ -33,7 +33,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
             icon: <Pizza className="h-5 w-5" />, 
             label: 'Collection',
             subItems: [
-                { href: '/collections', label: 'Plats' },
+                { href: '/plats', label: 'Plats' },
                 { href: '/boissons', label: 'Boissons' },
             ]
         },

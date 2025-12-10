@@ -21,7 +21,7 @@ export default async function CollectionPage({ params }: CollectionPageProps) {
 
     return (
         <div className="container mx-auto py-8 px-4">
-            <CollectionHeader collectionModel={collection.collectionModel} totalPlat={collection.totalPlat} />
+            <CollectionHeader collectionModel={collection.collectionModel} totalPlat={collection.totalPlat} plats={collection.plats} />
             <DishGrid dishes={dishes} />
         </div>
     );
