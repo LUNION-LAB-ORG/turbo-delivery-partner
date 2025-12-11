@@ -4,101 +4,148 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Select from 'react-select';
 import { toast } from 'react-toastify';
-import { useFormState } from 'react-dom';
-import { useForm } from 'react-hook-form';
-import { Collection } from '@/types/models';
 import { useRouter } from 'next/navigation';
 import { title } from '@/components/primitives';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { addDish } from '@/src/actions/restaurant.actions';
 import { PhotoIcon } from '@heroicons/react/24/outline';
 import { SubmitButton } from '@/components/ui/form-ui/submit-button';
+import { Collection } from '@/types/models';
 
-import { createDishSchema, type _createDishSchema } from '@/src/schemas/restaurants.schema';
-
-// **Import du composant AccompagnementsForm**
+// Sous-formulaires
 import AccompagnementsForm from './components/accompagnement-form';
 import OptionsForm from './components/option-form';
+
+type OptionValue = {
+    label: string;
+    price: string;
+};
+
+type Option = {
+    label: string;
+    min: string;
+    required: boolean;
+    values: OptionValue[];
+};
+
+type Accompagnement = {
+    label: string;
+    price: string; // string → le parent convertira en number
+};
 
 export default function CreateDishPage({ collections }: { collections: Collection[] }) {
     const router = useRouter();
 
-    const [state, formAction] = useFormState(
-        async (_: any, formData: FormData) => {
-            const result = await addDish(formData);
+    // États venant des sous-composants
+    const [accompagnements, setAccompagnements] = useState<Accompagnement[]>([]);
+    const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [options, setOptions] = useState<Option[]>([]);
 
-            if (result.status === 'success') {
-                toast.success(result.message);
-                router.push(`/plats/dish/${result.data?.id}`);
-            } else {
-                toast.error(result.message);
-            }
-
-            return result;
-        },
-        {
-            data: null,
-            message: '',
-            errors: {},
-            status: 'idle',
-            code: undefined,
-        },
-    );
-
-    const {
-        formState: { errors },
-    } = useForm<_createDishSchema>({
-        resolver: zodResolver(createDishSchema),
-        defaultValues: {
-            collectionId: '',
-            libelle: '',
-            description: '',
-            price: '',
-            cookTime: '',
-            imageUrl: undefined,
-        },
-    });
-
-    const collectionOptions = collections.map(c => ({
+    const collectionOptions = collections.map((c) => ({
         value: c.id,
         label: c.libelle.toUpperCase(),
     }));
 
+    /**
+     * Fonction isolée pour gérer la soumission
+     */
+    const handleSubmitDish = async (formData: FormData) => {
+        // Récupérer le fichier depuis l'input
+        const imageInput = document.getElementById("imageInput") as HTMLInputElement;
+        if (imageInput?.files?.[0]) {
+            formData.append("imageUrl", imageInput.files[0]); // <-- Nom exact attendu par le backend
+        } else {
+            toast.error("Veuillez sélectionner une image du plat !");
+            return;
+        }
+
+        // Inject accompagnements dynamiques
+        accompagnements.forEach((acc, index) => {
+            formData.append(`accompagnements[${index}].libelle`, acc.label);
+            formData.append(`accompagnements[${index}].price`, acc.price);
+        });
+
+        // Inject options dynamiques
+        options.forEach((opt, index) => {
+            formData.append(`options[${index}].libelle`, opt.label);
+            formData.append(`options[${index}].isRequired`, String(opt.required));
+            formData.append(`options[${index}].maxSeleteted`, opt.min);
+
+            opt.values.forEach((val, j) => {
+                formData.append(`options[${index}].valeurs[${j}].valeur`, val.label);
+                formData.append(`options[${index}].valeurs[${j}].prixSup`, val.price);
+            });
+        });
+
+        const result = await addDish(formData);
+
+        if (result.status === 'success') {
+            toast.success(result.message);
+            router.push(`/plats/dish/${result.data?.id}`);
+        } else {
+            toast.error(result.message);
+        }
+    };
+
     return (
         <div className="w-full h-full pb-2 px-2 flex flex-1 flex-col gap-4 lg:gap-6">
-            {/* Header + Add Button */}
             <div className="flex items-center justify-between">
                 <h1 className={title({ size: 'h3', class: 'text-primary' })}>Ajout d'un plat</h1>
             </div>
 
-            <form action={formAction} className="space-y-6">
-                {/* Upload image centré */}
+            <form
+                action={handleSubmitDish}
+                className="space-y-6"
+            >
+                {/* Upload image centré avec preview */}
                 <div className="flex justify-center">
                     <div className="flex flex-col items-center">
+                        {/* Input caché */}
+                        <input
+                            id="imageInput"
+                            name="image"
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) setImagePreview(URL.createObjectURL(file));
+                            }}
+                        />
+
                         <button
                             type="button"
-                            className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 text-sm"
+                            onClick={() => document.getElementById("imageInput")?.click()}
+                            className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center overflow-hidden"
                         >
-                            <PhotoIcon className="w-8 h-8" />
+                            {imagePreview ? (
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover rounded-xl"
+                                />
+                            ) : (
+                                <div className="flex flex-col items-center justify-center text-gray-400 text-sm">
+                                    <PhotoIcon className="w-8 h-8" />
+                                </div>
+                            )}
                         </button>
+
                         <div className="mt-2 font-semibold">Télécharger une image</div>
                     </div>
                 </div>
 
-                {/* Bloc principaux champs */}
+                {/* Champs principaux */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="w-full">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Sélectionner une collection
                         </label>
                         <Select
+                            name="collectionId"
                             options={collectionOptions}
                             placeholder="Sélectionner une collection"
                             className="text-sm"
                             classNamePrefix="react-select"
-                            onChange={(selectedOption) => {
-                                console.log('Collection sélectionnée :', selectedOption?.value);
-                            }}
                             isClearable
                         />
                     </div>
@@ -157,11 +204,11 @@ export default function CreateDishPage({ collections }: { collections: Collectio
                     </div>
                 </div>
 
-                {/* Section Accompagnements : ici on insère le composant */}
-                <AccompagnementsForm />
+                {/* Accompagnements */}
+                <AccompagnementsForm onChange={setAccompagnements} />
 
-                {/* Section Options */}
-                <OptionsForm />
+                {/* Options */}
+                <OptionsForm onChange={setOptions} />
 
                 <div className="flex justify-end pt-4">
                     <SubmitButton className="px-10 h-11 rounded-full bg-gradient-to-r from-[#ff512f] to-[#dd2476] text-white text-sm font-medium">

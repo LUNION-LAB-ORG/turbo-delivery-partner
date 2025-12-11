@@ -1,32 +1,41 @@
 import { TrashIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type Accompagnement = {
     label: string;
-    price: string;
+    price: string; // string → le parent convertira en number
 };
 
-export default function AccompagnementsForm() {
-    const [accompagnements, setAccompagnements] = useState([
+export default function AccompagnementsForm({
+    onChange,
+}: {
+    onChange: (data: Accompagnement[]) => void;
+}) {
+    const [accompagnements, setAccompagnements] = useState<Accompagnement[]>([
         { label: "", price: "" },
     ]);
 
+    // Remonte toujours les valeurs vers le parent
+    useEffect(() => {
+        onChange(accompagnements);
+    }, [accompagnements, onChange]);
+
     const handleAdd = () => {
-        setAccompagnements([...accompagnements, { label: "", price: "" }]);
+        setAccompagnements([
+            ...accompagnements,
+            { label: "", price: "" },
+        ]);
     };
 
     const handleRemove = (index: number) => {
-        setAccompagnements(accompagnements.filter((_, i) => i !== index));
+        const newList = accompagnements.filter((_, i) => i !== index);
+        setAccompagnements(newList.length > 0 ? newList : [{ label: "", price: "" }]);
     };
 
-    const handleChange = (
-        index: number,
-        field: keyof Accompagnement,
-        value: string
-    ) => {
-        const newAccompagnements = [...accompagnements];
-        newAccompagnements[index][field] = value;
-        setAccompagnements(newAccompagnements);
+    const handleChange = (index: number, field: keyof Accompagnement, value: string) => {
+        const updated = [...accompagnements];
+        updated[index][field] = value;
+        setAccompagnements(updated);
     };
 
     return (
@@ -39,21 +48,21 @@ export default function AccompagnementsForm() {
                     className="grid grid-cols-[2fr,1fr,auto] gap-3 items-center"
                 >
                     <input
-                        name={`accompagnements[${index}].label`}
                         type="text"
                         className="h-11 rounded-md border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder="Libellé"
                         value={acc.label}
                         onChange={(e) => handleChange(index, "label", e.target.value)}
                     />
+
                     <input
-                        name={`accompagnements[${index}].price`}
                         type="number"
                         className="h-11 rounded-md border border-gray-300 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
                         placeholder="0"
                         value={acc.price}
                         onChange={(e) => handleChange(index, "price", e.target.value)}
                     />
+
                     <button
                         type="button"
                         className="h-11 w-11 flex items-center justify-center rounded-md border border-gray-300 text-gray-400"
