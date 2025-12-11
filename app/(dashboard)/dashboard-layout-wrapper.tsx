@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Logo } from '@/components/icons';
-import { usePathname, useRouter } from 'next/navigation';
 import { Button } from '@heroui/react';
+import { Logo } from '@/components/icons';
+import { useState, useEffect } from 'react';
 import { TbTruckDelivery } from 'react-icons/tb';
+import { usePathname, useRouter } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Notifications from '@/components/dashboard/notifications/notifications';
 import { DashboardNavItems } from '@/components/dashboard/dashboard-nav-items';
@@ -22,9 +22,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
     const router = useRouter();
     const pathname = usePathname();
     const [sheetOpen, setSheetOpen] = useState(false);
-    const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');
-
-    
+    const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');    
 
     const ordersNav = [
         { href: '/mes-commandes', icon: <ShoppingBag className="h-5 w-5" />, label: 'Mes Commandes' },

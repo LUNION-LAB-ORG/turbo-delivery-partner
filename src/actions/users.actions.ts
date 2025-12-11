@@ -58,7 +58,6 @@ export async function loginUser(prevState: any, formData: FormData): Promise<Act
             message: 'Connexion réussie',
         };
     } catch (error: any) {
-        console.log(error)
         if (error?.response?.data && error.response?.data?.detail) {
             return {
                 status: 'error',
@@ -122,16 +121,18 @@ export async function registerStepFirst(prevState: any, formData: FormData): Pro
             };
         }
     }
-    cookies().set('email_otp', formdata.email);
+    const cookieStore = await cookies(); // ✅ Ajout de await
+    cookieStore.set('email_otp', formdata.email);
     redirect('/auth/signin?step=2');
 }
+
 export async function resendEmail(): Promise<any> {
-    console.log("entre+++++++++++++++++++++++++++++++++++++++")
     // Processing
-    const hasCookie = cookies().has('email_otp');
+    const cookieStore = await cookies(); // ✅ Ajout de await
+    const hasCookie = cookieStore.has('email_otp');
 
     if (hasCookie) {
-        const email = cookies().get('email_otp')?.value;
+        const email = cookieStore.get('email_otp')?.value;
 
         try {
             await apiClientHttp.request({
@@ -226,7 +227,8 @@ export async function registerFinalStep(prevState: any, formData: FormData): Pro
         },
     );
 
-    const hasCookie = cookies().has('email_otp');
+    const cookieStore = await cookies(); // ✅ Ajout de await
+    const hasCookie = cookieStore.has('email_otp');
     if (!hasCookie) {
         return {
             status: 'error',
@@ -241,7 +243,7 @@ export async function registerFinalStep(prevState: any, formData: FormData): Pro
         };
     }
 
-    const email = cookies().get('email_otp')?.value;
+    const email = cookieStore.get('email_otp')?.value;
 
     try {
         const data = await apiClientHttp.request({
@@ -323,7 +325,6 @@ export async function changePassword(prevState: any, formData: FormData): Promis
             data: data,
         };
     } catch (error: any) {
-        console.log("error------------------------------------", error)
         if (error?.response?.data && error?.response?.data?.detail) {
             return {
                 status: 'error',

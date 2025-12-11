@@ -64,11 +64,6 @@ export const metadata: Metadata = {
         description: "TURBO DELIVERY MANAGEMENT, leader de la livraison de restaurant à Abidjan. Spécialistes en livraison de restaurant en Côte d'Ivoire. Expertise locale, service personnalisé.",
         images: ['https://www.turbo-delivery-restaurant.com/twitter-image.png'],
     },
-    viewport: {
-        width: 'device-width',
-        initialScale: 1,
-        maximumScale: 1,
-    },
     robots: {
         index: true,
         follow: true,

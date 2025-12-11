@@ -5,15 +5,15 @@ import { getDishesByCollection, getDishesGroupByCollection } from "@/src/actions
 import { notFound } from "next/navigation";
 
 interface CollectionPageProps {
-  params: {
-    id: string;
-  };
+  params: Promise<{ id: string }>;
 }
 
 export default async function CollectionPage({ params }: CollectionPageProps) {
+    const { id } = await params;
+    
     const collections = await getDishesGroupByCollection();
-    const collection = collections.find((item) => item.collectionModel.id === params.id);
-    const dishes = await getDishesByCollection(params.id);
+    const collection = collections.find((item) => item.collectionModel.id === id); // ✅ Utilisez id au lieu de params.id
+    const dishes = await getDishesByCollection(id); // ✅ Utilisez id au lieu de params.id
 
     if (!collection) {
         return notFound();

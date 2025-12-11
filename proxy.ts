@@ -2,7 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { auth } from '@/auth';
 import { findOneRestaurant } from './src/actions/restaurant.actions';
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
     const session = await auth();
     const { pathname } = request.nextUrl;
 
