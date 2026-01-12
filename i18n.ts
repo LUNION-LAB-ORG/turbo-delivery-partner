@@ -1,4 +1,6 @@
-const cookieObj = typeof window === 'undefined' ? require('next/headers') : require('universal-cookie');
+'use client';
+
+import Cookies from 'universal-cookie';
 
 import en from './public/locales/en/index.json';
 import ae from './public/locales/ae/index.json';
@@ -16,39 +18,35 @@ import ru from './public/locales/ru/index.json';
 import sv from './public/locales/sv/index.json';
 import tr from './public/locales/tr/index.json';
 import zh from './public/locales/zh/index.json';
-const langObj: any = { en, ae, da, de, el, es, fr, hu, it, ja, pl, pt, ru, sv, tr, zh };
 
-const getLang = () => {
-    let lang = null;
-    if (typeof window !== 'undefined') {
-        const cookies = new cookieObj(null, { path: '/' });
-        lang = cookies.get('i18nextLng');
-    } else {
-        const cookies = cookieObj.cookies();
-        lang = cookies.get('i18nextLng')?.value;
-    }
-    return lang;
+const langObj: Record<string, any> = {
+    en, ae, da, de, el, es, fr, hu, it, ja, pl, pt, ru, sv, tr, zh,
+};
+
+const cookies = new Cookies(null, { path: '/' });
+
+const getLang = (): string => {
+    return cookies.get('i18nextLng') ?? 'en';
 };
 
 export const getTranslation = () => {
     const lang = getLang();
-    const data: any = langObj[lang || 'en'];
+    const data = langObj[lang] ?? langObj.en;
 
-    const t = (key: string) => {
-        return data[key] ? data[key] : key;
-    };
-
-    const initLocale = (themeLocale: string) => {
-        const lang = getLang();
-        i18n.changeLanguage(lang || themeLocale);
-    };
+    const t = (key: string): string => data[key] ?? key;
 
     const i18n = {
         language: lang,
-        changeLanguage: (lang: string) => {
-            const cookies = new cookieObj(null, { path: '/' });
-            cookies.set('i18nextLng', lang);
+        changeLanguage(newLang: string) {
+            cookies.set('i18nextLng', newLang, { path: '/' });
         },
+    };
+
+    const initLocale = (fallbackLocale: string) => {
+        const currentLang = getLang();
+        if (!currentLang && fallbackLocale) {
+            cookies.set('i18nextLng', fallbackLocale, { path: '/' });
+        }
     };
 
     return { t, i18n, initLocale };

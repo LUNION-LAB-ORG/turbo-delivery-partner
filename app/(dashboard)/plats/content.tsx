@@ -1,9 +1,10 @@
 'use client';
 import { useState } from 'react';
-import EmptyDataTable from '@/components/commons/EmptyDataTable';
 import { title } from '@/components/primitives';
-import { CollectionWithDishes, Plat } from '@/types/models';
 import createUrlFile from '@/utils/createUrlFile';
+import { useRouter } from 'next/navigation';
+import { CollectionWithDishes, Plat } from '@/types/models';
+import EmptyDataTable from '@/components/commons/EmptyDataTable';
 
 import { Button, Card, CardFooter, CardHeader, Image, Input } from '@heroui/react';
 import { IconEdit, IconPlus, IconTrash } from '@tabler/icons-react';
@@ -11,6 +12,7 @@ import { HandPlatter } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Content({ data }: { data: CollectionWithDishes[] }) {
+    const router = useRouter();
     const [search, setSearch] = useState('');
     const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -104,7 +106,7 @@ export default function Content({ data }: { data: CollectionWithDishes[] }) {
                                             {/* Icônes actions */}
                                             <div className="absolute top-2 right-2 flex gap-2 z-10">
                                                 <button
-                                                    onClick={() => {}}
+                                                    onClick={() => router.push(`/plats/dish/update/${dish.id}`)}
                                                     className="bg-white p-1 rounded-full shadow hover:bg-gray-100"
                                                 >
                                                     <IconEdit className="w-4 h-4 text-blue" />

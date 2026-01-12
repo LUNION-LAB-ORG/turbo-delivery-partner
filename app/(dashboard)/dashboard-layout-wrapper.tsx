@@ -84,8 +84,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                                 variant="bordered" 
                                 startContent={<Menu className="h-5 w-5" />} 
                                 className="shrink-0 md:hidden" 
-                                isIconOnly={true} 
-                            />
+                                isIconOnly={true} />
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col">
                             <DashboardNavItems navItems={navItems} onItemClick={() => setSheetOpen(false)} />

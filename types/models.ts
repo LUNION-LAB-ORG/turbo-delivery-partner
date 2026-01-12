@@ -151,7 +151,7 @@ export interface Ingredient {
 }
 
 export interface Accompaniment {
-    id: string;
+    id?: string;
     libelle: string;
     price: number;
     platId?: string;

@@ -1,9 +1,9 @@
 'use client';
 
-import { FormLogin } from '@/components/auth/form-login';
-import { body, title } from '@/components/primitives';
-import Image from 'next/image';
 import Link from 'next/link';
+import Image from 'next/image';
+import { body, title } from '@/components/primitives';
+import { FormLogin } from '@/components/auth/form-login';
 
 export default function AuthContent() {
     return (
@@ -23,8 +23,7 @@ export default function AuthContent() {
                             className={body({
                                 size: 'caption',
                                 class: 'mt-2 text-sm text-gray-600',
-                            })}
-                        >
+                            })} >
                             Vous n&apos;avez pas de compte ?{' '}
                             <Link href="/auth/signin" className="text-primary hover:underlined">
                                 S&apos;inscrire

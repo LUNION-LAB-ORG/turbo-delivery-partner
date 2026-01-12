@@ -1,9 +1,17 @@
 'use client';
 
-import { PropsWithChildren, useEffect, useState } from 'react';
+import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '@/store';
-import { toggleRTL, toggleTheme, toggleMenu, toggleLayout, toggleAnimation, toggleNavbar, toggleSemidark } from '@/store/themeConfigSlice';
+import {
+    toggleRTL,
+    toggleTheme,
+    toggleMenu,
+    toggleLayout,
+    toggleAnimation,
+    toggleNavbar,
+    toggleSemidark,
+} from '@/store/themeConfigSlice';
 import Loading from '@/components/layouts/loading';
 import { getTranslation } from '@/i18n';
 import { I18nProvider } from '@react-aria/i18n';
@@ -15,9 +23,11 @@ import { ToastContainer, Bounce } from 'react-toastify';
 function App({ children }: PropsWithChildren) {
     const themeConfig = useSelector((state: IRootState) => state.themeConfig);
     const dispatch = useDispatch();
-    const { initLocale } = getTranslation();
-    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
+
+    // ✅ STABILISATION I18N
+    const { initLocale } = useMemo(() => getTranslation(), []);
 
     useEffect(() => {
         dispatch(toggleTheme(localStorage.getItem('theme') || themeConfig.theme));
@@ -27,20 +37,32 @@ function App({ children }: PropsWithChildren) {
         dispatch(toggleAnimation(localStorage.getItem('animation') || themeConfig.animation));
         dispatch(toggleNavbar(localStorage.getItem('navbar') || themeConfig.navbar));
         dispatch(toggleSemidark(localStorage.getItem('semidark') || themeConfig.semidark));
-        // locale
+
+        // ✅ locale (stable)
         initLocale(themeConfig.locale);
 
         setIsLoading(false);
-    }, [dispatch, initLocale, themeConfig.theme, themeConfig.menu, themeConfig.layout, themeConfig.rtlClass, themeConfig.animation, themeConfig.navbar, themeConfig.locale, themeConfig.semidark]);
+    }, [
+        dispatch,
+        initLocale,
+        themeConfig.theme,
+        themeConfig.menu,
+        themeConfig.layout,
+        themeConfig.rtlClass,
+        themeConfig.animation,
+        themeConfig.navbar,
+        themeConfig.locale,
+        themeConfig.semidark,
+    ]);
 
     return (
         <HeroUIProvider navigate={router.push}>
-            <NextThemesProvider attribute="class" defaultTheme={'light'}>
+            <NextThemesProvider attribute="class" defaultTheme="light">
                 <I18nProvider locale={themeConfig.locale}>
                     <div
-                        className={`${(themeConfig.sidebar && 'toggle-sidebar') || ''} ${themeConfig.menu} ${themeConfig.layout} ${
-                            themeConfig.rtlClass
-                        } main-section relative font-nunito text-sm font-normal antialiased`}
+                        className={`${(themeConfig.sidebar && 'toggle-sidebar') || ''} ${themeConfig.menu} ${
+                            themeConfig.layout
+                        } ${themeConfig.rtlClass} main-section relative font-nunito text-sm font-normal antialiased`}
                     >
                         {isLoading ? (
                             <Loading />

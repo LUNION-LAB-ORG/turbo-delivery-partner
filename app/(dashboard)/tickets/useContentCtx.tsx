@@ -2,11 +2,11 @@
 
 import dayjs from 'dayjs';
 import { toast } from 'react-toastify';
-import { BonLivraisonVM } from '@/types';
+import { BonLivraisonTerminee } from '@/types';
 import { PaginatedResponse } from '@/types/models';
 import { Key, useCallback, useEffect, useState } from 'react';
 import { CalendarDate, Chip, RangeValue } from '@heroui/react';
-import { getAllBonLivraisons } from '@/src/actions/tickets.actions';
+import { getBonLivraisonTerminees } from '@/src/actions/tickets.actions';
 
 const getStatusColor = (statut: string) => {
     switch (statut?.toUpperCase()) {
@@ -33,7 +33,7 @@ export const columns = [
 ];
 
 interface Props {
-    initialData: PaginatedResponse<BonLivraisonVM> | null;
+    initialData: PaginatedResponse<BonLivraisonTerminee> | null;
     restaurantId?: string;
 }
 
@@ -42,7 +42,7 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize] = useState(10);
-    const [data, setData] = useState<PaginatedResponse<BonLivraisonVM> | null>(initialData);
+    const [data, setData] = useState<PaginatedResponse<BonLivraisonTerminee> | null>(initialData);
 
     const [dates, setDates] = useState<RangeValue<CalendarDate> | null>(null);
 
@@ -65,7 +65,7 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
             if ((dates?.start && dates?.end) || currentPage || pageSize) {
                 setIsLoading(true);
                 try {
-                    const newData = await getAllBonLivraisons(restaurantId ?? '', currentPage - 1, pageSize, { dates: { start: dates?.start?.toString() ?? '', end: dates?.end?.toString() ?? '' } });
+                    const newData = await getBonLivraisonTerminees(restaurantId ?? '', currentPage - 1, pageSize, { dates: { start: dates?.start?.toString() ?? '', end: dates?.end?.toString() ?? '' } });
                     setData(newData);
                 } catch (error) {
                     toast.error('Erreur lors de la récupération des données');
@@ -77,8 +77,8 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
         fetchData();
     }, [dates?.start, dates?.end, currentPage, pageSize, restaurantId]);
 
-    const renderCell = useCallback((bonLivraison: BonLivraisonVM, columnKey: Key) => {
-        const cellValue = bonLivraison[columnKey as keyof BonLivraisonVM];
+    const renderCell = useCallback((bonLivraison: BonLivraisonTerminee, columnKey: Key) => {
+        const cellValue = bonLivraison[columnKey as keyof BonLivraisonTerminee];
         switch (columnKey) {
             case 'livreur':
                 return <p>{cellValue?.toString() ?? '-'}</p>;
@@ -109,17 +109,8 @@ export default function useContentCtx({ initialData, restaurantId }: Props) {
                     </Chip>
                 );
             case 'date':
-                return (
-                    <p>
-                        {dayjs(
-                            (
-                                typeof cellValue === 'object' && cellValue !== null && 'hour' in cellValue
-                                    ? `1970-01-01T${String(cellValue.hour).padStart(2, '0')}:${String(cellValue.minute).padStart(2, '0')}:${String(cellValue.second ?? 0).padStart(2, '0')}`
-                                    : cellValue
-                            ) as string | number | Date | undefined // ✅ typage explicite accepté par dayjs
-                        ).format('DD/MM/YYYY')}
-                    </p>
-                );
+                const datetimeString = `${bonLivraison.date}T${bonLivraison.heure}`;
+                return <p>{dayjs(datetimeString).format('DD/MM/YYYY HH:mm:ss')}</p>;
             default:
                 return cellValue;
         }

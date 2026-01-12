@@ -18,12 +18,12 @@ const BASE_URL = '/api/V1/turbo/resto/user';
 const usersEndpoints = {
     base: { endpoint: BASE_URL, method: 'POST' },
     login: { endpoint: `${BASE_URL}/login`, method: 'POST' },
+    newPassword: { endpoint: `${BASE_URL}/new/password`, method: 'POST' },
+    register3: { endpoint: `${BASE_URL}/register/finalstep`, method: 'POST' },
     register1: { endpoint: `${BASE_URL}/register/stepfirst`, method: 'POST' },
     register2: { endpoint: `${BASE_URL}/register/stepsecond`, method: 'POST' },
-    register3: { endpoint: `${BASE_URL}/register/finalstep`, method: 'POST' },
     changePassword: { endpoint: `${BASE_URL}/change/password`, method: 'POST' },
     forgetPassword: { endpoint: `${BASE_URL}/forget/password`, method: 'POST' },
-    newPassword: { endpoint: `${BASE_URL}/new/password`, method: 'POST' },
 };
 
 export async function loginUser(prevState: any, formData: FormData): Promise<ActionResult<any>> {

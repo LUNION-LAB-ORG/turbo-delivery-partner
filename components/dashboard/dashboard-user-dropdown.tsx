@@ -16,7 +16,7 @@ export const DashboardUserDropdown = ({ restaurant, user }: { restaurant: Restau
         <div className="flex items-center gap-2">
             <span className={title({ size: 'h4', class: 'uppercase' })}>{restaurant?.nomEtablissement ?? ''}</span>
             <DropdownMenu>
-                <DropdownMenuTrigger>
+                <DropdownMenuTrigger asChild>
                     <div>
                         <Button variant="secondary" size="icon" className="rounded-full">
                             <Avatar size="sm" src={createUrlFile(restaurant?.logo ?? '', 'restaurant') ?? ''} alt="Logo Restaurant" />

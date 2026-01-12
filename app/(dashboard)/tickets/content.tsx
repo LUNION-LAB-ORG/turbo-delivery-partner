@@ -1,14 +1,14 @@
 'use client';
 
-import { BonLivraisonVM } from '@/types';
 import useContentCtx from './useContentCtx';
+import { BonLivraisonTerminee } from '@/types';
 import { title } from '@/components/primitives';
 import { PaginatedResponse } from '@/types/models';
 import { Calendar, Cherry, CircleFadingPlus, Home, SquareMenu, ToggleRight, User } from 'lucide-react';
 import { Table, TableHeader, TableBody, TableColumn, TableRow, TableCell, Pagination, RangeValue, CalendarDate, DateRangePicker, CardBody, Card } from '@heroui/react';
 
 interface ContentProps {
-    initialData: PaginatedResponse<BonLivraisonVM> | null;
+    initialData: PaginatedResponse<BonLivraisonTerminee> | null;
     restaurantId?: string;
 }  
 

@@ -50,6 +50,24 @@ interface LocalTime {
 
 export type statutType = "En de recupération" | "Annuler" | "Récupérer" | "En cours de livraison" | "En attente de versement" | "Terminer";
 
+export interface BonLivraisonTerminee {
+    commandeId: string;
+    reference: string;
+    livreurId: string;
+    livreur: string;
+    restaurant: string;
+    restaurantId: string;
+    coutLivraison: number;
+    coutCommande: number;
+    commission?: number;
+    date: string;
+    heure: string;
+    statut: string;
+    zoneId?: string;
+    nomZone?: string;
+    typeCommission?: string;
+}
+
 export interface BonLivraisonVM {
     commandeId?: string;
     reference?: string;

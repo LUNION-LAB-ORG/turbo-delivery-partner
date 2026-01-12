@@ -1,7 +1,16 @@
-import axios, { AxiosInstance, AxiosHeaders, AxiosRequestConfig, AxiosError } from 'axios';
-import { auth } from '@/auth';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 
 export type ServiceType = 'erp' | 'restaurant' | 'livreur' | 'client' | 'backend';
+
+let isLoggingOut = false;
+
+const baseUrlMap: Record<ServiceType, string> = {
+    erp: process.env.NEXT_PUBLIC_API_ERP_URL!,
+    restaurant: process.env.NEXT_PUBLIC_API_RESTO_URL!,
+    livreur: process.env.NEXT_PUBLIC_API_DELIVERY_URL!,
+    client: process.env.NEXT_PUBLIC_API_CLIENT_URL!,
+    backend: process.env.NEXT_PUBLIC_API_BACKEND_URL!,
+};
 
 class ApiClientHttp {
     private axiosInstance: AxiosInstance;
@@ -14,66 +23,52 @@ class ApiClientHttp {
             },
         });
 
-        // Interceptor pour gérer les réponses
+        /**
+         * Interceptor RESPONSE
+         * Gère proprement les 401 sans boucle infinie
+         */
         this.axiosInstance.interceptors.response.use(
-            (response) => response,
+            response => response,
             async (error: AxiosError) => {
-                if (error.response?.status === 401) {
-                    //TODO : refrech token 
-                    const url = new URL('/api/auth/logout', process.env.NEXT_PUBLIC_URL || '');
-                    await fetch(url.toString(), { method: 'POST' });
+                if (error.response?.status === 401 && !isLoggingOut) {
+                    isLoggingOut = true;
+                
+                    try {
+                        if (typeof window !== 'undefined') {
+                            await fetch('/api/auth/logout', { method: 'POST' });
+                        }
+                    } finally {
+                        if (typeof window !== 'undefined') {
+                            window.location.href = '/auth';
+                        }
+                    }
                 }
+
                 return Promise.reject(error);
-            },
+            }
         );
-
-        // Interceptor pour ajouter les en-têtes
-        this.axiosInstance.interceptors.request.use(async (config) => {
-            return config;
-            // const headers = await this.setHeaders();
-            // config.headers = headers;
-            // return config;
-        });
     }
 
-    private async getSession() {
-        let session;
-
-        if (typeof window === 'undefined') {
-            session = await auth();
+    /**
+     * Injection du token UNE SEULE FOIS (login)
+     */
+    setAuthToken(token?: string) {
+        if (token) {
+            this.axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         } else {
-            const { getSession } = await import('next-auth/react');
-            session = await getSession();
+            delete this.axiosInstance.defaults.headers.common['Authorization'];
         }
-
-        return session;
     }
 
-    private async setHeaders(): Promise<AxiosHeaders> {
-        const session = await this.getSession();
-        const headers = new AxiosHeaders();
-
-        headers.set('Authorization', session?.user?.token ? `Bearer ${session.user.token}` : '');
-
-        return headers;
-    }
-
-    private async getHeaders(service: ServiceType): Promise<AxiosHeaders> {
-        const session = await this.getSession();
-        const headers = new AxiosHeaders();
-        if (service !== 'backend') {
-            headers.set('Authorization', session?.user?.token ? `Bearer ${session.user.token}` : '');
-        }
-
-        return headers;
-    }
-
+    /**
+     * Requête HTTP générique
+     */
     async request<T = any>({
         endpoint,
         method,
         data,
         params,
-        service,
+        service = 'backend',
         config,
     }: {
         endpoint: string;
@@ -83,53 +78,50 @@ class ApiClientHttp {
         service?: ServiceType;
         config?: AxiosRequestConfig;
     }): Promise<T> {
-        if (service) {
-            const baseUrl =
-                {
-                    erp: process.env.NEXT_PUBLIC_API_ERP_URL,
-                    restaurant: process.env.NEXT_PUBLIC_API_RESTO_URL,
-                    livreur: process.env.NEXT_PUBLIC_API_DELIVERY_URL,
-                    client: process.env.NEXT_PUBLIC_API_CLIENT_URL,   
-                    backend: process.env.NEXT_PUBLIC_API_BACKEND_URL,  
-                }[service] || '';
+        let instance: AxiosInstance;
 
-            const headers = await this.getHeaders(service);
-            config = {
-                ...config,
-                baseURL: baseUrl,
-                headers: {
-                    ...config?.headers,
-                    ...headers,
-                },
-            };
+        if (service) {
+            // Pour backend, on n'injecte PAS le token
+            if (service === 'backend') {
+                instance = axios.create({
+                    baseURL: baseUrlMap[service],
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            } else {
+                // Pour tous les autres services, on reprend les headers de l'instance principale
+                instance = axios.create({
+                    baseURL: baseUrlMap[service],
+                    headers: this.axiosInstance.defaults.headers.common,
+                });
+            }
+        } else {
+            // Pas de service spécifié : on utilise l'instance par défaut
+            instance = this.axiosInstance;
         }
 
         try {
-            const queryString = new URLSearchParams(params).toString();
+            const queryString = params ? new URLSearchParams(params).toString() : '';
             const url = `${endpoint.trim()}${queryString ? `?${queryString}` : ''}`;
-
-            switch (method.trim().toLowerCase()) {
+                    
+            switch (method.toLowerCase()) {
                 case 'post':
-                    return (await this.axiosInstance.post(url, data, config)).data;
+                    return (await instance.post(url, data, config)).data;
                 case 'put':
-                    return (await this.axiosInstance.put(url, data, config)).data;
+                    return (await instance.put(url, data, config)).data;
                 case 'patch':
-                    return (await this.axiosInstance.patch(url, data, config)).data;
+                    return (await instance.patch(url, data, config)).data;
                 case 'delete':
-                    return (await this.axiosInstance.delete(url, config)).data;
+                    return (await instance.delete(url, config)).data;
                 default:
-                    return (await this.axiosInstance.get(url, config)).data;
+                    return (await instance.get(url, config)).data;
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                // Log helpful error information
                 console.error('API Request failed:', {
                     status: error.response?.status,
-                    statusText: error.response?.statusText,
                     url: error.config?.url,
                     baseUrl: error.config?.baseURL,
                     method: error.config?.method,
-                    headers: error.config?.headers,
                     data: error.response?.data,
                 });
             } else {
@@ -140,4 +132,6 @@ class ApiClientHttp {
     }
 }
 
-export const apiClientHttp = new ApiClientHttp(process.env.NEXT_PUBLIC_API_BACKEND_URL || '');
+export const apiClientHttp = new ApiClientHttp(
+    process.env.NEXT_PUBLIC_API_BACKEND_URL || ''
+);

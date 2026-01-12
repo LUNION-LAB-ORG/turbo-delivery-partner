@@ -31,9 +31,9 @@ import {
     OptionValue,
     RepositionnerCommande,
 } from '@/types/models';
-import { unstable_update } from '@/auth';
-import { apiClientHttp } from '@/lib/api-client-http';
+import { unstable_update, auth } from '@/auth';
 import { DeliveryFee } from '@/types/restaurant';
+import { apiClientHttp } from '@/lib/api-client-http';
 
 // Configuration
 const BASE_URL = '';
@@ -57,6 +57,7 @@ const restaurantEndpoints = {
     assignTypeCuisine: { endpoint: `/api/V1/turbo/resto/typecuisine/assign`, method: 'POST' },
     listTypeCuisine: { endpoint: `/api/V1/turbo/resto/type/cuisine/liste`, method: 'GET' },
     addDish: { endpoint: `/api/V1/turbo/resto/plat/add`, method: 'POST' },
+    updateDish: { endpoint: (dishID: string) => `/api/V1/turbo/resto/plat/update/${dishID}`, method: 'PUT' },
     listPlatOption: { endpoint: `/api/V1/turbo/resto/type/cuisine/liste`, method: 'GET' },
     addPlatOption: { endpoint: `/api/V1/turbo/resto/plat/add/option/plat`, method: 'POST' },
     addPlatOptionValue: { endpoint: `/api/V1/turbo/resto/plat/add/option/value`, method: 'POST' },
@@ -171,6 +172,11 @@ export async function createRestaurant(formData: FormData): Promise<ActionResult
 }
 
 export async function findOneRestaurant(): Promise<FindOneRestaurant | null> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<FindOneRestaurant>({
             endpoint: restaurantEndpoints.info.endpoint,
@@ -421,6 +427,69 @@ export async function addDish(formData: FormData): Promise<ActionResult<Dish | n
         const data = await apiClientHttp.request<Dish>({
             endpoint: restaurantEndpoints.addDish.endpoint,
             method: restaurantEndpoints.addDish.method,
+            service: 'restaurant',
+            data: sendFormData,
+            config: {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            },
+        });
+
+        return {
+            status: 'success',
+            message: 'Plat créé avec succès',
+            data: data,
+        };
+    } catch (error: any) {
+        if (error?.response?.status == 413) {
+            return {
+                status: 'error',
+                message: 'Fichiers volumineux. Utilisez des fichiers de moins de 5Mo',
+            };
+        }
+        if (error?.response?.data && error.response?.data?.detail) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors de l'ajout du plat",
+            };
+        } else if (error?.response?.data?.message) {
+            return {
+                status: 'error',
+                message: error?.response?.data?.detail ?? "Erreur lors de l'ajout du plat",
+            };
+        } else {
+            return {
+                status: 'error',
+                message: "Erreur lors de l'ajout du plat",
+            };
+        }
+    }
+}
+
+export async function updateDish(dishID: string, formData: FormData): Promise<ActionResult<Dish | null>> {
+    const {
+        success,
+        data: formdata,
+        errorsInArray,
+    } = processFormData(createDishSchema, formData, {
+        useDynamicValidation: true,
+    });
+
+    if (!success && errorsInArray) {
+        return {
+            status: 'error',
+            message: errorsInArray![0].message ?? 'Données manquantes ou mal formatées',
+        };
+    }
+
+    // Create a new FormData object to ensure we're sending multipart/form-data
+    const sendFormData = createFormData(formdata);
+
+    try {
+        const data = await apiClientHttp.request<Dish>({
+            endpoint: restaurantEndpoints.updateDish.endpoint(dishID),
+            method: restaurantEndpoints.updateDish.method,
             service: 'restaurant',
             data: sendFormData,
             config: {
