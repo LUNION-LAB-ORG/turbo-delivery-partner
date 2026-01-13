@@ -1,9 +1,9 @@
-import { apiClientHttp } from "@/lib/api-client-http";
-import { BonLivraisonTerminee, BonLivraisonVM, ParametreBonLivraisonFacture } from "@/types";
-import { PaginatedResponse } from "@/types/models";
-import { formatDate } from "@/utils/date-formate";
-import { RangeValue } from "@heroui/react";
 import axios from "axios";
+import { RangeValue } from "@heroui/react";
+import { formatDate } from "@/utils/date-formate";
+import { PaginatedResponse } from "@/types/models";
+import { apiClientHttp } from "@/lib/api-client-http";
+import { BonLivraisonTerminee, BonLivraisonVM, ITicketParams, ITicketsStats, ParametreBonLivraisonFacture } from "@/types";
 
 // Configuration
 const BASE_URL = '/api/restaurant';
@@ -14,6 +14,7 @@ const ticketsEndpoints = {
     bonLivraisons: { endpoint: (restaurantId: string) => `${BASE_URL}/bon-livraison/${restaurantId}`, method: 'GET' },
     bonLivraisonTerminers: { endpoint: `${BASE_URL}/bon-livraison/tous-termines`, method: 'GET' },
     bonLivraisonTerminees: { endpoint: `${BASE_URL_ERP}/tous/termines`, method: 'GET' },
+    stats: { endpoint: `${BASE_URL_ERP}/stats`, method: 'GET' },
     reportingBonLivraison: { endpoint: `${BASE_URL_2}/facture-bon-livraison`, method: "POST" }
 };
 
@@ -60,7 +61,8 @@ export async function getAllBonLivraisonTerminers(restaurantId: string, page: nu
     }
 }
 
-export async function reportingBonLivraisonTerminers(parametre: ParametreBonLivraisonFacture): Promise<ArrayBuffer | null> {
+export async function reportingBonLivraisonTerminers(parametre: ParametreBonLivraisonFacture)
+    : Promise<ArrayBuffer | null> {
     try {
         const response = await axios.post(
             `${process.env.NEXT_PUBLIC_API_BACKEND_URL}${ticketsEndpoints.reportingBonLivraison.endpoint}`,
@@ -75,20 +77,32 @@ export async function reportingBonLivraisonTerminers(parametre: ParametreBonLivr
     }
 }
 
-export async function getBonLivraisonTerminees(
-    restaurantId: string, page: number, size: number, 
-    { dates: { start, end } }: { dates: RangeValue<string | null> })
+export async function getBonLivraisonStatsRequest(params: ITicketParams) {
+    return await apiClientHttp.request<ITicketsStats>({
+        endpoint: ticketsEndpoints.stats.endpoint,
+        method: ticketsEndpoints.stats.method,
+        params: {
+            ...(params.search && { search: params.search }),
+            ...(params.restaurantId && { restaurantId: params.restaurantId.trim() }),
+            ...(params.livreurId && { livreurId: params.livreurId.trim() }),
+            ...(params.debut && { debut: params.debut.toISOString().split('T')[0], }),
+            ...(params.fin && { fin: params.fin.toISOString().split('T')[0], }),
+        },
+    });
+}
+
+export async function getBonLivraisonTerminees(params: ITicketParams)
     : Promise<PaginatedResponse<BonLivraisonTerminee>> {
     try {
         return await apiClientHttp.request<PaginatedResponse<BonLivraisonTerminee>>({
             endpoint: ticketsEndpoints.bonLivraisonTerminees.endpoint,
             method: ticketsEndpoints.bonLivraisonTerminees.method,
             params: {
-                debut: start ? formatDate(start, 'YYYY-MM-DD') : '',
-                fin: end ? formatDate(end, 'YYYY-MM-DD') : '',
-                restaurantId: restaurantId,
-                page: page.toString(),
-                size: size.toString()
+                ...(params.search && { search: params.search }),
+                ...(params.restaurantId && { restaurantId: params.restaurantId.trim() }),
+                ...(params.livreurId && { livreurId: params.livreurId.trim() }),
+                ...(params.debut && { debut: params.debut.toISOString().split('T')[0], }),
+                ...(params.fin && { fin: params.fin.toISOString().split('T')[0], }),
             },
         });
     } catch (error) {

@@ -1,11 +1,17 @@
 import { auth } from '@/auth';
 import Content from './content';
-import { getBonLivraisonTerminees } from '@/src/actions/tickets.actions';
+import { getBonLivraisonStatsRequest, getBonLivraisonTerminees } from '@/src/actions/tickets.actions';
 
 export default async function Page() {
     const session = await auth();
-    const initialData = await getBonLivraisonTerminees(session?.user.restauranID ?? "", 0, 10, { dates: { start: null, end: null } });
-    return (
-        <Content initialData={initialData} restaurantId={session?.user.restauranID} />
-    );
+    const restaurantId = session?.user.restauranID;
+
+    if (!restaurantId) {
+        throw new Error('Restaurant ID introuvable');
+    }
+
+    const initialData = await getBonLivraisonTerminees({restaurantId});
+    const initStats = await getBonLivraisonStatsRequest({restaurantId});
+
+    return ( <Content initialData={initialData} restaurantId={restaurantId} initStats={initStats} /> );
 }

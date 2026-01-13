@@ -68,6 +68,24 @@ export interface BonLivraisonTerminee {
     typeCommission?: string;
 }
 
+export interface ITicketsStats {
+    revenus: number;
+    tickets: number;
+    livreurs: number;
+    restaurants: number;
+    totalCommissions: number;
+}
+
+export interface ITicketParams {
+    page?: number;
+    size?: number;
+    restaurantId?: string;
+    livreurId?: string;
+    debut?: Date;
+    fin?: Date;
+    search?: string;
+}
+
 export interface BonLivraisonVM {
     commandeId?: string;
     reference?: string;
