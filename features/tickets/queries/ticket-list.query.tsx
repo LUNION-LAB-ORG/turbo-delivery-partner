@@ -14,6 +14,7 @@ export const ticketsListQueryOption = (ticketsParamsDTO: ITicketParams) => {
     return {
         queryKey: ticketsKeyQuery('list', ticketsParamsDTO),
         queryFn: async () => {
+            console.log('Executing tickets list query with params:', ticketsParamsDTO);
             if (!ticketsParamsDTO.restaurantId) {
                 return { content: [], totalElements: 0, totalPages: 0 };
             }
@@ -27,7 +28,6 @@ export const ticketsListQueryOption = (ticketsParamsDTO: ITicketParams) => {
 //2- Hook pour récupérer les actualités
 export const useTicketsListQuery = (ticketsParamsDTO: ITicketParams) => {
     if (ticketsParamsDTO.search?.trim()) {
-        ticketsParamsDTO.restaurantId = '';
         ticketsParamsDTO.livreurId = '';
         ticketsParamsDTO.debut = undefined;
         ticketsParamsDTO.fin = undefined;
