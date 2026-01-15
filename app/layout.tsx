@@ -4,6 +4,7 @@ import '../styles/tailwind.css';
 import { Metadata, Viewport } from 'next';
 import { Lato } from 'next/font/google';
 import NextAuthSessionProvider from '@/providers/next-auth-session.provider';
+import { NuqsAdapter } from 'nuqs/adapters/next';
 
 export const metadata: Metadata = {
     title: {
@@ -127,7 +128,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                     <link rel="apple-touch-icon" href="/icon-192x192.png" />
                 </head>
                 <body className={nunito.variable}>
-                    <ProviderComponent>{children}</ProviderComponent>
+                    <ProviderComponent>
+                        <NuqsAdapter>{children}</NuqsAdapter>
+                    </ProviderComponent>
                 </body>
             </html>
         </NextAuthSessionProvider>
