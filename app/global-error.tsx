@@ -30,7 +30,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
                         </motion.p>
 
                         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="flex justify-center">
-                            <Button startContent={<RefreshCcw className="w-4 h-4" />} color="primary" onClick={() => reset()} className="space-x-2">
+                            <Button startContent={<RefreshCcw className="w-4 h-4" />} color="primary" onPress={() => reset()} className="space-x-2">
                                 Réessayer
                             </Button>
                         </motion.div>
