@@ -315,12 +315,17 @@ export async function addPicture(formData: FormData): Promise<ActionResult<any>>
 }
 
 export async function getCollections(): Promise<Collection[]> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+    
     try {
         const data = await apiClientHttp.request<Collection[]>({
             endpoint: restaurantEndpoints.getCollection.endpoint,
             method: restaurantEndpoints.getCollection.method,
             service: 'restaurant',
-        });
+        });   
 
         return data;
     } catch (error) {
