@@ -14,14 +14,13 @@ export const ticketsListQueryOption = (ticketsParamsDTO: ITicketParams) => {
     return {
         queryKey: ticketsKeyQuery('list', ticketsParamsDTO),
         queryFn: async () => {
-            console.log('Executing tickets list query with params:', ticketsParamsDTO);
             if (!ticketsParamsDTO.restaurantId) {
                 return { content: [], totalElements: 0, totalPages: 0 };
             }
             return await getBonLivraisonRequest(ticketsParamsDTO);
         },
         staleTime: 60 * 1000, //
-        refetchOnMount: true,
+        refetchOnMount: true
     };
 };
 

@@ -34,8 +34,10 @@ export default function Content() {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <TicketStatsCard isLoading={ticketsStats.isStatsLoading} title="Total des Frais de livraison" value={formatCFA(ticketsStats?.totalRevenus ?? 0)} variant="primary" />
-                <TicketStatsCard isLoading={ticketsStats.isStatsLoading} title="Total des commissions" value={formatCFA(ticketsStats?.totalCommissions ?? 0)} />
+                <TicketStatsCard isLoading={ticketsStats.isStatsLoading} title="Total des Frais de livraison"
+                                 value={formatCFA(ticketsStats?.totalRevenus ?? 0)} variant="primary" />
+                <TicketStatsCard isLoading={ticketsStats.isStatsLoading} title="Total des commissions"
+                                 value={formatCFA(ticketsStats?.totalCommissions ?? 0)} />
             </div>
 
             <Card>
@@ -69,7 +71,7 @@ export default function Content() {
                                 mode="range"
                                 selected={{
                                     from: filters.debut,
-                                    to: filters.fin,
+                                    to: filters.fin
                                 }}
                                 onSelect={(value) => handleDateChange(value)}
                             />
@@ -77,7 +79,7 @@ export default function Content() {
                     </Popover>
                 </CardHeader>
                 <CardContent className="px-0">
-                    <div>
+                    <div className="overflow-x-auto">
                         <Table
                             isStriped
                         >
@@ -110,9 +112,11 @@ export default function Content() {
                                     </TableRow>
                                 ) : table.getRowModel().rows?.length ? (
                                     table.getRowModel().rows.map((row) => (
-                                        <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={isFetching ? 'opacity-70' : ''}>
+                                        <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}
+                                                  className={isFetching ? 'opacity-70' : ''}>
                                             {row.getVisibleCells().map((cell) => (
-                                                <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                                <TableCell
+                                                    key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                                             ))}
                                         </TableRow>
                                     ))
@@ -128,7 +132,8 @@ export default function Content() {
                     </div>
                     {pagination?.pageCount! > 1 && (
                         <div className="flex justify-center pt-4 sm:pt-6">
-                            <Pagination total={pagination?.pageCount ?? 1} page={filters.page + 1} onChange={pagination.handlePageChange} color="primary" />
+                            <Pagination total={pagination?.pageCount ?? 1} page={filters.page + 1}
+                                        onChange={pagination.handlePageChange} color="primary" />
                         </div>
                     )}
                 </CardContent>
