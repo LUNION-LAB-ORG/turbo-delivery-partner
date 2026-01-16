@@ -198,6 +198,11 @@ export async function addHoraire(formData: FormData): Promise<ActionResult<Openi
         useDynamicValidation: true,
     });
 
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     if (!success && errorsInArray) {
         return {
             status: 'error',
@@ -239,6 +244,10 @@ export async function addHoraire(formData: FormData): Promise<ActionResult<Openi
 }
 
 export async function getHoraires(): Promise<OpeningHour[] | null> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
     try {
         const data = await apiClientHttp.request<OpeningHour[]>({
             endpoint: restaurantEndpoints.getHoraires.endpoint,
@@ -259,6 +268,11 @@ export async function addPicture(formData: FormData): Promise<ActionResult<any>>
     } = processFormData(addPictureSchema, formData, {
         useDynamicValidation: true,
     });
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
 
     if (!success && errorsInArray) {
         return {
@@ -334,6 +348,11 @@ export async function getCollections(): Promise<Collection[]> {
 }
 
 export async function getBoissons(): Promise<Drink[]> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<Drink[]>({
             endpoint: restaurantEndpoints.getBoisson.endpoint,
@@ -361,6 +380,11 @@ export async function getAllFraisLivraison(restaurantId: string): Promise<Delive
 }
 
 export async function getDishesGroupByCollection(): Promise<CollectionWithDishes[]> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<CollectionWithDishes[]>({
             endpoint: restaurantEndpoints.getDishesGroupByCollection.endpoint,
@@ -382,6 +406,11 @@ export async function getDishesGroupByCollection(): Promise<CollectionWithDishes
 }
 
 export async function getDishesByCollection(collectionID: string): Promise<Dish[]> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<Dish[]>({
             endpoint: restaurantEndpoints.getDishesByCollection.endpoint(collectionID),
@@ -396,6 +425,11 @@ export async function getDishesByCollection(collectionID: string): Promise<Dish[
 }
 
 export async function getDishComplet(dishID: string): Promise<DishComplet | null> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<DishComplet>({
             endpoint: restaurantEndpoints.getDishComplet.endpoint(dishID),
@@ -417,6 +451,11 @@ export async function addDish(formData: FormData): Promise<ActionResult<Dish | n
     } = processFormData(createDishSchema, formData, {
         useDynamicValidation: true,
     });
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
 
     if (!success && errorsInArray) {
         return {
@@ -480,6 +519,11 @@ export async function updateDish(dishID: string, formData: FormData): Promise<Ac
     } = processFormData(createDishSchema, formData, {
         useDynamicValidation: true,
     });
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
 
     if (!success && errorsInArray) {
         return {
@@ -554,6 +598,11 @@ export async function addAccompaniment(formData: FormData): Promise<ActionResult
         };
     }
 
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<Accompaniment>({
             endpoint: restaurantEndpoints.addAccompagnement.endpoint,
@@ -604,6 +653,11 @@ export async function updateAccompaniment(id: string, formData: FormData): Promi
             status: 'error',
             message: errorsInArray![0].message ?? 'Données manquantes ou mal formatées',
         };
+    }
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
     }
 
     try {
@@ -659,6 +713,11 @@ export async function addBoisson(formData: FormData): Promise<ActionResult<Drink
         };
     }
 
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<Drink>({
             endpoint: restaurantEndpoints.addBoisson.endpoint,
@@ -705,6 +764,11 @@ export async function updateBoisson(id: string, formData: FormData): Promise<Act
         },
     });
 
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     if (!success && errorsInArray) {
         return {
             status: 'error',
@@ -745,6 +809,11 @@ export async function updateBoisson(id: string, formData: FormData): Promise<Act
 }
 
 export async function deleteBoisson(id: string): Promise<ActionResult<Drink | null>> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<Drink>({
             endpoint: restaurantEndpoints.deleteBoisson.endpoint(id), // ⚡ doit retourner `/boisson/delete/${id}`
@@ -797,6 +866,12 @@ export async function addOption(formData: FormData): Promise<ActionResult<Option
             message: errorsInArray![0].message ?? 'Données manquantes ou mal formatées',
         };
     }
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     try {
         const data = await apiClientHttp.request<Option>({
             endpoint: restaurantEndpoints.addPlatOption.endpoint,
@@ -842,6 +917,11 @@ export async function addOptionValue(formData: FormData): Promise<ActionResult<O
         },
     });
 
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     if (!success && errorsInArray) {
         return {
             status: 'error',
@@ -882,6 +962,12 @@ export async function addOptionValue(formData: FormData): Promise<ActionResult<O
 }
 
 export async function updateOption(formData: FormData): Promise<ActionResult<Option | null>> {
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     const {
         success,
         data: formdata,
@@ -945,12 +1031,18 @@ export async function updateOptionValue(formData: FormData): Promise<ActionResul
         },
     });
 
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+
     if (!success && errorsInArray) {
         return {
             status: 'error',
             message: errorsInArray![0].message ?? 'Données manquantes ou mal formatées',
         };
     }
+
     try {
         const data = await apiClientHttp.request<OptionValue>({
             endpoint: restaurantEndpoints.addPlatOptionValue.endpoint,
@@ -1018,6 +1110,11 @@ export async function repositionnerLivreur(commande: RepositionnerCommande): Pro
 }
 
 export async function retirerLivreur(livreurId: string): Promise<any> {
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+    
     try {
         const data = await apiClientHttp.request({
             endpoint: restaurantEndpoints.retirerLivreur.endpoint,
@@ -1066,8 +1163,13 @@ export async function updateRestaurant(formData: FormData): Promise<ActionResult
             message: errorsInArray![0].message ?? 'Données manquantes ou mal formatées',
         };
     }
+
+    const session = await auth();
+    if (session?.user?.token) {
+        apiClientHttp.setAuthToken(session.user.token);
+    }
+    
     try {
-        console.log("Avant la requête", formdata)
 
         const data = await apiClientHttp.request<OptionValue>({
             endpoint: restaurantEndpoints.updateRestaurant.endpoint,
