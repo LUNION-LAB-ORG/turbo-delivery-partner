@@ -1,0 +1,10 @@
+ignoredBuiltDependencies:
+  - '@prisma/client'
+  - '@prisma/engines'
+  - prisma
+
+onlyBuiltDependencies:
+  - core-js
+  - sharp
+  - tesseract.js
+  - unrs-resolver

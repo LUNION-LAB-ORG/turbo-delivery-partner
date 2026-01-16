@@ -28,11 +28,11 @@ class ApiClientHttp {
          * Gère proprement les 401 sans boucle infinie
          */
         this.axiosInstance.interceptors.response.use(
-            response => response,
+            (response) => response,
             async (error: AxiosError) => {
                 if (error.response?.status === 401 && !isLoggingOut) {
                     isLoggingOut = true;
-                
+
                     try {
                         if (typeof window !== 'undefined') {
                             await fetch('/api/auth/logout', { method: 'POST' });
@@ -45,7 +45,7 @@ class ApiClientHttp {
                 }
 
                 return Promise.reject(error);
-            }
+            },
         );
     }
 
@@ -74,7 +74,7 @@ class ApiClientHttp {
         endpoint: string;
         method: string;
         data?: any;
-        params?: Record<string, string>;
+        params?: Record<string, any>;
         service?: ServiceType;
         config?: AxiosRequestConfig;
     }): Promise<T> {
@@ -100,9 +100,13 @@ class ApiClientHttp {
         }
 
         try {
+            // Supprimer les paramètres indéfinis
+            if (params) {
+                Object.keys(params).forEach((key) => params[key] === undefined && delete params[key]);
+            }
             const queryString = params ? new URLSearchParams(params).toString() : '';
             const url = `${endpoint.trim()}${queryString ? `?${queryString}` : ''}`;
-                    
+
             switch (method.toLowerCase()) {
                 case 'post':
                     return (await instance.post(url, data, config)).data;
@@ -132,6 +136,4 @@ class ApiClientHttp {
     }
 }
 
-export const apiClientHttp = new ApiClientHttp(
-    process.env.NEXT_PUBLIC_API_BACKEND_URL || ''
-);
+export const apiClientHttp = new ApiClientHttp(process.env.NEXT_PUBLIC_API_BACKEND_URL || '');
