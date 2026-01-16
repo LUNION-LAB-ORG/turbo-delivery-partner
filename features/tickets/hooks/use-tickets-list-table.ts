@@ -7,8 +7,25 @@ import { useTicketsStatsQuery } from '@/features/tickets/queries/ticket-stats.qu
 
 export function useTicketsListTable() {
     const [rowSelection, setRowSelection] = useState({});
-    const { filters, setFilters, tickets, isLoading, isError, error, isFetching, pagination } = useTickets();
-    const { data: stats, isLoading: isStatsLoading, isError: isStatsError, error: statsError } = useTicketsStatsQuery(filters);
+    const {
+        filters,
+        setFilters,
+        tickets,
+        isLoading,
+        isError,
+        error,
+        isFetching,
+        pagination,
+        currentSearchParams
+    } = useTickets();
+
+
+    const {
+        data: stats,
+        isLoading: isStatsLoading,
+        isError: isStatsError,
+        error: statsError
+    } = useTicketsStatsQuery(currentSearchParams);
 
     const table = useReactTable({
         columns: ticketColumns,
@@ -19,17 +36,17 @@ export function useTicketsListTable() {
         state: {
             pagination: {
                 pageIndex: filters.page,
-                pageSize: filters.size,
-            },
+                pageSize: filters.size
+            }
         },
         onPaginationChange: (updater) => {
             const newState = typeof updater === 'function' ? updater(table.getState().pagination) : updater;
             setFilters((prev) => ({
                 ...prev,
                 page: newState.pageIndex + 1,
-                size: newState.pageSize,
+                size: newState.pageSize
             }));
-        },
+        }
     });
 
     const handleDateChange = (value: DateRange | undefined) => {
@@ -38,7 +55,7 @@ export function useTicketsListTable() {
                 ...prev,
                 debut: value.from ? new Date(value.from) : undefined,
                 fin: value.to ? new Date(value.to) : undefined,
-                page: 0,
+                page: 0
             }));
         }
     };
@@ -63,7 +80,7 @@ export function useTicketsListTable() {
             totalCommissions: stats?.totalCommissions || 0,
             isStatsLoading,
             isStatsError,
-            statsError,
-        },
+            statsError
+        }
     };
 }

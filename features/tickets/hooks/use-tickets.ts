@@ -42,6 +42,7 @@ export default function useTickets() {
         isError,
         error,
         isFetching,
+        currentSearchParams,
         pagination: {
             pageCount,
             totalItems,

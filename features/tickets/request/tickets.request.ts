@@ -11,7 +11,6 @@ const bonLivraisonEndpoints = {
 };
 
 export async function getBonLivraisonRequest(params: ITicketParams): Promise<PaginatedResponse<BonLivraisonTerminee>> {
-    console.log('Fetching bon livraison with params:', params);
     return await apiClientHttp.request<PaginatedResponse<BonLivraisonTerminee>>({
         endpoint: bonLivraisonEndpoints.bonLivraisonTerminees.endpoint,
         method: bonLivraisonEndpoints.bonLivraisonTerminees.method,
