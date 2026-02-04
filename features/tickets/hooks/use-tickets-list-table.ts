@@ -51,7 +51,8 @@ export function useTicketsListTable() {
     });
 
     const {
-        handleExcelExport
+        handleExcelExport,
+        handlePdfExport
     } = useTicketsExport();
 
     const selectedRows = table.getSelectedRowModel().rows.map(row => row.original);
@@ -59,6 +60,8 @@ export function useTicketsListTable() {
     const exportSelectedTickets = (format: 'xlsx' | 'pdf') => {
         if (format === 'xlsx') {
             handleExcelExport(selectedRows);
+        } else {
+            handlePdfExport(selectedRows);
         }
     };
 

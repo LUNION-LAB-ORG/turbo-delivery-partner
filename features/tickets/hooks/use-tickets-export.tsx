@@ -1,4 +1,4 @@
-import { generateXlsTickets } from '@/features/tickets/utils/ticket-export.utils';
+import { generatePdfTemplate, generateXlsTickets } from '@/features/tickets/utils/ticket-export.utils';
 import { toast } from 'react-toastify';
 import { BonLivraisonTerminee } from '@/types';
 
@@ -21,8 +21,27 @@ function useTicketsExport() {
         toast.success(`${dataToExport.length} ligne(s) exportée(s) en Excel`);
     };
 
+    const handlePdfExport = (dataToExport: BonLivraisonTerminee[]) => {
+        const htmlContent = generatePdfTemplate(dataToExport);
+        const printWindow = window.open('', '_blank');
+
+        if (!printWindow) {
+            toast.error('Impossible d’ouvrir la fenêtre d’impression. Veuillez autoriser les pop-ups.');
+            return;
+        }
+
+        printWindow.document.write(htmlContent);
+        printWindow.document.close();
+
+        setTimeout(() => {
+            printWindow.print();
+            toast.success(`${dataToExport.length} ligne(s) prêtes pour export PDF. Utilisez "Enregistrer en PDF" dans la boîte de dialogue d'impression.`);
+        }, 250);
+    };
+
     return {
-        handleExcelExport
+        handleExcelExport,
+        handlePdfExport
     };
 }
 

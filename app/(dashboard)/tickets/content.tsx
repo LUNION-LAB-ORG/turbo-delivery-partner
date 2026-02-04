@@ -93,7 +93,14 @@ export default function Content() {
                                             disabled={table.getSelectedRowModel().rows.length === 0}
                                             onClick={() => exports.exportSelectedTickets('xlsx')}
                                         >
-                                            Exporter la sélection
+                                            Exporter la sélection en Excel
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            disabled={table.getSelectedRowModel().rows.length === 0}
+                                            onClick={() => exports.exportSelectedTickets('pdf')}
+                                        >
+                                            Exporter la sélection en PDF
                                         </Button>
                                     </div>
                                 </div>
