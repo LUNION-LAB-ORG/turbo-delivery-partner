@@ -2,8 +2,22 @@ import { ColumnDef } from '@tanstack/react-table';
 import { BonLivraisonTerminee } from '@/types';
 import { getStatusColor } from '@/features/helpers';
 import { Chip } from '@heroui/react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export const ticketColumns: ColumnDef<BonLivraisonTerminee>[] = [
+    {
+        id: 'select',
+        header: ({ table }) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+                onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({ row }) => <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />,
+        enableSorting: false,
+        enableHiding: false,
+    },
     {
         header: 'Référence',
         accessorKey: 'reference',

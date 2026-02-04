@@ -4,6 +4,7 @@ import useTickets from '@/features/tickets/hooks/use-tickets';
 import { ticketColumns } from '@/components/tickets/ticket-columns';
 import { DateRange } from 'react-day-picker';
 import { useTicketsStatsQuery } from '@/features/tickets/queries/ticket-stats.query';
+import useTicketsExport from '@/features/tickets/hooks/use-tickets-export';
 
 export function useTicketsListTable() {
     const [rowSelection, setRowSelection] = useState({});
@@ -49,6 +50,18 @@ export function useTicketsListTable() {
         }
     });
 
+    const {
+        handleExcelExport
+    } = useTicketsExport();
+
+    const selectedRows = table.getSelectedRowModel().rows.map(row => row.original);
+
+    const exportSelectedTickets = (format: 'xlsx' | 'pdf') => {
+        if (format === 'xlsx') {
+            handleExcelExport(selectedRows);
+        }
+    };
+
     const handleDateChange = (value: DateRange | undefined) => {
         if (value?.from && value?.to) {
             setFilters((prev) => ({
@@ -81,6 +94,9 @@ export function useTicketsListTable() {
             isStatsLoading,
             isStatsError,
             statsError
+        },
+        exports: {
+            exportSelectedTickets
         }
     };
 }

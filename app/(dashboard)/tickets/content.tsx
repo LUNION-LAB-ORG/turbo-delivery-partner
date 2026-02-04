@@ -25,7 +25,8 @@ export default function Content() {
         pagination,
         filters,
         setFilters,
-        handleDateChange
+        handleDateChange,
+        exports
     } = useTicketsListTable();
     return (
         <div className="w-full h-full pb-10 flex flex-1 flex-col gap-4">
@@ -82,6 +83,21 @@ export default function Content() {
                     <div className="overflow-x-auto">
                         <Table
                             isStriped
+                            topContent={
+                                <div className="px-4 py-2 flex items-center justify-between">
+                                    <div>
+                                        {table.getSelectedRowModel().rows.length} ticket(s) sélectionné(s)
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            disabled={table.getSelectedRowModel().rows.length === 0}
+                                            onClick={() => exports.exportSelectedTickets('xlsx')}
+                                        >
+                                            Exporter la sélection
+                                        </Button>
+                                    </div>
+                                </div>
+                            }
                         >
                             <TableHeader>
                                 {table.getFlatHeaders().map((header) => (
@@ -132,8 +148,13 @@ export default function Content() {
                     </div>
                     {pagination?.pageCount! > 1 && (
                         <div className="flex justify-center pt-4 sm:pt-6">
-                            <Pagination total={pagination?.pageCount ?? 1} page={filters.page + 1}
-                                        onChange={pagination.handlePageChange} color="primary" />
+                            <Pagination
+                                total={pagination?.pageCount ?? 1} page={filters.page + 1}
+                                onChange={(page) => {
+                                    table.toggleAllPageRowsSelected(false);
+                                    pagination.handlePageChange(page);
+                                }} color="primary"
+                            />
                         </div>
                     )}
                 </CardContent>

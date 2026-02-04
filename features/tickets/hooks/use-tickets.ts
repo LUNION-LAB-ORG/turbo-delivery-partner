@@ -5,7 +5,7 @@ import { useTicketsListQuery } from '@/features/tickets/queries/ticket-list.quer
 import { useSession } from 'next-auth/react';
 
 export default function useTickets() {
-    const { filters, setFilter, resetFilters, setFilters } = useTicketFilters();
+    const { filters, resetFilters, setFilters } = useTicketFilters();
     const session = useSession();
     const restaurantId = session.data?.user.restauranID;
 
@@ -27,12 +27,12 @@ export default function useTickets() {
     const pageCount = data?.totalPages || 0;
     const tickets = data?.content || [];
     const handlePageChange = (newPage: number) => {
-        console.log('Changing to page:', newPage);
         setFilters((prev) => ({
             ...prev,
             page: newPage - 1,
         }));
     };
+
     return {
         filters,
         setFilters,
