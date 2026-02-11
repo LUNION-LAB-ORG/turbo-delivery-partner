@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { Button } from '@heroui/react';
 import { Logo } from '@/components/icons';
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { TbTruckDelivery } from 'react-icons/tb';
 import { usePathname, useRouter } from 'next/navigation';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import Notifications from '@/components/dashboard/notifications/notifications';
 import { DashboardNavItems } from '@/components/dashboard/dashboard-nav-items';
 import { DashboardUserDropdown } from '@/components/dashboard/dashboard-user-dropdown';
-import { Bell, Gauge, Pizza, ShoppingBag, TicketCheck, Hammer, Menu } from 'lucide-react';
+import { Bell, Gauge, Hammer, Menu, Pizza, ScrollText, ShoppingBag, TicketCheck } from 'lucide-react';
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
@@ -22,40 +22,44 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
     const router = useRouter();
     const pathname = usePathname();
     const [sheetOpen, setSheetOpen] = useState(false);
-    const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');    
+    const [activeSection, setActiveSection] = useState<'turbo' | 'orders'>('turbo');
 
     const ordersNav = [
         { href: '/mes-commandes', icon: <ShoppingBag className="h-5 w-5" />, label: 'Mes Commandes' },
-        { 
-            href: '', 
-            icon: <Pizza className="h-5 w-5" />, 
+        {
+            href: '',
+            icon: <Pizza className="h-5 w-5" />,
             label: 'Collection',
             subItems: [
                 { href: '/plats', label: 'Plats' },
                 { href: '/boissons', label: 'Boissons' },
-            ]
+            ],
         },
         { href: '/analytics', icon: <Gauge className="h-5 w-5" />, label: 'Dashboard' },
     ];
 
-    const turboNav = [
-        { href: '/delivery', icon: <TicketCheck className="h-5 w-5" />, label: 'Demande de TURBOY' },
-        { href: '/tickets', icon: <Hammer className="h-5 w-5" />, label: 'Mes Tickets' },
-        { href: '/file-attente', icon: <TbTruckDelivery className="h-5 w-5" />, label: 'Ma file d\'attente' },
-        { href: '/notification', icon: <Bell className="h-5 w-5" />, label: 'Notification' },
-        { href: '/analytics', icon: <Gauge className="h-5 w-5" />, label: 'Dashboard' },
-    ];
-    
+    const turboNav = useMemo(
+        () => [
+            { href: '/delivery', icon: <TicketCheck className="h-5 w-5" />, label: 'Demande de TURBOY' },
+            { href: '/tickets', icon: <Hammer className="h-5 w-5" />, label: 'Mes Tickets' },
+            { href: '/factures', icon: <ScrollText className="h-5 w-5" />, label: 'Mes Factures' },
+            { href: '/file-attente', icon: <TbTruckDelivery className="h-5 w-5" />, label: "Ma file d'attente" },
+            { href: '/notification', icon: <Bell className="h-5 w-5" />, label: 'Notification' },
+            { href: '/analytics', icon: <Gauge className="h-5 w-5" />, label: 'Dashboard' },
+        ],
+        [],
+    );
+
     const navItems = activeSection === 'turbo' ? turboNav : ordersNav;
 
     // 🔹 Synchroniser activeSection avec le chemin actuel au chargement / changement de route
     useEffect(() => {
-        if (turboNav.some(nav => pathname.startsWith(nav.href))) {
+        if (turboNav.some((nav) => pathname.startsWith(nav.href))) {
             setActiveSection('turbo');
         } else {
             setActiveSection('orders');
         }
-    }, [pathname]);
+    }, [pathname, turboNav]);
 
     return (
         <div className="grid relative mx-auto w-full max-w-screen-2xl h-screen md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
@@ -80,11 +84,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                 <header className="flex h-14 items-center gap-4 border-b dark:border-muted bg-muted/40 px-4 lg:h-[60px] lg:px-6">
                     <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
                         <SheetTrigger asChild>
-                            <Button 
-                                variant="bordered" 
-                                startContent={<Menu className="h-5 w-5" />} 
-                                className="shrink-0 md:hidden" 
-                                isIconOnly={true} />
+                            <Button variant="bordered" startContent={<Menu className="h-5 w-5" />} className="shrink-0 md:hidden" isIconOnly={true} />
                         </SheetTrigger>
                         <SheetContent side="left" className="flex flex-col">
                             <DashboardNavItems navItems={navItems} onItemClick={() => setSheetOpen(false)} />
@@ -95,9 +95,7 @@ export default function DashboardLayoutWrapper({ children, session, restaurant }
                         <Notifications />
                     </div>
 
-                    <div className="w-full flex-1 flex items-center justify-end">
-                        {/* espace pour recherche ou theme switch */}
-                    </div>
+                    <div className="w-full flex-1 flex items-center justify-end">{/* espace pour recherche ou theme switch */}</div>
 
                     {session && session?.user && <DashboardUserDropdown restaurant={restaurant} user={session?.user} />}
                 </header>
