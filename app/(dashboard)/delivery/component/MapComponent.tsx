@@ -52,7 +52,7 @@ export const MapComponent = ({ markers, restaurant }: MapComponentProps) => {
 
     return (
         <div className="h-96 w-full rounded-lg overflow-hidden">
-            <LoadScript googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''} libraries={LIBRARIES}>
+            <LoadScript googleMapsApiKey={process.env.GOOGLE_MAPS_API_KEY || ''} libraries={LIBRARIES}>
                 <GoogleMap
                     mapContainerStyle={{ width: '100%', height: '100%' }}
                     center={(deliveryOrder[0]?.point.lat != 0 && deliveryOrder[0]?.point) || userLocation || defaultCenter}

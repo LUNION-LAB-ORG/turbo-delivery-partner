@@ -1,6 +1,8 @@
 import { apiClientHttp } from '@/lib/api-client-http';
 import { PaginatedResponse } from '@/types/models';
 import { IFacture, IFactureDetail, IFactureParams } from '@/features/factures/types/facture.types';
+import { createContestationDTO, updateContestationDTO } from '@/features/factures/schemas/contestation.schema';
+import { IContestation } from '@/features/factures/types/contestation.types';
 
 const BASE_URL = '/api/erp';
 
@@ -22,3 +24,20 @@ export async function obtenirFactureRequest(id: string) {
         method: 'GET',
     });
 }
+
+export async function creerContestationRequest(data: createContestationDTO) {
+    return await apiClientHttp.request<IContestation>({
+        endpoint: `${BASE_URL}/contestations`,
+        method: 'POST',
+        data,
+    });
+}
+
+export async function modifierContestationRequest(id: string, data: updateContestationDTO) {
+    return await apiClientHttp.request<IContestation>({
+        endpoint: `${BASE_URL}/contestations/${id}`,
+        method: 'PUT',
+        data,
+    });
+}
+
