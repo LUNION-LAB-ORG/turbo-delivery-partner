@@ -20,7 +20,7 @@ function useFactureTable() {
             size: filters.size,
             periodeDebut: filters.periodeDebut || undefined,
             periodeFin: filters.periodeFin || undefined,
-            statut: 'VALIDATED',
+            // statut: 'VALIDATED', TODO: Enlever apres les tests
         };
     }, [restaurantId, filters]);
 

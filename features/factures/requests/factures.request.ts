@@ -27,7 +27,7 @@ export async function obtenirFactureRequest(id: string) {
 
 export async function creerContestationRequest(data: createContestationDTO) {
     return await apiClientHttp.request<IContestation>({
-        endpoint: `${BASE_URL}/contestations`,
+        endpoint: `/api/contestations`,
         method: 'POST',
         data,
     });
