@@ -20,7 +20,7 @@ function useFactureTable() {
             size: filters.size,
             periodeDebut: filters.periodeDebut || undefined,
             periodeFin: filters.periodeFin || undefined,
-            // statut: 'VALIDATED', TODO: Enlever apres les tests
+            statut: 'VALIDATED'
         };
     }, [restaurantId, filters]);
 
@@ -32,7 +32,7 @@ function useFactureTable() {
         columns: factureTableColumns,
         getCoreRowModel: getCoreRowModel(),
         manualPagination: true,
-        pageCount: facturesData?.totalPages || 0,
+        pageCount: facturesData?.totalPages || 0
     });
 
     const pagination = {
@@ -41,7 +41,7 @@ function useFactureTable() {
         page: filters.page,
         handlePageChange: (newPage: number) => {
             setFilters({ page: newPage - 1 }); // Convert from 1-based to 0-based
-        },
+        }
     };
 
     const handleSizeChange = (newSize: number) => {
@@ -52,7 +52,7 @@ function useFactureTable() {
         setFilters({
             periodeDebut: debut ? new Date(debut) : subMonths(new Date(), 1),
             periodeFin: fin ? new Date(fin) : new Date(),
-            page: 0,
+            page: 0
         });
     };
 
@@ -66,7 +66,7 @@ function useFactureTable() {
         filters,
         setFilters,
         handleSizeChange,
-        handlePeriodeFilterChange,
+        handlePeriodeFilterChange
     };
 }
 
