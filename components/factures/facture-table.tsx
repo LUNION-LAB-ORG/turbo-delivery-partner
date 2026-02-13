@@ -42,13 +42,20 @@ export function FactureTable() {
                                       ))}
                                   </TableRow>
                               ))
-                            : factureTable.getRowModel().rows.map((row) => (
-                                  <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'} className={isFactureFetching ? 'opacity-70' : ''}>
-                                      {row.getVisibleCells().map((cell) => (
-                                          <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
-                                      ))}
-                                  </TableRow>
-                              ))}
+                            : factureTable.getRowModel().rows.map((row) => {
+                                  const hasContestations = row.original.nbrContestations > 0;
+                                  return (
+                                      <TableRow
+                                          key={row.id}
+                                          data-state={row.getIsSelected() && 'selected'}
+                                          className={`${isFactureFetching ? 'opacity-70' : ''} ${hasContestations ? 'bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30' : ''}`}
+                                      >
+                                          {row.getVisibleCells().map((cell) => (
+                                              <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
+                                          ))}
+                                      </TableRow>
+                                  );
+                              })}
                     </TableBody>
                 </Table>
             </div>

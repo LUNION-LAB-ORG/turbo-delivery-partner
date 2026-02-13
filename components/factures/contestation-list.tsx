@@ -1,6 +1,6 @@
 'use client';
 
-import { Chip, Card, CardBody, CardHeader } from '@heroui/react';
+import { Card, CardBody, CardHeader, Chip } from '@heroui/react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { AlertCircle, CheckCircle } from 'lucide-react';
@@ -23,7 +23,7 @@ export function ContestationList({ contestations }: ContestationListProps) {
     return (
         <div className="space-y-3">
             {contestations.map((contestation) => (
-                <Card key={contestation.id} className="shadow-sm">
+                <Card key={contestation.id}>
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <div className="flex items-center gap-2">
                             {contestation.status === 'RESOLUE' ? (
@@ -32,20 +32,16 @@ export function ContestationList({ contestations }: ContestationListProps) {
                                 <AlertCircle className="w-5 h-5 text-warning" />
                             )}
                             <span className="text-sm font-medium">
-                                {format(new Date(contestation.created_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
+                                {format(new Date(contestation.createdAt), 'dd MMM yyyy à HH:mm', { locale: fr })}
                             </span>
                         </div>
-                        <Chip color={contestation.status === 'RESOLUE' ? 'success' : 'warning'} size="sm" variant="flat">
+                        <Chip color={contestation.status === 'RESOLUE' ? 'success' : 'warning'} size="sm"
+                              variant="flat">
                             {contestation.status === 'RESOLUE' ? 'Résolue' : 'Active'}
                         </Chip>
                     </CardHeader>
                     <CardBody className="pt-0">
                         <p className="text-sm text-gray-700 dark:text-gray-300">{contestation.description}</p>
-                        {contestation.updated_at !== contestation.created_at && (
-                            <p className="text-xs text-gray-500 mt-2">
-                                Modifiée le {format(new Date(contestation.updated_at), 'dd MMM yyyy à HH:mm', { locale: fr })}
-                            </p>
-                        )}
                     </CardBody>
                 </Card>
             ))}

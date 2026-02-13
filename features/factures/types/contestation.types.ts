@@ -3,6 +3,13 @@ export interface IContestation {
     facture_id: string;
     description: string;
     status: 'RESOLUE' | 'ACTIVE';
-    created_at: string;
-    updated_at: string;
+    createdAt: string;
+}
+
+export interface IContestationSearchParams {
+    factureId: string;
+    debut?: string;
+    fin?: string;
+    page: number;
+    size: number;
 }

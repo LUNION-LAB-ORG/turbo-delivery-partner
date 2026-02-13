@@ -7,6 +7,7 @@ export interface IFacture {
     periodeDebut: string;
     periodeFin: string;
     montant: number;
+    nbrContestations: number;
     statut: string;
     createdAt: string;
     updatedAt: string;

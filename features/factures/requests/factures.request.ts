@@ -2,7 +2,7 @@ import { apiClientHttp } from '@/lib/api-client-http';
 import { PaginatedResponse } from '@/types/models';
 import { IFacture, IFactureDetail, IFactureParams } from '@/features/factures/types/facture.types';
 import { createContestationDTO, updateContestationDTO } from '@/features/factures/schemas/contestation.schema';
-import { IContestation } from '@/features/factures/types/contestation.types';
+import {IContestation, IContestationSearchParams} from '@/features/factures/types/contestation.types';
 
 const BASE_URL = '/api/erp';
 
@@ -22,6 +22,14 @@ export async function obtenirFactureRequest(id: string) {
     return await apiClientHttp.request<IFactureDetail>({
         endpoint: `${BASE_URL}/factures/${id}/details`,
         method: 'GET',
+    });
+}
+
+export async function obtenirContestationsListRequest(params: IContestationSearchParams): Promise<PaginatedResponse<IContestation>> {
+    return await apiClientHttp.request<PaginatedResponse<IContestation>>({
+        endpoint: `/api/contestations`,
+        method: 'GET',
+        params,
     });
 }
 

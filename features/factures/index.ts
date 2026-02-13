@@ -9,11 +9,14 @@ export * from './schemas/contestation.schema';
 export * from './requests/factures.request';
 
 // Export des mutations
-export * from './mutations/contestation.mutation';
+export * from './queries/contestation.mutation';
 
 // Export des queries
 export * from './queries/facture.query';
+export * from './queries/contestation.query';
+export * from './queries/index.query';
 
 // Export des hooks
 export { default as useFactureTable } from './hooks/use-facture-table';
+export * from './hooks/use-contestations';
 

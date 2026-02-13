@@ -5,6 +5,7 @@ export { factureTableColumns } from './facture-table-columns';
 
 // Export des composants de contestation
 export { ContestationButton } from './contestation-button';
+export { ContestationDrawer } from './contestation-drawer';
 export { ContestationModal } from './contestation-modal';
 export { ContestationForm } from './contestation-form';
 export { ContestationList } from './contestation-list';

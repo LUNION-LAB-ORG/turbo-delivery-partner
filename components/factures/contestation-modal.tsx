@@ -2,7 +2,7 @@
 
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { ContestationForm } from './contestation-form';
-import { useCreerContestation, useModifierContestation } from '@/features/factures/mutations/contestation.mutation';
+import { useCreerContestation, useModifierContestation } from '@/features/factures/queries/contestation.mutation';
 import { createContestationDTO, updateContestationDTO } from '@/features/factures/schemas/contestation.schema';
 import { IContestation } from '@/features/factures/types/contestation.types';
 

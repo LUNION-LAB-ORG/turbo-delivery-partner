@@ -19,7 +19,7 @@ const formatDate = (dateString: string) => {
 const FactureActions = ({ facture }: { facture: IFacture }) => {
     return (
         <div className="flex items-center gap-2">
-            <ContestationButton factureId={facture.id} />
+            <ContestationButton factureId={facture.id} nbrContestations={facture.nbrContestations} />
             <FacturePdfViewer factureId={facture.id} />
         </div>
     );
